@@ -287,6 +287,7 @@ input[type=range]{width:100%}
 <section id="ready" class="screen">
   <div class="pad center tcenter">
     <p class="muted" id="readyTitle">Rodada 1</p>
+    <div class="seg" id="dailySeg" hidden><button type="button" data-v="1">Com tempo (3 min)</button><button type="button" data-v="0">Sem tempo</button></div>
     <div class="bigcode" id="readyCode">SOL</div>
     <div class="chips" id="readyChips"></div>
     <p class="muted" id="readySeries"></p>
@@ -504,17 +505,19 @@ function gen3(rng,o,maxW){ return [genPiece(rng,o,maxW),genPiece(rng,o,maxW),gen
 class Engine{
   constructor(o){ this.o=o; this.b=Array.from({length:N},()=>Array(N).fill(null)); this.combo=0; this.since=0; this.maxCombo=0; this.lines=0; }
   fits(p,r,c,reg){
+    let inside=!reg;
     for(const [dr,dc] of p.cells){ const y=r+dr, x=c+dc;
       if(y<0||y>=N||x<0||x>=N) return false;
-      if(reg && (x<reg[0]||x>reg[1])) return false;
+      if(reg && x>=reg[0] && x<=reg[1]) inside=true;
       if(this.b[y][x]) return false; }
-    return true;
+    return inside;
   }
   inBounds(p,r,c,reg){
+    let inside=!reg;
     for(const [dr,dc] of p.cells){ const y=r+dr, x=c+dc;
       if(y<0||y>=N||x<0||x>=N) return false;
-      if(reg && (x<reg[0]||x>reg[1])) return false; }
-    return true;
+      if(reg && x>=reg[0] && x<=reg[1]) inside=true; }
+    return inside;
   }
   anyFit(p,reg){ for(let r=0;r<=N-p.h;r++) for(let c=0;c<=N-p.w;c++) if(this.fits(p,r,c,reg)) return true; return false; }
   snap(){ return this.b.map(row=>row.map(v=>v?{...v}:null)); }
@@ -660,7 +663,7 @@ const NETF=['attacks','powers','handicap'];
 const LABEL={sudden:'Morte súbita',obstacles:'Obstáculos',heavy:'Peças pesadas',color:'Bônus de cor',undo:'Desfazer',hold:'Guardar peça',bomb:'Bomba',ice:'Gelo',wild:'Coringa',final:'Reta final',attacks:'Ataques',powers:'Poderes e bloco dourado',handicap:'Handicap'};
 const HINT={sudden:'5 s para colocar cada peça',obstacles:'blocos cinzas no início',heavy:'só peças grandes',color:'+100 por linha de uma cor só',undo:'desfaz 1 jogada por partida',hold:'guarda 1 peça para depois',bomb:'explode 3x3 ao sumir',ice:'precisa sumir duas vezes',wild:'vale qualquer cor',final:'pontos em dobro nos últimos 30 s',attacks:'3+ linhas mandam obstáculos',powers:'congelar, névoa e bloco disputado',handicap:'quem venceu começa com obstáculos'};
 const TYPES={live:'Duelo ao vivo',coop:'Co-op',halves:'Co-op em metades',versus:'Versus em turnos'};
-const TYPE_HINT={live:'Cada um no seu tabuleiro, com as mesmas peças, placar ao vivo e miniatura do outro.',coop:'Um tabuleiro só, jogando um de cada vez e somando pontos.',halves:'Um tabuleiro só: cada um cuida de uma metade, e as linhas só fecham com os dois.',versus:'Um tabuleiro só, em turnos: você escolhe a peça que o outro vai jogar.'};
+const TYPE_HINT={live:'Cada um no seu tabuleiro, com as mesmas peças, placar ao vivo e miniatura do outro.',coop:'Um tabuleiro só, jogando um de cada vez e somando pontos.',halves:'Um tabuleiro só: cada um tem um lado, e toda peça precisa tocar o seu lado. As linhas só fecham com os dois.',versus:'Um tabuleiro só, em turnos: você escolhe a peça que o outro vai jogar.'};
 function defOpts(){ const o={time:1,play:0,goal:0,series:0}; [...FLAGS,...NETF].forEach(k=>o[k]=false); return o; }
 function applies(type,k){
   const base=['time','play','goal','obstacles','heavy','color','final','bomb','ice','wild'];
@@ -704,15 +707,16 @@ function makeCode(o){
   const w=WORDS[Math.floor(Math.random()*WORDS.length)];
   return parseCode(w+enc4(optsToBits(o))+String(Math.floor(Math.random()*100)).padStart(2,'0'));
 }
-function dailyOpts(key){
+function dailyOpts(key,timed=true){
   const r=makeRng('DAILYOPT|'+key), o=defOpts();
-  o.time=1; o.play=[0,0,1,2][Math.floor(r()*4)];
+  o.time=timed?1:3; o.play=[0,0,1,2][Math.floor(r()*4)];
   const pool=['obstacles','color','bomb','heavy','final','ice'];
   o[pool[Math.floor(r()*pool.length)]]=true;
   if(o.color && r()<.5) o.wild=true;
   return o;
 }
-function dailyCode(key){ const [y,m,d]=key.split('-'); return 'DIA-'+d+m; }
+function dailyCode(dk){ const [k,v]=dk.split('|'); const [y,m,d]=k.split('-'); return 'DIA-'+d+m+(v?'-S':''); }
+function setDaily(timed){ setup.timed=timed; setup.key=setup.day+(timed?'':'|S'); setup.opts=dailyOpts(setup.day,timed); }
 
 /* ===================== placar da noite, histórico, recordes ===================== */
 function getNight(){ const n=store.get('ddb_night',{me:0,other:0,tie:0,at:0}); if(Date.now()-n.at>8*3600e3){ return {me:0,other:0,tie:0,at:Date.now()}; } return n; }
@@ -1108,7 +1112,34 @@ function duelTick(t){
   }
   requestAnimationFrame(duelTick);
 }
-function sendState(){ if(!D||!D.live) return; send({t:'st',s:D.score,m:D.eng.b.flat().map(v=>v?(v.c===-1?2:1):0).join('')}); }
+function boardStr(b){ return b.flat().map(v=>{ if(!v) return '.-'; const c=v.c===-1?'s':v.c===-2?'g':String(v.c); const s=v.s==='bomb'?'b':v.s==='ice'?'i':v.s==='wild'?'w':v.cr?'c':'-'; return c+s; }).join(''); }
+function strBoard(str){ const b=Array.from({length:N},()=>Array(N).fill(null)); if(!str) return b; for(let i=0;i<64;i++){ const c=str[i*2], s=str[i*2+1]; if(!c||c==='.') continue; b[(i/N)|0][i%N]={c:c==='s'?-1:c==='g'?-2:+c,s:s==='b'?'bomb':s==='i'?'ice':s==='w'?'wild':null,cr:s==='c'?1:0,t:Infinity}; } return b; }
+function sendState(){ if(!D||!D.live||D.over) return; send({t:'st',s:D.score,m:D.eng.b.flat().map(v=>v?(v.c===-1?2:1):0).join(''),b:boardStr(D.eng.b)}); }
+function enterSpectate(){
+  const d=D; d.spect=true; IN=null; cancelDrag();
+  cellsEl.forEach(el=>el.classList.remove('dead','glow'));
+  renderTray([null,null,null],null,{holdOn:false});
+  $('#scoreLbl').textContent='Outro'; resetScore(d.opp.score);
+  $('#oppLbl').textContent='Você terminou'; $('#oppScore').textContent=fmtN(d.info.score); $('#mini').hidden=true;
+  $('#subTxt').textContent='Para vencer, ele precisa passar '+fmtN(d.info.score); updateCombo(0,0);
+  setStatus('Assistindo o tabuleiro do outro');
+  setActions(`<button class="chip" id="aMine">Meu resultado</button>`+['😂','😱','🔥','👏','😈'].map(e=>`<button class="emo" data-e="${e}">${e}</button>`).join(''));
+  $('#aMine').addEventListener('click',showDuelEnd);
+  $$('#actions .emo').forEach(b=>b.addEventListener('click',()=>{ send({t:'emo',e:b.dataset.e}); bigEmoji(b.dataset.e); }));
+  d.prevB=null; renderSpect(); d.lastTick=performance.now(); requestAnimationFrame(spectTick);
+}
+function renderSpect(){
+  const d=D; if(!d||!d.spect) return;
+  const b=strBoard(d.opp.b); renderBoard(b,{...d.o,play:0},null);
+  if(d.prevB){ const old=d.prevB, nw=[]; for(let i=0;i<64;i++){ if(old[i*2]==='.'&&d.opp.b&&d.opp.b[i*2]!=='.') nw.push(i); } glowCells(nw,b); }
+  d.prevB=d.opp.b; showScore(d.opp.score);
+}
+function spectTick(t){
+  const d=D; if(!d||!d.spect||d.opp.info) return;
+  const dt=Math.min(1000,t-d.lastTick); d.lastTick=t; if(!d.paused) d.elapsed+=dt;
+  const tot=TIMES[d.o.time]*1000; if(tot) setTimer(tot-d.elapsed,tot,false);
+  requestAnimationFrame(spectTick);
+}
 function removeGold(){ const b=D.eng.b; for(let y=0;y<N;y++) for(let x=0;x<N;x++) if(b[y][x]&&b[y][x].c===-2) b[y][x]=null; renderDuel(); }
 function spawnGold(){
   const cand=[]; for(let y=0;y<N;y++) for(let x=0;x<N;x++) if(!D.eng.b[y][x]&&!D.eng.wouldFill(y,x)) cand.push([y,x]);
@@ -1147,7 +1178,7 @@ function duelEnd(reason){
   d.newBest=checkBest(d.cfg.type,d.o,d.score)&&d.score>0;
   if(!d.live) addHist({date:Date.now(),kind:d.cfg.type,label:d.cfg.type==='daily'?'Desafio do dia':'Duelo · '+PLAYS[d.o.play],code:d.cfg.code||'',score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo,result:null});
   setTimeout(()=>{ if(D!==d) return; praise(REASON[reason]); SFX.over(); cellsEl.forEach(el=>{ if(el.classList.contains('on')) el.classList.add('dead'); });
-    setTimeout(()=>{ if(D===d) showDuelEnd(); },1400); }, reason==='stuck'?450:0);
+    setTimeout(()=>{ if(D!==d) return; if(d.live&&!d.opp.info&&NET.open) enterSpectate(); else showDuelEnd(); },1400); }, reason==='stuck'?450:0);
 }
 function liveRes(me,op){
   if(me.reason==='quit') return 'lose'; if(op.reason==='quit') return 'win';
@@ -1175,6 +1206,7 @@ function showDuelEnd(){
       body+=`<h2>Sua pontuação</h2><div class="endscore">${fmtN(i.score)}</div><p class="muted">Aguardando o outro terminar… Placar dele agora: <b id="waitOpp">${fmtN(d.opp.score)}</b></p>`;
       body+=statsHTML(stats)+graphSVG([{tl:i.timeline,color:'#fff',label:'Você'}]);
     }
+    if(d.spect&&!d.opp.info) btns.push({t:'Assistir o outro',cls:'primary',on:closeEnd});
     btns.push({t:'Compartilhar',on:()=>shareText(shareMsg())});
     btns.push({t:'Voltar à sala',cls:'ghost',on:()=>{ send({t:'lobby'}); toLobby(); }});
   } else {
@@ -1258,9 +1290,10 @@ $('#btnJoin').addEventListener('click',join);
 $('#codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
 $('#codeIn').addEventListener('input',()=>$('#joinErr').textContent='');
 function showReady(){
-  $('#readyResult').innerHTML=''; $('#btnStart').hidden=false;
+  $('#readyResult').innerHTML=''; $('#btnStart').hidden=false; $('#dailySeg').hidden=true;
   if(setup.type==='daily'){
     $('#readyTitle').textContent='Desafio do dia'; $('#readyCode').textContent=dailyCode(setup.key);
+    $('#dailySeg').hidden=false; $$('#dailySeg button').forEach(b=>b.classList.toggle('sel',(b.dataset.v==='1')===setup.timed));
     $('#readyChips').innerHTML=summary(setup.opts,'duel').map(s=>`<span>${s}</span>`).join('');
     $('#readySeries').textContent='';
     const done=store.get('ddb_daily',{})[setup.key];
@@ -1269,7 +1302,7 @@ function showReady(){
       $('#readyResult').innerHTML=`<div class="card"><div class="endscore">${fmtN(done.score)}</div><p class="muted">${done.lines} linhas · combo x${done.combo}</p><button class="btn" id="dailyShare">Compartilhar resultado</button></div>`;
       $('#btnStart').hidden=true;
       $('#dailyShare').addEventListener('click',()=>{ let t=`Duelo de Blocos · Desafio do dia ${dailyCode(setup.key)}\n${fmtN(done.score)} pontos · ${done.lines} linhas · combo x${done.combo}\nConsegue bater?`; const l=gameLink(); if(l) t+='\n'+l; shareText(t); });
-    } else $('#readyHint').textContent='Mesmas peças para todo mundo hoje. Só vale uma tentativa: confira se o código é igual no outro celular.';
+    } else $('#readyHint').textContent='Mesmas peças para todo mundo hoje. Vale uma tentativa com tempo e uma sem tempo: confira se o código é igual no outro celular.';
   } else {
     const n=SERIES_N[setup.opts.series], need=Math.ceil(n/2);
     if(n>1&&(setup.ser.me>=need||setup.ser.other>=need)) setup.ser={me:0,other:0};
@@ -1286,7 +1319,8 @@ $('#btnStart').addEventListener('click',()=>{
   if(setup.type==='daily') startDuel({type:'daily',opts:setup.opts,seed:'DAILY|'+setup.key,label:'Desafio '+dailyCode(setup.key),code:dailyCode(setup.key),key:setup.key});
   else startDuel({type:'duel',opts:setup.opts,seed:'D|'+setup.norm+'|'+setup.round,label:setup.code+(setup.round>1?' · R'+setup.round:''),code:setup.code});
 });
-$('#goDaily').addEventListener('click',()=>{ const key=todayKey(); setup={type:'daily',key,opts:dailyOpts(key),round:1,ser:{me:0,other:0}}; showReady(); });
+$('#goDaily').addEventListener('click',()=>{ setup={type:'daily',day:todayKey(),round:1,ser:{me:0,other:0}}; setDaily(true); showReady(); });
+$$('#dailySeg button').forEach(b=>b.addEventListener('click',()=>{ setDaily(b.dataset.v==='1'); showReady(); }));
 
 /* ===================== CONEXÃO (WebRTC) ===================== */
 const NET={pc:null,dc:null,role:null,open:false,session:'',round:0,rematch:{me:false,other:false},ser:{me:0,other:0},lastWinner:null,other:null,lobby:{type:'live',opts:defOpts()},cur:null};
@@ -1386,7 +1420,7 @@ $('#pGuestShare').addEventListener('click',()=>shareText($('#pGuestCode').value)
 function setupDC(ch){
   NET.dc=ch;
   ch.onopen=()=>{ NET.open=true; NET.session=NET.session||Math.random().toString(36).slice(2,10); NET.ser={me:0,other:0}; toast('Conectado!'); SFX.win();
-    const today=store.get('ddb_daily',{})[todayKey()]; send({t:'hello',daily:today?{key:todayKey(),score:today.score}:{key:todayKey(),score:null},last:store.get('ddb_lastOnline',null)}); toLobby(); };
+    const dl=store.get('ddb_daily',{}), tk=todayKey(); send({t:'hello',daily:{key:tk,t:dl[tk]?dl[tk].score:null,s:dl[tk+'|S']?dl[tk+'|S'].score:null},last:store.get('ddb_lastOnline',null)}); toLobby(); };
   ch.onclose=()=>{ const was=NET.open; NET.open=false; if(!was) return; toast('Conexão perdida'); $('#lobbyConn').textContent='Desconectado';
     if(D&&D.live&&!D.over){ toast('Conexão perdida. A partida continua, e o resultado será comparado quando reconectarem.'); }
     if(SH&&!SH.over){ sharedOver({reason:'disc',winner:null,sc:SH.view?SH.view.sc:0,scs:SH.view?SH.view.scs:{A:0,B:0},lines:0,combo:0,timeline:[[0,0]]}); }
@@ -1400,7 +1434,7 @@ function onMsg(m){
     case 'cfg': if(NET.role==='B'){ NET.cur=m; if(m.newSeries) NET.ser={me:0,other:0}; beginOnline(m); } break;
     case 'lobby': toLobby(); break;
     case 'rematch': NET.rematch.other=true; if(NET.role==='A'&&NET.rematch.me) hostStart(true); else { toast('O outro quer revanche!'); refreshEnd(); } break;
-    case 'st': if(D&&D.live){ D.opp.score=m.s; D.opp.mini=m.m; $('#oppScore').textContent=fmtN(m.s); renderMini(m.m); const w=$('#waitOpp'); if(w) w.textContent=fmtN(m.s); } break;
+    case 'st': if(D&&D.live){ D.opp.score=m.s; D.opp.mini=m.m; if(m.b) D.opp.b=m.b; if(D.spect) renderSpect(); else { $('#oppScore').textContent=fmtN(m.s); renderMini(m.m); } const w=$('#waitOpp'); if(w) w.textContent=fmtN(m.s); } break;
     case 'end': if(D&&D.live){ D.opp.info=m.info;
       if(!D.over){
         if(m.info.reason==='goal') duelEnd('oppGoal');
@@ -1408,7 +1442,7 @@ function onMsg(m){
         else if(passedOpp()) duelEnd('passed');
         else { $('#subTxt').textContent='Para vencer: passe '+fmtN(m.info.score); toast(`O outro terminou com ${fmtN(m.info.score)}. Passe essa pontuação para vencer`); }
       }
-      if(D.over&&$('#end').classList.contains('show')) showDuelEnd(); } saveLastOnline(); break;
+      if(D.over&&(D.spect||$('#end').classList.contains('show'))) showDuelEnd(); } saveLastOnline(); break;
     case 'atk': receiveAttack(m.n); break;
     case 'pw': receivePower(m.k,m.side); break;
     case 'gold': applyGold(m.y,m.x); break;
@@ -1439,8 +1473,10 @@ function toLobby(){
 }
 function renderLobby(){
   renderNight();
-  const mine=store.get('ddb_daily',{})[todayKey()], th=NET.other&&NET.other.daily&&NET.other.daily.key===todayKey()?NET.other.daily.score:null;
-  $('#lobbyDaily').innerHTML=`<div class="kv"><span>Você</span><b>${mine?fmtN(mine.score):'ainda não jogou'}</b></div><div class="kv"><span>Outro</span><b>${th!=null?fmtN(th):'ainda não jogou'}</b></div>`+(mine&&th!=null?`<p class="muted">${mine.score>th?'Você está na frente hoje!':mine.score<th?'O outro está na frente hoje.':'Empate no desafio de hoje.'}</p>`:'');
+  const dl=store.get('ddb_daily',{}), tk=todayKey(), od=NET.other&&NET.other.daily&&NET.other.daily.key===tk?NET.other.daily:null;
+  $('#lobbyDaily').innerHTML=[['','t','Com tempo'],['|S','s','Sem tempo']].map(([suf,k,lab])=>{ const mine=dl[tk+suf]?dl[tk+suf].score:null, th=od?od[k]:null;
+    const lead=mine!=null&&th!=null?(mine>th?' · você na frente':mine<th?' · o outro na frente':' · empate'):'';
+    return `<div class="kv"><span>${lab}${lead}</span><b>${mine!=null?fmtN(mine):'–'} × ${th!=null?fmtN(th):'–'}</b></div>`; }).join('')+'<p class="muted">Você × Outro. Traço quer dizer que ainda não jogou.</p>';
   if(NET.role==='A'){
     const L=NET.lobby;
     $('#typeSeg').innerHTML=Object.keys(TYPES).map(k=>`<button type="button" data-k="${k}" class="${L.type===k?'sel':''}">${TYPES[k]}</button>`).join('');
@@ -1493,7 +1529,7 @@ function startShared(cfg){
   if(host){
     const eng=new Engine(o); if(o.obstacles) eng.addStones(makeRng(cfg.seed+'|obs'),6);
     const H={eng,rngA:makeRng(cfg.seed+'|A'),rngB:makeRng(cfg.seed+'|B'),trays:{A:null,B:null},tray:null,sc:0,scs:{A:0,B:0},turn:'A',ph:'choose',ch:null,timeline:[[0,0]],ev:null,suddenAt:Infinity,over:null,paused:false,stuck:{A:false,B:false}};
-    if(cfg.type==='versus') H.tray=gen3(H.rngA,o); else { const mw=cfg.type==='halves'?4:0; H.trays.A=gen3(H.rngA,o,mw); H.trays.B=gen3(H.rngB,o,mw); }
+    if(cfg.type==='versus') H.tray=gen3(H.rngA,o); else { const mw=0; H.trays.A=gen3(H.rngA,o,mw); H.trays.B=gen3(H.rngB,o,mw); }
     SH.H=H; SH.view=hostView();
   }
   resetScore(); animTimers.forEach(clearTimeout); $('#fx').innerHTML=''; cellsEl.forEach(el=>el.classList.remove('dead','glow','fall'));
@@ -1567,7 +1603,7 @@ function hostPlace(who,src,r,c){
   H.ev={id:(H.ev?H.ev.id:0)+1,who,pts,res:{n:res.n,chain:res.chain,colorLines:res.colorLines,bombs:res.bombs,perfect:res.perfect,combo:res.combo},cleared:res.steps.flatMap(s=>s.cleared.map(x=>[x[0],x[1],x[2]])),placed:res.placed,cr:r+p.h/2,cc:c+p.w/2};
   playEv(H.ev);
   if(vs){ if(H.tray.every(x=>!x)) H.tray=gen3(H.rngA,SH.o); H.turn=other(who); H.ph='choose'; H.ch=null; armSuddenH(); }
-  else if(H.trays[who].every(x=>!x)) H.trays[who]=gen3(who==='A'?H.rngA:H.rngB,SH.o,SH.type==='halves'?4:0);
+  else if(H.trays[who].every(x=>!x)) H.trays[who]=gen3(who==='A'?H.rngA:H.rngB,SH.o);
   const g=GOALS[SH.o.goal];
   if(g){ if(vs&&H.scs[who]>=g){ hostEnd('goal',who); return true; } if(!vs&&H.sc>=g){ hostEnd('goal',null); return true; } }
   hostCheckStuck();
@@ -1631,7 +1667,7 @@ function renderSharedStatus(t){
     else st=v.turn===me?'Sua vez: coloque a peça escolhida':'Vez do outro';
     if(SH.o.sudden&&SH.playing){ let l=null; if(SH.host) l=SH.H.suddenAt-SH.elapsed; else if(SH.remAt&&SH.remAt.sd!=null) l=SH.remAt.sd-(t-SH.remAt.at); if(l!=null&&!v.paused){ st+=' · '+(Math.max(0,l)/1000).toFixed(1).replace('.',',')+' s'; warn=l<2000; } }
   } else {
-    if(SH.type==='halves') st='Sua metade: '+(me==='A'?'esquerda':'direita');
+    if(SH.type==='halves') st='Seu lado: '+(me==='A'?'esquerda':'direita')+' · a peça precisa tocar nele';
     if(SH.type==='coop') st=v.turn===me?(v.stuck&&v.stuck[other(me)]?'Sua vez de novo: o outro está sem jogada':'Sua vez'):'Vez do outro';
     if(v.stuck&&v.stuck[me]){ st='Sem jogada para você. Espere o outro abrir espaço'; warn=true; }
   }
