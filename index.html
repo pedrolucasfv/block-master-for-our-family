@@ -316,6 +316,8 @@ body.spr.skin-velvet :is(#grid,#tray,#holdRow,.drag) [data-col]>.bev{background-
 .slot.chosen{background:var(--chip);box-shadow:inset 0 0 0 2px var(--text)}
 .slot.pick{background:var(--chip)}
 .pwi{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cs)*.56);pointer-events:none;z-index:2;line-height:1}
+.slot.hold.pulse{animation:holdPulse 1s ease-in-out infinite}
+@keyframes holdPulse{0%,100%{box-shadow:0 0 0 0 rgba(229,72,63,0)}50%{box-shadow:0 0 0 4px rgba(229,72,63,.75)}}
 .holdrow{display:flex;width:calc(var(--CS)*(var(--N,8) + .42));height:calc(var(--CS)*1.8);margin-top:calc(var(--CS)*.15)}
 .hold{flex:1;border:1.5px dashed var(--muted)}
 .hold.target{background:rgba(255,255,255,.15);border-color:#fff}
@@ -368,6 +370,10 @@ body.spr.skin-velvet :is(#grid,#tray,#holdRow,.drag) [data-col]>.bev{background-
 .bigemo{position:absolute;left:50%;top:22%;font-size:64px;transform:translate(-50%,-50%);animation:praise 1.6s ease forwards}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translate(-50%,20px);background:rgba(10,16,48,.92);color:#fff;padding:10px 14px;border-radius:12px;font-size:14px;z-index:90;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+.simfr{position:fixed;inset:0;width:100%;height:100%;border:0;opacity:0;pointer-events:none;z-index:-1;background:transparent}
+.simfr.on{opacity:1;pointer-events:auto;z-index:9998}
+#simSw{position:fixed;left:0;top:46%;z-index:9999;background:rgba(10,16,48,.88);color:#fff;border-radius:0 14px 14px 0;padding:10px 10px 10px 8px;font-size:13px;font-weight:800;line-height:1.15;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#simSw small{display:block;font-size:10px;font-weight:600;opacity:.75}
 .av{display:inline-block;border-radius:50%;object-fit:cover;vertical-align:middle;color:#fff;font-weight:700;text-align:center;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 .av.big{box-shadow:0 0 0 3px #fff,0 4px 14px rgba(0,0,0,.35)}
 .profhead{display:flex;align-items:center;gap:12px}
@@ -669,7 +675,8 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 <section id="settings" class="screen">
   <div class="pad">
     <div class="topnav"><button class="back" id="setBack">← Voltar</button></div>
-    <h1>Configurações</h1>
+    <h1 id="setTitle">Configurações</h1>
+    <div class="card" id="devCard" hidden><h2>🤖 Modo teste</h2><p class="muted">Ligado. Na sala, quem criou vê "Aparelho de teste": um celular de mentira que entra na sala e joga sozinho. Toque 7 vezes no título para desligar.</p></div>
     <div class="card"><h2>Meu perfil</h2><div id="profBox"></div></div>
     <div class="card">
       <h2>Altura da peça ao arrastar</h2>
@@ -693,6 +700,7 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
     <div class="topnav"><button class="back" id="connBack">← Voltar</button></div>
     <h1 id="connTitle">Jogar conectado</h1>
     <div id="pHostBox" hidden>
+      <button class="btn small" id="pHostSim" hidden style="margin-bottom:10px">🤖 Usar aparelho de teste</button>
       <div class="card">
         <p class="step" id="pHostStep">1. Mostre este código para o outro celular</p>
         <div class="connstat" id="pHostWait">Preparando…</div>
@@ -739,6 +747,7 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
       <div class="optrow"><label for="nickIn">Seu apelido</label><input class="code nick" id="nickIn" maxlength="16" placeholder="Como você quer aparecer" autocomplete="off" spellcheck="false" enterkeyhint="done"></div>
       <div class="players" id="lobbyPlayers"></div>
       <div class="row"><button class="btn small" id="lobbyAdd">+ Adicionar jogador</button><button class="btn small" id="lobbySpec">📺 Conectar espectador</button></div>
+      <div class="row" id="lobbySimRow" hidden><button class="btn small" id="lobbySim">🤖 Aparelho de teste</button><button class="btn small ghost" id="lobbySimDel">Remover testes</button></div>
     </div>
     <div class="card" id="roomCard" hidden><h2>Resultados da sala</h2><div id="roomList"></div><button class="btn small" id="roomShare" style="margin-top:8px">Compartilhar no WhatsApp</button></div>
     <div class="card night"><div><div class="muted">Placar da noite (suas vitórias × derrotas)</div><b id="lobbyNight"></b></div></div>
@@ -996,9 +1005,12 @@ const FOG_SIDES=['top','bottom','left','right'];
 function fogShow(side,ms){ const f=$('#fog'), h=side==='top'||side==='bottom', st=f.style;
   st.left=side==='right'?'50%':'0'; st.top=side==='bottom'?'50%':'0'; st.width=h?'100%':'50%'; st.height=h?'50%':'100%'; f.classList.add('show');
   clearTimeout(fogShow.t); if(ms) fogShow.t=setTimeout(()=>f.classList.remove('show'),ms); }
+/* aparelho de teste: o mesmo jogo aberto escondido dentro do seu, com ?sim=n */
+const SIM=(()=>{ try{ return new URLSearchParams(location.search).get('sim'); }catch(e){ return null; } })(), SIMMEM={};
+let SIMCTL=false;
 const store={
-  get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return d; } },
-  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  get(k,d){ if(SIM) return k in SIMMEM?JSON.parse(SIMMEM[k]):d; try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ if(SIM){ SIMMEM[k]=JSON.stringify(v); return; } try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 };
 const NF=(()=>{ try{ return new Intl.NumberFormat('pt-BR'); }catch(e){ return null; } })();
 const fmtN = n => NF?NF.format(Math.round(n)):String(Math.round(n));
@@ -1203,7 +1215,8 @@ function applyLook(){
 }
 
 /* ===================== som ===================== */
-let actx=null, muted=store.get('ddb_muted',false), noiseBuf=null, master=null, verb=null;
+if(SIM) store.set('ddb_nick','Teste '+SIM);
+let actx=null, muted=SIM?true:store.get('ddb_muted',false), noiseBuf=null, master=null, verb=null;
 function ac(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } if(actx&&actx.state==='suspended'){ try{ actx.resume(); }catch(e){} } return actx; }
 function bus(){
   const a=ac(); if(!a) return null;
@@ -1506,7 +1519,7 @@ function say(word,level=9){
   const w=String(word).toLowerCase().replace(/[^a-z]/g,'');
   playVoice(w);
 }
-function buzz(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function buzz(p){ if(SIM&&!SIMCTL) return; try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 
 /* ===================== partículas ===================== */
 const pcv=$('#pcv'), pctx=pcv.getContext('2d'); let parts=[], prun=false, DPR=1;
@@ -1699,8 +1712,8 @@ async function importVoices(files,only){
 }
 async function toggleRec(w){
   if(recState){ const r=recState; if(r.mr.state!=='inactive') r.mr.stop(); return; }
-  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ toast('Este navegador não permite gravar aqui. Abra pelo link https do jogo.'); return; }
-  let st; try{ st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}}); }catch(e){ toast('Microfone bloqueado. Permita o acesso no navegador.'); return; }
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ mediaHelp('mic',null); return; }
+  let st; try{ st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}}); }catch(e){ mediaHelp('mic',e); return; }
   const mr=new MediaRecorder(st), chunks=[];
   recState={w,mr}; renderVoiceList();
   mr.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
@@ -1753,8 +1766,8 @@ function readPhoto(file){
 let profRec=null;
 async function recordBordao(key){
   if(profRec){ if(profRec.mr.state!=='inactive') profRec.mr.stop(); return; }
-  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ toast('Este navegador não permite gravar aqui. Abra pelo link https do jogo.'); return; }
-  let st; try{ st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}}); }catch(e){ toast('Microfone bloqueado. Permita o acesso no navegador.'); return; }
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ mediaHelp('mic',null); return; }
+  let st; try{ st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}}); }catch(e){ mediaHelp('mic',e); return; }
   const mr=new MediaRecorder(st), chunks=[]; profRec={key,mr}; renderProfile();
   mr.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
   mr.onstop=()=>{ st.getTracks().forEach(t=>t.stop()); clearTimeout(profRec&&profRec.to); profRec=null;
@@ -2207,6 +2220,18 @@ async function shareText(text){
   if(navigator.share){ try{ await navigator.share({text}); return; }catch(e){ if(e.name==='AbortError') return; } }
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
+/* por que o microfone/câmera não abriu, em palavras simples */
+function mediaWhy(kind,e){
+  const nome=kind==='mic'?'o microfone':'a câmera';
+  let framed=false; try{ framed=window.self!==window.top; }catch(x){ framed=true; }
+  const pol=document.permissionsPolicy||document.featurePolicy; let allowed=true; try{ if(pol&&pol.allowsFeature) allowed=pol.allowsFeature(kind==='mic'?'microphone':'camera'); }catch(x){}
+  if(framed||!allowed) return `Esta tela não deixa usar ${nome}: o jogo está aberto dentro de outro app (pré-visualização). Abra o jogo direto no Chrome ou no Safari, pelo link do site, para usar ${nome}.`;
+  if(!window.isSecureContext) return `Para usar ${nome}, abra o jogo por um link que comece com https.`;
+  if(e&&(e.name==='NotFoundError'||e.name==='OverconstrainedError')) return `Não encontrei ${nome} neste aparelho.`;
+  if(e&&e.name==='NotReadableError') return `${nome[0].toUpperCase()+nome.slice(1)} está sendo usado por outro app. Feche o outro app e tente de novo.`;
+  return `O navegador bloqueou ${nome}. Toque no cadeado (ou nos três pontinhos) ao lado do endereço do site, permita ${nome} e tente de novo.`;
+}
+function mediaHelp(kind,e){ openEnd(`<h2>${kind==='mic'?'🎙 Microfone':'📷 Câmera'} indisponível</h2><p class="reason" style="margin-top:8px">${esc(mediaWhy(kind,e))}</p>`,[{t:'Entendi',cls:'primary',on:closeEnd}]); }
 function gameLink(){ return /^https?:/.test(location.href)?location.href.split('#')[0]:''; }
 
 /* ===================== DUELO (local e ao vivo) ===================== */
@@ -2257,7 +2282,8 @@ function renderDuel(anim){
   updateCombo(D.eng.combo,D.eng.since);
   const u=$('#aUndo'); if(u) u.disabled=D.undoUsed||!D.snap||!D.playing;
   updPowChips();
-  if(D.live&&!D.o.sudden&&!D.spect){ const bl=bombLeft(D.eng.b); setStatus(bl!=null?`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`:'',bl!=null&&bl<=1); }
+  if(D.holdHint) setStatus('Guarde a peça!',true);
+  else if(D.live&&!D.o.sudden&&!D.spect){ const bl=bombLeft(D.eng.b); setStatus(bl!=null?`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`:'',bl!=null&&bl<=1); }
 }
 const duelIN={
   piece:src=>src==='h'?D.hold:D.tray[src],
@@ -2280,7 +2306,8 @@ function duelHold(src){
   if(src==='h'||!D.o.hold||!D.playing) return false;
   const p=D.tray[src]; D.tray[src]=D.hold||null; D.hold=p;
   if(D.tray.every(x=>!x)) D.tray=gen3(D.rng,D.o);
-  renderDuel(); duelCheckStuck(); return true;
+  if(D.holdHint){ D.holdHint=false; setStatus(''); }
+  holdPulse(false); renderDuel(); duelCheckStuck(); return true;
 }
 function duelDrop(src,r,c){
   const p=src==='h'?D.hold:D.tray[src];
@@ -2323,7 +2350,13 @@ function duelAfter(newMove){
   if(passedOpp()){ duelEnd('passed'); return; }
   duelCheckStuck();
 }
-function duelCheckStuck(){ if(!D.playing) return; const ps=[...D.tray,D.hold].filter(Boolean); if(!ps.some(p=>D.eng.anyFit(p))) duelEnd('stuck'); }
+/* com o espaço de guardar vazio e só uma peça na bandeja, guardar traz 3 peças novas: ainda há jogada */
+function holdRescue(tray,hold,on){ return !!on&&!hold&&tray.filter(Boolean).length===1; }
+function duelCheckStuck(){ if(!D.playing) return; const ps=[...D.tray,D.hold].filter(Boolean); D.holdHint=false;
+  if(ps.some(p=>D.eng.anyFit(p))){ holdPulse(false); return; }
+  if(holdRescue(D.tray,D.hold,D.o.hold)){ D.holdHint=true; toast('Nenhuma peça cabe: guarde a peça para receber peças novas'); holdPulse(true); setStatus('Guarde a peça!',true); return; }
+  duelEnd('stuck'); }
+function holdPulse(on){ const h=$('#holdSlot'); if(h) h.classList.toggle('pulse',!!on); }
 function armSudden(){ if(D&&D.o.sudden) D.suddenAt=D.elapsed+5000; }
 function duelTick(t){
   if(!D||D.over) return;
@@ -2739,9 +2772,9 @@ async function copyText(text,btn){
 }
 let stream=null, scanning=false, detector=null;
 async function scan(onText,errEl){
-  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){ errEl.textContent='Câmera indisponível aqui. Use Copiar e colar.'; return; }
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){ errEl.textContent=mediaWhy('cam',null)+' Por enquanto, use Copiar e colar.'; return; }
   try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}); }
-  catch(e){ errEl.textContent=`Não foi possível abrir a câmera (${e.name}). Abra o jogo por um link https ou use Copiar e colar.`; return; }
+  catch(e){ errEl.textContent=mediaWhy('cam',e)+' Por enquanto, use Copiar e colar.'; return; }
   const video=$('#video'), canvas=$('#canvas'), ctx=canvas.getContext('2d',{willReadFrequently:true});
   video.srcObject=stream; $('#scanner').classList.add('show'); try{ await video.play(); }catch(e){}
   if('BarcodeDetector' in window&&!detector){ try{ detector=new BarcodeDetector({formats:['qr_code']}); }catch(e){ detector=null; } }
@@ -2799,6 +2832,7 @@ function hostRoomInit(){
   NET.players=['A']; NET.prof={}; NET.teams={}; NET.names={A:myNick()}; NET.daily={A:myDaily()}; NET.ser={}; NET.room={matches:[]}; NET.rematchReq=new Set(); NET.lastWinner=null;
 }
 async function hostNewOffer(spec){
+  $('#pHostSim').hidden=!!spec||!devOn();
   if(!spec&&NET.players.length>=MAXP){ toast('A sala já tem 6 jogadores'); return; }
   $('#connTitle').textContent='Jogar conectado';
   resetConnectUI(); $('#pHostBox').hidden=false; show('connect');
@@ -3049,6 +3083,7 @@ function renderLobby(){
   $('#lobbyConn').textContent=(host?'Você criou a sala':'Você entrou na sala')+` · ${n} jogador${n>1?'es':''}`;
   $('#lobbyPlayers').innerHTML=ids.map(id=>`<span>${avatarHTML(id,20)}${id==='A'?'👑 ':''}${esc(nm(id,false))}${id===NET.role?' (você)':''}</span>`).join('');
   $('#lobbyAdd').hidden=!host||n>=MAXP; $('#lobbySpec').hidden=!host||!!NET.peers.S;
+  $('#lobbySimRow').hidden=!host||!devOn(); $('#lobbySim').hidden=n>=MAXP; $('#lobbySimDel').hidden=!SIMS.length;
   if(NET.specOn||NET.peers.S) $('#lobbyPlayers').insertAdjacentHTML('beforeend','<span>📺 Espectador</span>');
   const tk=todayKey(), fmtD=v=>v!=null?fmtN(v):'–';
   $('#lobbyDaily').innerHTML=ids.map(id=>{ const d=id===NET.role?myDaily():(NET.daily[id]&&NET.daily[id].key===tk?NET.daily[id]:{}); return `<div class="kv"><span>${esc(nm(id))}</span><b>${fmtD(d.t)} · ${fmtD(d.s)}</b></div>`; }).join('')+'<p class="muted">Com tempo · sem tempo. Traço quer dizer que ainda não jogou.</p>';
@@ -3260,6 +3295,7 @@ function hostPlace(who,src,r,c){
   if(g){ if(vs&&H.scs[who]>=g){ hostEnd('goal',who); return true; } if(!vs&&B.sc>=g){ hostEnd('goal',ts?k:null); return true; } }
   hostCheckStuck();
   if(isTurnType(SH.type)&&!H.over){ let nx=nextOf(who); for(let k=0;k<SH.ids.length&&H.stuck[nx];k++) nx=nextOf(nx); H.turn=nx; if(nx===who&&SH.ids.length>1) H.ev.keep=1; }
+  if(SH.hook&&SH.hook.afterTurn) SH.hook.afterTurn();
   return true;
 }
 /* blocos de poder no tabuleiro dividido dos times */
@@ -3323,7 +3359,7 @@ function hostHold(who,src){
 }
 function hostCheckStuck(){
   if(SH.type==='versus'||SH.H.over) return; const H=SH.H;
-  const can=w=>{ const B=H.bd[bdKey(w)], reg=regionOf(SH.type,w); return H.trays[w].some(p=>p&&B.eng.anyFit(p,reg))||(!!B.hold&&B.eng.anyFit(B.hold,reg)); };
+  const can=w=>{ const B=H.bd[bdKey(w)], reg=regionOf(SH.type,w); return H.trays[w].some(p=>p&&B.eng.anyFit(p,reg))||(!!B.hold&&B.eng.anyFit(B.hold,reg))||holdRescue(H.trays[w],B.hold,SH.o.hold&&SH.type!=='versus'); };
   SH.ids.forEach(id=>H.stuck[id]=!can(id));
   if(SH.type==='tsplit'){
     /* time sem jogadas fica de fora; o outro continua até passar a pontuação dele */
@@ -3433,6 +3469,8 @@ function renderSharedStatus(t){
     if(SH.type==='tsplit'){ const k=bdKey(me), ids=bdIds(k), i=ids.indexOf(me); st=ids.length<=1?'O tabuleiro do time é todo seu':`Sua faixa: ${STRIPS[ids.length][i]} · ${TEAM[k].e} ${TEAM[k].n}`; if(v.shield) st+=' · 🛡️'; }
     if(SH.type==='coop'){ const others=SH.ids.filter(x=>x!==me); st=v.turn===me?(v.stuck&&others.every(x=>v.stuck[x])?'Sua vez de novo: os outros estão sem jogada':'Sua vez'):`Vez de ${nm(v.turn)}`; }
     if(v.stuck&&v.stuck[me]){ st='Sem jogada para você. Espere alguém abrir espaço'; warn=true; }
+    { const tr=v.tr[me]||[], reg=regionOf(SH.type,me); VE.b=v.b; const rescue=SH.o.hold&&!tr.some(p=>p&&VE.anyFit(p,reg))&&!(v.hold&&VE.anyFit(v.hold,reg))&&holdRescue(tr,v.hold,true)&&(!isTurnType(SH.type)||v.turn===me);
+      holdPulse(rescue); if(rescue){ st='Nenhuma peça cabe: guarde a peça!'; warn=true; } }
     if(SH.type==='tsplit'&&v.out&&v.out[bdKey(me)]){ st='Seu time ficou sem jogadas. Agora é torcer!'; warn=true; }
     if(SH.type==='tsplit'){ const bl=bombLeft(v.b); if(bl!=null){ st=`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`; warn=bl<=1; } }
     if(v.hammer>0){ st=`🔨 Toque em ${v.hammer} bloco${v.hammer>1?'s':''} do seu tabuleiro para quebrar`; warn=false; }
@@ -3663,11 +3701,11 @@ const CW1={name:'Pelúcia',boss:'Ursão',phases:[
   {name:'Faxina',icon:'🧹',goal:'clear',setup:'stones',k:10,desc:'O tabuleiro começa com {k} blocos cinza. Limpe todos.',st:{by:'pieces',two:30,three:22}},
   {name:'Caça às estrelas',icon:'⭐',goal:'golds',setup:'golds',k:4,limit:30,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:22,three:16}},
   {name:'Pegando fogo',icon:'🔥',goal:'combo',v:3,limit:30,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:15,three:10}},
-  {name:'Chuva de pedras',icon:'🌧️',goal:'survive',time:120,rain:15,desc:'Aguente 2 minutos. Cai um bloco cinza a cada {rain} segundos.',st:{by:'lines',two:12,three:18}},
+  {name:'Chuva de pedras',icon:'🌧️',goal:'survive',time:120,rain:15,mt:8,desc:'Aguente 2 minutos. Cai um bloco cinza a cada {rain} segundos, e você tem 8 segundos por jogada.',st:{by:'lines',two:12,three:18}},
   {name:'Quebra-cabeça',icon:'🧩',goal:'empty',setup:'puzzle',desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
   {name:'Inverno',icon:'❄️',goal:'clear',setup:'ice',k:8,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:45,three:35}},
   {name:'Arco-íris',icon:'🌈',goal:'colorLines',v:2,limit:60,colors:[0,3,5],desc:'Só 3 cores. Faça {v} linhas de uma cor só em até {limit} peças.',st:{by:'pieces',two:40,three:28}},
-  {name:'Chefão: Ursão',icon:'🐻',goal:'boss',hp:30,time:180,desc:'Cada linha tira vida do Ursão; o combo multiplica o dano.',st:{by:'time',two:100,three:70}}
+  {name:'Chefão: Ursão',icon:'🐻',goal:'boss',hp:30,time:180,desc:'Cada linha tira vida do Ursão; o combo multiplica o dano. Bravo, ele congela uma peça por 4 s.',st:{by:'time',two:100,three:70}}
 ]};
 const CHELPS=[{k:'martelo',i:'🔨',n:'Martelo',need:6,d:'quebra 1 bloco'},{k:'swap',i:'🔀',n:'Trocar peças',need:12,d:'troca as suas 3 peças'},{k:'row',i:'💥',n:'Bomba de linha',need:18,d:'limpa uma linha inteira'}];
 function campLoad(slot){ return Object.assign({stars:{},att:{}},store.get('ddb_camp_'+slot,{})); }
@@ -3728,7 +3766,7 @@ function campHook(cfg){
     if(def.setup==='ice'){ const idx=e.addStones(rnd,def.k,0); idx.forEach(i=>{ e.b[(i/N)|0][i%N]={c:Math.floor(rnd()*NCOL),s:'ice',t:0,ic:1}; }); }
     if(def.setup==='puzzle'){ const pz=makePuzzle('W1P7'); e.b=pz.board; const q={}; SH.ids.forEach(id=>q[id]=[]); pz.pieces.forEach((p,i)=>q[SH.ids[i%SH.ids.length]].push(p));
       SH.ids.forEach(id=>{ H.trays[id]=[null,null,null]; for(let s=0;s<3&&q[id].length;s++) H.trays[id][s]=q[id].shift(); }); H.campQ=q; }
-    H.cp={w:1,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1};
+    H.cp={w:1,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
     hk.progress(H);
   };
   hk.progress=H=>{
@@ -3751,27 +3789,40 @@ function campHook(cfg){
     return win;
   };
   hk.finish=(win,msg)=>{ const H=SH.H, cp=H.cp; if(H.over) return; cp.win=win; cp.msg=msg||''; cp.el=SH.elapsed; cp.stars=campStarsCalc(def,sc,cp,cp.att); hostEnd(win?'campwin':'campfail',null); };
-  hk.canPlace=(who,src)=>{ const cp=SH.H.cp; return !(cp.frz&&src!=='h'&&cp.frz.slot===src); };
-  hk.canDrag=src=>{ const cp=SH.view&&SH.view.cp; return !(cp&&cp.frz&&src!=='h'&&cp.frz.slot===src); };
-  hk.dimSlot=i=>{ const cp=SH.view&&SH.view.cp; return !!(cp&&cp.frz&&cp.frz.slot===i); };
+  const frzOn=cp=>{ if(!cp||!cp.frz) return false; const el=SH.host?SH.elapsed:cp.el+(SH.remAt?performance.now()-SH.remAt.at:0); return el<cp.frz.until; };
+  hk.canPlace=(who,src)=>{ const cp=SH.H.cp; return !(frzOn(cp)&&cp.frz.id===who&&src!=='h'&&cp.frz.slot===src); };
+  hk.canDrag=src=>{ const cp=SH.view&&SH.view.cp; return !(frzOn(cp)&&cp.frz.id===SH.me&&src!=='h'&&cp.frz.slot===src); };
+  hk.dimSlot=i=>{ const cp=SH.view&&SH.view.cp; return !!(frzOn(cp)&&cp.frz.id===SH.me&&cp.frz.slot===i); };
   hk.afterPlace=(who,res,pts,B)=>{
-    const H=SH.H, cp=H.cp; cp.placed++; cp.lines+=res.n; cp.score+=pts; cp.combo=Math.max(cp.combo,res.combo||0); cp.colorLines+=res.colorLines||0; cp.frz=null;
+    const H=SH.H, cp=H.cp; if(cp.mt) cp.moveAt=SH.elapsed+cp.mt; cp.placed++; cp.lines+=res.n; cp.score+=pts; cp.combo=Math.max(cp.combo,res.combo||0); cp.colorLines+=res.colorLines||0;
     if(def.goal==='boss'){
       if(res.n>0){ const dmg=res.n*Math.max(1,res.combo||1)*(res.chain||1); cp.hp-=dmg; H.ev.dmg=dmg; }
       if(cp.hp>0){ cp.bossN++; const rage=cp.hp<=cp.hpMax/2; if(rage&&!cp.rage){ cp.rage=1; H.ev.rage=1; }
-        if(cp.bossN>=(rage?4:5)){ cp.bossN=0; const added=B.eng.addStones(Math.random,2,-5,'ice'); H.ev.boss={cells:added}; if(rage){ cp.frz={slot:Math.floor(Math.random()*3)}; H.ev.boss.frz=1; } } }
+        if(cp.bossN>=(rage?4:5)){ cp.bossN=0; const added=B.eng.addStones(Math.random,2,-5,'ice'); H.ev.boss={cells:added}; if(rage) cp.frzPending=1; } }
     }
     if(hk.noRegen){ const q=H.campQ[who]; if(H.trays[who].every(x=>!x)&&q.length) for(let s=0;s<3&&q.length;s++) H.trays[who][s]=q.shift(); }
     if(hk.progress(H)){ hk.finish(true); return; }
     if(sc.limit&&cp.placed>=sc.limit){ hk.finish(false,'Acabaram as peças'); return; }
     if(hk.noRegen&&cp.left===0){ hk.finish(false,'As peças acabaram e sobrou bloco no tabuleiro'); return; }
   };
+  /* depois da reposição e da troca de vez: congela uma peça de quem joga agora, por 4 segundos */
+  hk.afterTurn=()=>{
+    const H=SH.H, cp=H.cp; if(!cp.frzPending||H.over) return; cp.frzPending=0;
+    const id=H.turn, tray=H.trays[id]||[], cand=[0,1,2].filter(i=>tray[i]);
+    if(!cand.length) return;
+    cp.frz={slot:cand[Math.floor(Math.random()*cand.length)],id,until:SH.elapsed+4000}; if(H.ev&&H.ev.boss) H.ev.boss.frz=1;
+  };
   hk.afterHelp=()=>{ const H=SH.H; if(H.over) return; if(hk.progress(H)) hk.finish(true); };
   hk.stuck=()=>hk.finish(false,def.setup==='puzzle'?'Nenhuma peça cabe mais: o quebra-cabeça travou':'Sem espaço no tabuleiro');
   hk.tick=t=>{
     if(!SH||SH.over) return; const v=SH.view, cp=SH.host?SH.H.cp:v&&v.cp; if(!cp) return;
+    if(cp.frz&&SH.playing){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?t-SH.remAt.at:0);
+      if(el>=cp.frz.until){ if(SH.host){ cp.frz=null; broadcast(); } renderShared(); } else if(t-(hk.fzT||0)>250){ hk.fzT=t; renderSharedStatus(t); } }
+    if(cp.mt&&SH.playing&&!(v&&v.paused)&&t-(hk.stT||0)>100){ hk.stT=t; renderSharedStatus(t);
+      const el=SH.host?SH.elapsed:cp.el+(SH.remAt?t-SH.remAt.at:0), sec=Math.ceil((cp.moveAt-el)/1000); if(sec<=3&&sec>0&&sec!==hk.beep){ hk.beep=sec; SFX.tick(); } }
     if(!SH.host){ if(cp.tl&&SH.remAt&&SH.playing&&!(v&&v.paused)){ const el=cp.el+(t-SH.remAt.at); setTimer(cp.tl*1000-el,cp.tl*1000,false); } return; }
     const H=SH.H; if(!SH.playing||H.paused||H.over) return; cp.el=SH.elapsed;
+    if(cp.mt&&SH.elapsed>=cp.moveAt){ hk.finish(false,'O tempo da jogada acabou'); return; }
     if(cp.tl){ const left=cp.tl*1000-SH.elapsed; setTimer(left,cp.tl*1000,false);
       if(left<=0){ if(def.goal==='survive'){ hk.progress(H); hk.finish(true); } else hk.finish(false,'O tempo acabou'); return; } }
     if(sc.rain&&SH.elapsed>=cp.rainAt*1000){ cp.rainAt+=sc.rain; const added=H.bd.all.eng.addStones(Math.random,1);
@@ -3779,9 +3830,10 @@ function campHook(cfg){
       playEv(H.ev); hostCheckStuck(); broadcast(); renderShared(); }
   };
   hk.status=v=>{ const cp=v.cp; if(!cp) return null; const grp=SH.ids.length>1;
-    let t=(grp?(v.turn===SH.me?'Sua vez · ':`Vez de ${nm(v.turn)} · `):'')+cp.txt;
-    if(cp.frz) t+=' · ❄️ peça congelada'; if(v.hammer>0) t='🔨 Toque num bloco para quebrar'; if(SH.tapMode==='row') t='💥 Toque numa casa: a linha inteira some';
-    return {t,w:!!cp.frz}; };
+    let t=(grp?(v.turn===SH.me?'Sua vez · ':`Vez de ${nm(v.turn)} · `):'')+cp.txt, w=false;
+    if(frzOn(cp)&&cp.frz.id===SH.me){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?performance.now()-SH.remAt.at:0); t+=` · ❄️ peça congelada (${Math.ceil((cp.frz.until-el)/1000)} s)`; w=true; }
+    if(cp.mt&&SH.playing){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?performance.now()-SH.remAt.at:0), left=Math.max(0,cp.moveAt-el); t=`⏱ ${(left/1000).toFixed(1).replace('.',',')} s · `+t; if(left<3000) w=true; } if(v.hammer>0) t='🔨 Toque num bloco para quebrar'; if(SH.tapMode==='row') t='💥 Toque numa casa: a linha inteira some';
+    return {t,w}; };
   hk.render=(v,anim)=>{
     const cp=v.cp; if(!cp) return;
     if(def.goal==='boss'&&!SH.over){ const tr=$('#fxl .bosstrip'); if(!tr||tr.style.visibility==='hidden'){ bossDock(cp.rage); bossHP(cp.hp,cp.hpMax); } }
@@ -3797,7 +3849,7 @@ function campHook(cfg){
     if(ev.rain){ setTimeout(()=>BC.drop(ev.rain),0); SFX.alert(); }
     if(ev.dmg) bossHurt(ev.dmg);
     if(ev.boss){ const later=ev.dmg?650:0; setTimeout(()=>{ if(!SH||SH.over) return; BC.drop(ev.boss.cells,1000); bossShow('attack',{cells:ev.boss.cells,rage:!!(SH.view&&SH.view.cp&&SH.view.cp.rage)||!!ev.rage});
-        setTimeout(()=>bossSay(ev.boss.frz?'Grrr! Ursinhos blindados… e congelei uma peça!':ev.rage?'Agora fiquei BRAVO! Tomem ursinhos!':'Grrr! Tomem ursinhos blindados!',1500),260);
+        setTimeout(()=>bossSay(ev.boss.frz?'Grrr! Ursinhos blindados… e congelei uma peça por 4 segundos!':ev.rage?'Agora fiquei BRAVO! Tomem ursinhos!':'Grrr! Tomem ursinhos blindados!',1500),260);
         setTimeout(()=>shake(),1350); },later); }
     else if(ev.rage){ setTimeout(()=>{ if(!SH||SH.over) return; bossShow('rage',{rage:true}); setTimeout(()=>bossSay('Vocês me deixaram BRAVO!',1500),250); },ev.dmg?650:0); }
   };
@@ -4078,6 +4130,76 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden&&D&&!D.liv
 applyLook(); sizeCanvas(); renderNight(); renderHome();
 loadVoices();
 ['pointerdown','keydown'].forEach(ev=>window.addEventListener(ev,function once(){ ac(); setTimeout(warmSounds,50); if(!Object.values(vbuf).some(Boolean)) loadVoices(); window.removeEventListener(ev,once); },{once:true}));
+/* ================= MODO TESTE: aparelhos de mentira na sala =================
+   Cada aparelho de teste é o próprio jogo aberto num quadro escondido (?sim=n), entrando na sala
+   como convidado de verdade. As mensagens vão por postMessage em vez da conexão direta.
+   Ele joga sozinho; o botão da esquerda troca a tela para você jogar por ele. */
+let SIMS=[], SIMV=-1, simNext=0;
+function devOn(){ return !SIM&&!!store.get('ddb_dev',false); }
+function renderDev(){ $('#devCard').hidden=!devOn(); }
+renderDev();
+{ let taps=0, tt=0; $('#setTitle').addEventListener('click',()=>{ if(SIM) return; const n=performance.now(); taps=n-tt<1500?taps+1:1; tt=n;
+  if(taps>=7){ taps=0; const on=!devOn(); store.set('ddb_dev',on); renderDev(); toast(on?'🤖 Modo teste ligado':'Modo teste desligado'); if(!on) SIMS.slice().forEach(simRemove); } }); }
+function simUrl(n){ const u=new URL(location.href); u.hash=''; u.searchParams.set('sim',n); return u.href; }
+function simAdd(){
+  if(NET.role!=='A') return;
+  if(!/^(https?|file):$/.test(location.protocol)){ toast('O aparelho de teste só funciona com o jogo aberto pelo link do site.'); return; }
+  if(NET.players.length+SIMS.filter(x=>!x.joined).length>=MAXP){ toast('A sala já tem 6 jogadores'); return; }
+  let n=1; while(SIMS.some(x=>x.n===n)) n++;
+  const fr=document.createElement('iframe'); fr.className='simfr'; fr.setAttribute('aria-hidden','true'); fr.tabIndex=-1;
+  const sim={n,fr,dead:false,joined:false};
+  sim.dc={readyState:'open',onmessage:null,onclose:null,send(txt){ if(!sim.dead&&fr.contentWindow) fr.contentWindow.postMessage({sim:'m',txt},'*'); },close(){ simDrop(sim); }};
+  sim.pend={pc:{close(){ simDrop(sim); },_watch(){}},dc:sim.dc,spec:false};
+  SIMS.push(sim); fr.src=simUrl(n); document.body.appendChild(fr); toast(`🤖 Ligando o Teste ${n}…`);
+}
+/* some sem avisar ninguém (sala fechada) */
+function simDrop(sim){ if(sim.dead) return; sim.dead=true; sim.fr.remove(); SIMS=SIMS.filter(x=>x!==sim); if(SIMV>=SIMS.length) SIMV=-1; simSwRender(); }
+/* o jogador de teste sai da sala */
+function simRemove(sim){ if(sim.dead) return; const oc=sim.dc.onclose; simDrop(sim); if(oc) oc(); if($('#lobby').classList.contains('active')) renderLobby(); }
+function simSwRender(){
+  let b=$('#simSw'); if(!SIMS.length){ if(b) b.remove(); SIMV=-1; return; }
+  if(!b){ b=document.createElement('button'); b.id='simSw'; b.addEventListener('click',()=>{ SIMV=SIMV+1>=SIMS.length?-1:SIMV+1; simSwRender(); }); document.body.appendChild(b); }
+  b.innerHTML=SIMV<0?'📱 Eu<small>trocar ▸</small>':`🤖 Teste ${SIMS[SIMV].n}<small>trocar ▸</small>`;
+  SIMS.forEach((x,i)=>{ x.fr.classList.toggle('on',i===SIMV); if(x.fr.contentWindow) x.fr.contentWindow.postMessage({sim:'ctl',on:i===SIMV},'*'); });
+  cancelDrag();
+}
+if(!SIM) window.addEventListener('message',e=>{
+  const sim=SIMS.find(x=>x.fr.contentWindow===e.source), d=e.data; if(!sim||!d||typeof d!=='object') return;
+  if(d.sim==='ready'){ if(NET.role!=='A'){ simDrop(sim); return; } sim.joined=true; hostPeerOpen(sim.pend); if(!sim.dead){ sim.fr.contentWindow.postMessage({sim:'open'},'*'); simSwRender(); } }
+  else if(d.sim==='m'){ if(sim.dc.onmessage) sim.dc.onmessage({data:d.txt}); }
+  else if(d.sim==='bye') simRemove(sim);
+});
+$('#lobbySim').addEventListener('click',simAdd);
+$('#lobbySimDel').addEventListener('click',()=>{ SIMS.slice().forEach(simRemove); });
+$('#pHostSim').addEventListener('click',()=>{ if(NET.role!=='A') hostRoomInit(); simAdd(); });
+/* ---- dentro do aparelho de teste ---- */
+function simBoot(){
+  const P=window.parent; let dc=null;
+  window.addEventListener('message',e=>{ if(e.source!==P) return; const d=e.data; if(!d||typeof d!=='object') return;
+    if(d.sim==='open'){ if(dc&&dc.onopen) dc.onopen(); }
+    else if(d.sim==='m'){ if(dc&&dc.onmessage) dc.onmessage({data:d.txt}); }
+    else if(d.sim==='ctl'){ SIMCTL=!!d.on; muted=!SIMCTL; if(!SIMCTL) cancelDrag(); } });
+  dc={readyState:'open',onopen:null,onmessage:null,onclose:null,send(txt){ P.postMessage({sim:'m',txt},'*'); },close(){ P.postMessage({sim:'bye'},'*'); }};
+  closeNet(); NET.wantSpec=false; NET.link={pc:{close(){},_watch(){}},dc}; guestDC(dc);
+  P.postMessage({sim:'ready'},'*');
+  setInterval(simBot,450);
+}
+/* o robô: escolhe peça e lugar sozinho, num ritmo de gente */
+function simBot(){
+  if(SIMCTL||!NET.open) return; const t=performance.now(); if(t<simNext) return;
+  if($('#lobby').classList.contains('active')){ /* times: entra no time com menos gente */
+    const ty=NET.lobby&&NET.lobby.type; if((ty==='tlive'||ty==='tsplit')&&!(NET.teams&&NET.teams[NET.role])){
+      const cnt=k=>Object.values(NET.teams||{}).filter(x=>x===k).length; send({t:'team',v:cnt('la')<cnt('az')?'la':'az'}); simNext=t+1500; } return; }
+  if(!IN||drag) return;
+  if(IN.tap){ for(const s of [0,1,2]) if(IN.tap(s)){ simNext=t+900+Math.random()*700; return; } }
+  const opts=[];
+  for(const s of [0,1,2,'h']){ if(!IN.canDrag(s)) continue; const p=IN.piece(s); if(!p) continue;
+    for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(IN.check(p,r,c)===true) opts.push([s,r,c]); }
+  if(opts.length){ const o=opts[Math.floor(Math.random()*opts.length)]; IN.drop(o[0],o[1],o[2]); simNext=t+1300+Math.random()*1200; return; }
+  if(IN.toHold&&!IN.piece('h')){ for(const s of [0,1,2]) if(IN.canDrag(s)&&IN.piece(s)&&IN.toHold(s)){ simNext=t+1000; return; } }
+  simNext=t+800;
+}
+if(SIM) simBoot();
 })();
 </script>
 </body>
