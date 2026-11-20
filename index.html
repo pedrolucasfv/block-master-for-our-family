@@ -167,7 +167,7 @@ textarea{width:100%;min-height:70px;font:12px/1.35 ui-monospace,Menlo,monospace;
   background-blend-mode:normal,normal,normal,normal,overlay,normal;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.3)}
 .skin-candy .bev,.skp.skin-candy .bev{border:0;border-radius:calc(var(--cs)*.16);background:linear-gradient(var(--c) 0 42%,#3e2414 42%);box-shadow:inset 0 calc(var(--cs)*.05) 0 rgba(255,255,255,.35)}
-.skin-crochet .bev,.skp.skin-crochet .bev{border:0;border-radius:calc(var(--cs)*.14);background:radial-gradient(circle,color-mix(in srgb,var(--c) 60%,#fff) 0 12%,transparent 13% 22%,var(--c) 23% 44%,color-mix(in srgb,var(--c) 60%,#000) 45% 48%,color-mix(in srgb,var(--c) 85%,#000) 49%),var(--c);background-blend-mode:normal;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.skin-crochet .bev,.skp.skin-crochet .bev{border:0;border-radius:calc(var(--cs)*.14);background:repeating-linear-gradient(60deg,color-mix(in srgb,var(--c) 75%,#fff) 0 12%,var(--c) 12% 25%),var(--c);background-blend-mode:normal;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
 .skin-bear .bev,.skp.skin-bear .bev{background:var(--c);border-radius:calc(var(--cs)*.24)}
 .skin-jelly .bev,.skp.skin-jelly .bev{background:repeating-linear-gradient(60deg,rgba(255,255,255,.5) 0 12%,transparent 12% 26%),var(--c);border-radius:50%;transform:scale(.8,.75)}
 .skin-bug .bev,.skp.skin-bug .bev{background:radial-gradient(circle at 30% 50%,#2a2320 0 9%,transparent 10%),radial-gradient(circle at 70% 50%,#2a2320 0 9%,transparent 10%),var(--c);border-radius:45% 45% 40% 40%}
@@ -508,7 +508,10 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 #camp .card .muted,#camp .card b{color:#5a4560}#camp .back{background:rgba(255,255,255,.75);color:#5a4560;box-shadow:0 3px 10px rgba(120,80,130,.15)}.cnm{flex:1;font-weight:600;font-size:15px}.cnm small{display:block;font-weight:400;font-size:11px;color:var(--pmuted)}
 .cst i{font-style:normal;color:var(--pmuted);opacity:.4;font-size:18px}.cst i.on{color:var(--gold);opacity:1}
 #campHelps .off{opacity:.55}
-.stargoal{display:inline-block;margin-top:2px;font-weight:600;color:var(--gold);font-size:12px}
+.mission{flex:0 1 230px;min-width:0;text-align:left;background:var(--panel);color:var(--ptext);border-radius:14px;padding:7px 10px;box-shadow:var(--chipFx);font-size:11.5px;line-height:1.3}
+.mission .mdesc{color:var(--pmuted)}.mission .mst{margin-top:4px;font-weight:600;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mission .mst span{display:block}
+#game.bossmode .scorerow{gap:8px}
 :root[data-world] #camp{background:transparent}
 .wtabs{display:flex;gap:8px;overflow-x:auto;margin:0 0 10px;padding:3px 2px 6px;scrollbar-width:none}
 .wtab{flex:1 0 50px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:50px;max-width:84px;padding:8px 2px;border-radius:16px;border:0;background:rgba(255,255,255,.6);color:inherit;font:inherit;box-shadow:0 3px 10px rgba(120,80,130,.15)}
@@ -837,6 +840,7 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
     <div class="timebar" id="timebar"><i id="timebarFill"></i></div>
     <div class="scorerow">
       <div><div class="score" id="score">0</div><div class="slbl" id="scoreLbl"></div></div>
+      <div class="mission" id="mission" hidden></div>
     </div>
     <div class="opps" id="opps" hidden></div>
     <div class="subline"><span id="subTxt"></span><span class="combo" id="combo"></span></div>
@@ -1277,29 +1281,28 @@ function drawBlock(skin,c,fr,w,dpr,lite){
     const hl=x.createRadialGradient(w*.36,w*.3,0,w*.36,w*.3,w*.32); hl.addColorStop(0,'rgba(255,255,255,.28)'); hl.addColorStop(1,'rgba(255,255,255,0)');
     x.fillStyle=hl; x.fillRect(0,0,w,w);
   } else if(skin==='crochet'){
-    /* crochê: "quadradinho de vovó" (granny square). Anel no meio e voltas de grupinhos de 3 pontos,
-       com os furinhos entre eles, em tons da cor da peça */
+    /* crochê: carreiras de pontos em "V" (duas laçadas inclinadas), cada laçada com volume, sombra embaixo
+       e os fios torcidos da lã; as carreiras se encaixam umas nas outras como no tecido de verdade */
     const r=w*.14; rrect(x,w,r); x.clip();
-    x.fillStyle=mix(c,'#000000',.6); x.fillRect(0,0,w,w);
-    const cx=w/2, cy=w/2, lw=Math.max(1,w*.012);
-    const stitch=(px,py,len,wid,ang,col)=>{ x.save(); x.translate(px,py); x.rotate(ang);
-      const g=x.createLinearGradient(-wid/2,0,wid/2,0); g.addColorStop(0,mix(col,'#000000',.62)); g.addColorStop(.45,mix(col,'#ffffff',.72)); g.addColorStop(1,mix(col,'#000000',.7));
-      x.beginPath(); if(x.roundRect) x.roundRect(-wid/2,-len/2,wid,len,wid/2); else x.rect(-wid/2,-len/2,wid,len); x.fillStyle=g; x.fill();
-      x.strokeStyle='rgba(255,255,255,.35)'; x.lineWidth=lw; x.beginPath(); for(let k=-1;k<=1;k++){ const yy=k*len*.28; x.moveTo(-wid*.32,yy-wid*.25); x.lineTo(wid*.32,yy+wid*.25); } x.stroke();
-      x.strokeStyle=mix(col,'#000000',.45); x.lineWidth=lw; x.beginPath(); if(x.roundRect) x.roundRect(-wid/2,-len/2,wid,len,wid/2); x.stroke(); x.restore(); };
-    /* uma volta: em cada lado, grupinhos de 3 pontos em pé (virados para fora), e um grupinho inclinado em cada canto */
-    const round=(half,len,wid,groups,col)=>{
-      for(let side=0;side<4;side++){ const ang=side*Math.PI/2;
-        for(let gI=0;gI<groups;gI++){ const t=groups===1?0:(gI/(groups-1)-.5)*half*.82;
-          for(let k=-1;k<=1;k++){ const along=t+k*wid*1.02, px=cx+Math.cos(ang)*half-Math.sin(ang)*along, py=cy+Math.sin(ang)*half+Math.cos(ang)*along; stitch(px,py,len,wid,ang+Math.PI/2,col); } } }
-      for(let k=0;k<4;k++){ const a=Math.PI/4+k*Math.PI/2, d=half*1.3; [-1,1].forEach(sd=>stitch(cx+Math.cos(a)*d-Math.sin(a)*sd*wid*.55,cy+Math.sin(a)*d+Math.cos(a)*sd*wid*.55,len*.9,wid,a+Math.PI/2,col)); } };
-    round(w*.38,w*.17,w*.1,2,c);
-    round(w*.2,w*.14,w*.095,1,hmix(c,'#ffffff',.72));
-    x.lineWidth=w*.06; x.strokeStyle=mix(c,'#ffffff',.5); x.beginPath(); x.arc(cx,cy,w*.075,0,7); x.stroke();
-    x.lineWidth=lw; x.strokeStyle='rgba(255,255,255,.5)'; x.setLineDash([w*.02,w*.025]); x.beginPath(); x.arc(cx,cy,w*.075,0,7); x.stroke(); x.setLineDash([]);
-    if(!lite){ x.strokeStyle=mix(c,'#ffffff',.55); x.globalAlpha=.3; x.lineWidth=Math.max(1,w*.007); x.beginPath();
-      for(let k=0;k<70;k++){ const px=Math.random()*w, py=Math.random()*w, a=Math.random()*6.28, l=w*(.015+Math.random()*.025); x.moveTo(px,py); x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l); } x.stroke(); x.globalAlpha=1; }
-    inShadow(x,w,r,'rgba(0,0,0,.35)',w*.06,0,-w*.03);
+    x.fillStyle=mix(c,'#000000',.5); x.fillRect(0,0,w,w);
+    const cols=3, rows=4, sw=w/cols, sh=w/rows, lw=Math.max(1,w*.012);
+    const loop=(lx,ly,ang)=>{ const a=sw*.24, b=sh*.66;
+      x.save(); x.translate(lx,ly); x.rotate(ang);
+      x.fillStyle='rgba(0,0,0,.28)'; x.beginPath(); x.ellipse(a*.15,b*.14,a,b,0,0,7); x.fill();
+      const g=x.createLinearGradient(-a,-b*.3,a,b*.3); g.addColorStop(0,mix(c,'#000000',.68)); g.addColorStop(.38,mix(c,'#ffffff',.68)); g.addColorStop(.62,c); g.addColorStop(1,mix(c,'#000000',.62));
+      x.beginPath(); x.ellipse(0,0,a,b,0,0,7); x.fillStyle=g; x.fill();
+      x.save(); x.clip(); x.lineWidth=lw;
+      for(let k=-5;k<=5;k++){ const yy=k*b*.2; x.strokeStyle='rgba(0,0,0,.2)'; x.beginPath(); x.moveTo(-a,yy-a*.7); x.lineTo(a,yy+a*.7); x.stroke();
+        x.strokeStyle='rgba(255,255,255,.22)'; x.beginPath(); x.moveTo(-a,yy-a*.7+lw*1.4); x.lineTo(a,yy+a*.7+lw*1.4); x.stroke(); }
+      x.restore();
+      x.strokeStyle=mix(c,'#000000',.55); x.lineWidth=lw; x.beginPath(); x.ellipse(0,0,a,b,0,0,7); x.stroke();
+      x.restore(); };
+    for(let ry=-1;ry<=rows;ry++) for(let cc=0;cc<cols;cc++){ const ox=cc*sw, oy=ry*sh;
+      loop(ox+sw*.31,oy+sh*.5,-.42); loop(ox+sw*.69,oy+sh*.5,.42); }
+    if(!lite){ x.strokeStyle=mix(c,'#ffffff',.6); x.globalAlpha=.28; x.lineWidth=Math.max(1,w*.007); x.beginPath();
+      for(let k=0;k<110;k++){ const px=Math.random()*w, py=Math.random()*w, a=Math.random()*6.28, l=w*(.015+Math.random()*.03); x.moveTo(px,py); x.quadraticCurveTo(px+Math.cos(a+1)*l*.6,py+Math.sin(a+1)*l*.6,px+Math.cos(a)*l,py+Math.sin(a)*l); } x.stroke(); x.globalAlpha=1; }
+    inShadow(x,w,r,'rgba(0,0,0,.32)',w*.07,0,-w*.035);
+    inShadow(x,w,r,'rgba(255,255,255,.22)',w*.05,0,w*.025);
   } else if(skin==='fruit'){
     const r=w*.13, f=fr?fr[0]:c; rrect(x,w,r); x.clip();
     let g=x.createLinearGradient(0,0,0,w); g.addColorStop(0,mix(f,'#ffffff',.78)); g.addColorStop(.58,f); g.addColorStop(1,f); x.fillStyle=g; x.fillRect(0,0,w,w);
@@ -2630,7 +2633,7 @@ function startDuel(cfg){
   const tot=TIMES[o.time]*1000;
   $('#timer').textContent=tot?fmtT(tot):(GOALS[o.goal]?'Meta '+GOAL_L[o.goal]:'Sem limite'); $('#timer').className='timer';
   $('#timebar').style.visibility=(tot||GOALS[o.goal])?'visible':'hidden'; $('#timebarFill').style.transform=tot?'scaleX(1)':'scaleX(0)';
-  D.oldBest=getBest(cfg.type,o); $('#subTxt').textContent=D.oldBest?'Recorde '+fmtN(D.oldBest):(cfg.type==='solo'?'Primeira partida neste modo':'Recorde 0'); updateCombo(0,0); updTeamLine();
+  $('#mission').hidden=true; D.oldBest=getBest(cfg.type,o); $('#subTxt').textContent=D.oldBest?'Recorde '+fmtN(D.oldBest):(cfg.type==='solo'?'Primeira partida neste modo':'Recorde 0'); updateCombo(0,0); updTeamLine();
   if(D.teams) $('#scoreLbl').textContent=`Você · ${TEAM[D.myTeam].e} ${TEAM[D.myTeam].n}`;
   setStatus(D.live?'':(PLAYS[o.play]!=='Clássico'?'Modo '+PLAYS[o.play]:''));
   $('#fog').classList.remove('show');
@@ -3571,7 +3574,7 @@ function startShared(cfg){
   const tot=TIMES[o.time]*1000;
   $('#timer').textContent=tot?fmtT(tot):(GOALS[o.goal]?'Meta '+GOAL_L[o.goal]:'Sem limite'); $('#timer').className='timer';
   $('#timebar').style.visibility=(tot||GOALS[o.goal])?'visible':'hidden'; $('#timebarFill').style.transform=tot?'scaleX(1)':'scaleX(0)';
-  $('#subTxt').textContent=(vs||ts)?'':cfg.solo?'':`Recorde da ${teamWord()} `+fmtN(getBest(cfg.type,o)); updateCombo(0,0); setStatus('');
+  $('#subTxt').textContent=(vs||ts)?'':cfg.solo?'':`Recorde da ${teamWord()} `+fmtN(getBest(cfg.type,o)); updateCombo(0,0); setStatus(''); $('#mission').hidden=true;
   $('#fog').classList.remove('show');
   buildSharedActions();
   IN=sharedIN; show('game');
@@ -4506,7 +4509,8 @@ function campHook(cfg){
     if(def.goal==='boss'&&!SH.over){ const tr=$('#fxl .bosstrip'); if(!tr||tr.style.visibility==='hidden'){ bossDock(cp.rage); bossHP(cp.hp,cp.hpMax); } }
     if(def.goal==='boss'&&!SH.bossIntro){ SH.bossIntro=true; const s0=SH; bossPrep(W.boss).then(()=>{ if(SH===s0&&!SH.over){ bossDock(cp.rage); bossShow('enter'); setTimeout(()=>bossSay(BS.say.enter,1900),350); } }); }
     $('#gLabel').textContent=`Fase ${ph} · ${def.name}`; $('#scoreLbl').textContent=cfg.solo?'Pontos':'Pontos do grupo';
-    { const tx=campStarTxt(def,sc); $('#subTxt').innerHTML=`${def.icon} ${esc(campDesc(def,sc))}<br><b class="stargoal">★★★ ${esc(tx[1])} · ★★ ${esc(tx[0])}${cp.used&&cp.used.length?' · com ajuda, no máximo ★★':''}</b>`; }
+    { const tx=campStarTxt(def,sc), m=$('#mission'), html=`<div class="mdesc">${def.icon} ${esc(campDesc(def,sc))}</div><div class="mst"><span>★★★ ${esc(tx[1])}</span><span>★★ ${esc(tx[0])}</span>${cp.used&&cp.used.length?'<span>com ajuda: no máximo ★★</span>':''}</div>`;
+      if(m.hidden||m._h!==html){ m._h=html; m.innerHTML=html; if(m.hidden){ m.hidden=false; layout(); } } $('#subTxt').textContent=''; }
     const tb=$('#timebar'); tb.classList.remove('hp');
     if(def.goal==='boss') bossHP(cp.hp,cp.hpMax);
     if(cp.tl){ tb.style.visibility='visible'; } else { tb.style.visibility='hidden'; $('#timer').textContent=''; }
