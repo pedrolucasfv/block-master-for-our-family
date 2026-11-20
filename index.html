@@ -4222,7 +4222,8 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
 const CWD=w=>CWORLDS[(w||1)-1]||CWORLDS[0];
 /* chave das estrelas: o Mundo 1 guarda só o número da fase (como sempre foi); os outros, "mundo-fase" */
 const ck=(w,ph)=>(w||1)===1?String(ph):w+'-'+ph;
-const campSkin=cfg=>CWD(cfg&&cfg.camp&&cfg.camp.w).skin;
+/* tema das fases do mundo; se a pessoa estiver usando o tema ganho nesse mundo (normal ou dourado), as fases usam ele */
+const campSkin=cfg=>{ const W=CWD(cfg&&cfg.camp&&cfg.camp.w); return baseSkin(SET.skin)===W.reward&&hasSkin(W.reward)&&(!isGold(SET.skin)||hasGold(W.reward))?SET.skin:W.skin; };
 /* fruta madura: aparece com uma contagem de jogadas; colhida (limpa) antes de zerar conta ponto, senão apodrece e vira bloco cinza */
 function ripeAdd(eng,n,life){ const idx=eng.addStones(Math.random,n,-7); idx.forEach(i=>{ eng.b[(i/N)|0][i%N].rp=life; }); return idx; }
 /* flor de sakura: igual à fruta madura, mas quando a contagem zera ela só voa embora (a casa fica vazia) */
