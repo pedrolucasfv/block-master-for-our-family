@@ -1819,7 +1819,7 @@ function teamRec(type,label,teams,sc,winner,per,quitter){
   const ids=Object.keys(teams);
   return {type,label,date:Date.now(),tw:1,rows:ids.map(id=>({n:nm(id,false),s:per&&per[id]!=null?per[id]:0,p:winner?(teams[id]===winner?1:2):1,c:0,q:id===quitter?1:0})),
     tm:{az:ids.filter(id=>teams[id]==='az').map(id=>nm(id,false)),la:ids.filter(id=>teams[id]==='la').map(id=>nm(id,false)),sAz:sc.az||0,sLa:sc.la||0}}; }
-const TYPE_HINT={camp:'Campanha em grupo e em turnos (até 4). Com mais gente, as metas ficam maiores. O progresso do grupo fica no celular de quem criou a sala.',tlive:'Dois times, cada jogador no seu tabuleiro, com as mesmas peças. Os pontos do time são somados e os ataques vão para o líder do outro time.',tsplit:'Um tabuleiro por time, dividido em faixas (uma para cada jogador, até 3 por time). Os dois tabuleiros correm lado a lado e linhas limpas atacam o outro time.',live:'Cada um no seu tabuleiro (2 a 6 jogadores), com as mesmas peças, placar ao vivo e miniatura dos outros. Ataques vão para o líder.',coop:'Um tabuleiro só (2 a 4 jogadores), um de cada vez, somando pontos.',halves:'Um tabuleiro só e cada um com a sua parte: com 2, metades; com 3 ou 4, um quadrante para cada num tabuleiro 10×10 (com 3, o quarto é livre). Toda peça precisa tocar a sua parte.',versus:'Um tabuleiro só, em turnos (2 a 4 jogadores): cada um escolhe a peça de quem joga depois dele.'};
+const TYPE_HINT={camp:'Campanha em grupo (até 4), num tabuleiro só dividido: cada um com a sua parte (metade, ou quadrante com 3 ou 4 jogadores), todos jogando ao mesmo tempo. No quebra-cabeça o tabuleiro é livre para todos. Com mais gente, as metas ficam maiores. O progresso do grupo fica no celular de quem criou a sala.',tlive:'Dois times, cada jogador no seu tabuleiro, com as mesmas peças. Os pontos do time são somados e os ataques vão para o líder do outro time.',tsplit:'Um tabuleiro por time, dividido em faixas (uma para cada jogador, até 3 por time). Os dois tabuleiros correm lado a lado e linhas limpas atacam o outro time.',live:'Cada um no seu tabuleiro (2 a 6 jogadores), com as mesmas peças, placar ao vivo e miniatura dos outros. Ataques vão para o líder.',coop:'Um tabuleiro só (2 a 4 jogadores), um de cada vez, somando pontos.',halves:'Um tabuleiro só e cada um com a sua parte: com 2, metades; com 3 ou 4, um quadrante para cada num tabuleiro 10×10 (com 3, o quarto é livre). Toda peça precisa tocar a sua parte.',versus:'Um tabuleiro só, em turnos (2 a 4 jogadores): cada um escolhe a peça de quem joga depois dele.'};
 function defOpts(){ const o={time:1,play:0,goal:0,series:0}; [...FLAGS,...NETF].forEach(k=>o[k]=false); return o; }
 function applies(type,k){
   const base=['time','play','goal','obstacles','heavy','color','final','bomb','ice','wild'];
@@ -3396,7 +3396,7 @@ function hostStart(rematch){
   const size=L.type==='halves'&&ids.length>2?10:L.type==='tsplit'&&teams&&Math.max(...['az','la'].map(k=>Object.values(teams).filter(x=>x===k).length))===3?9:8;
   const cfg={t:'cfg',type:L.type,opts:{...L.opts},seed:'N|'+NET.session+'|'+NET.round,round:NET.round,newSeries:!rematch,hc:null,players:ids,size,teams};
   if(L.type==='camp'){ const w=L.w||1, ph=L.ph||1, def=CWD(w).phases[ph-1], st=campLoad('group'), k=ck(w,ph); st.att[k]=(st.att[k]||0)+1; campSave('group',st);
-    cfg.opts=campOpts(def); cfg.size=8; cfg.camp={w,ph,helps:campHelps(st),slot:'group',att:st.att[k]}; }
+    cfg.opts=campOpts(def); cfg.size=ids.length>2&&def.setup!=='puzzle'?10:8; cfg.camp={w,ph,helps:campHelps(st),slot:'group',att:st.att[k]}; }
   if(!rematch) NET.ser={};
   if(L.type==='live'&&L.opts.handicap&&rematch&&NET.lastWinner) cfg.hc=NET.lastWinner;
   NET.cur=cfg; send(cfg); beginOnline(cfg);
@@ -3439,6 +3439,8 @@ function regionOf(type,who){
   if(!SH) return null;
   if(type==='tsplit'){ const ids=bdIds(bdKey(who)), k=ids.indexOf(who), m=ids.length, n=N; if(m<=1||k<0) return null;
     const w=Math.floor(n/m), x0=k*w, x1=k===m-1?n-1:x0+w-1; return [[x0,x1,0,n-1]]; }
+  /* campanha em grupo: cada um com a sua parte, como no Co-op dividido (no quebra-cabeça o tabuleiro é livre para todos) */
+  if(type==='camp'){ if(SH.ids.length<2||(SH.hook&&SH.hook.noRegen)) return null; type='halves'; }
   if(type!=='halves') return null; const ids=SH.ids, k=ids.indexOf(who); if(k<0) return null; const n=N, h=n/2;
   if(ids.length<=2) return [k?[h,n-1,0,n-1]:[0,h-1,0,n-1]];
   const Q=[[0,h-1,0,h-1],[h,n-1,0,h-1],[0,h-1,h,n-1],[h,n-1,h,n-1]], r=[Q[k]]; if(ids.length===3) r.push(Q[3]); return r;
@@ -4290,7 +4292,7 @@ function campStarsCalc(def,sc,cp,att){
   if(cp.used.length) st=Math.min(st,2);
   return st;
 }
-const isTurnType=t=>t==='coop'||t==='camp';
+const isTurnType=t=>t==='coop';
 /* regras de cada fase (o anfitrião calcula; os outros só mostram) */
 function campHook(cfg){
   const ph=cfg.camp.ph, w=cfg.camp.w||1, W=CWD(w), def=W.phases[ph-1], BS=BOSSES[W.boss], P=cfg.players.length, sc=campScale(def,P), hk={noRegen:def.setup==='puzzle',def,sc};
@@ -4368,7 +4370,7 @@ function campHook(cfg){
   /* depois da reposição e da troca de vez: congela uma peça de quem joga agora, por 4 segundos */
   hk.afterTurn=()=>{
     const H=SH.H, cp=H.cp; if(!cp.frzPending||H.over) return; cp.frzPending=0;
-    const id=H.turn, tray=H.trays[id]||[], cand=[0,1,2].filter(i=>tray[i]);
+    const ids=SH.ids.filter(x=>(H.trays[x]||[]).some(Boolean)), id=ids.length?ids[Math.floor(Math.random()*ids.length)]:H.turn, tray=H.trays[id]||[], cand=[0,1,2].filter(i=>tray[i]);
     if(!cand.length) return;
     cp.frz={slot:cand[Math.floor(Math.random()*cand.length)],id,until:SH.elapsed+4000}; if(H.ev&&H.ev.boss) H.ev.boss.frz=1;
   };
@@ -4390,7 +4392,8 @@ function campHook(cfg){
       playEv(H.ev); hostCheckStuck(); broadcast(); renderShared(); }
   };
   hk.status=v=>{ const cp=v.cp; if(!cp) return null; const grp=SH.ids.length>1;
-    let t=(grp?(v.turn===SH.me?'Sua vez · ':`Vez de ${nm(v.turn)} · `):'')+cp.txt, wn=false;
+    const k=SH.ids.indexOf(SH.me), part=grp&&!hk.noRegen?(SH.ids.length<=2?(k?'Seu lado: direita · ':'Seu lado: esquerda · '):`Seu quadrante: ${['↖','↗','↙','↘'][k]} · `):'';
+    let t=part+cp.txt, wn=false;
     if(frzOn(cp)&&cp.frz.id===SH.me){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?performance.now()-SH.remAt.at:0); t+=` · ${BS.frzI} ${BS.frzT} (${Math.ceil((cp.frz.until-el)/1000)} s)`; wn=true; }
     if(def.gum&&cp.gum) t+=` · 🫧 gruda em ${def.gum-(cp.gumN||0)}`;
     if(def.belt) t+=` · 🏭 anda em ${def.belt.every-(cp.beltN||0)}`;
@@ -4408,7 +4411,7 @@ function campHook(cfg){
     const tb=$('#timebar'); tb.classList.remove('hp');
     if(def.goal==='boss') bossHP(cp.hp,cp.hpMax);
     if(cp.tl){ tb.style.visibility='visible'; } else { tb.style.visibility='hidden'; $('#timer').textContent=''; }
-    $$('#actions [data-help]').forEach(b=>{ const k=b.dataset.help; b.disabled=!cp.helps.includes(k)||cp.used.includes(k)||(k==='swap'&&hk.noRegen)||(SH.ids.length>1&&v.turn!==SH.me)||!SH.playing; });
+    $$('#actions [data-help]').forEach(b=>{ const k=b.dataset.help; b.disabled=!cp.helps.includes(k)||cp.used.includes(k)||(k==='swap'&&hk.noRegen)||!SH.playing; });
   };
   hk.ev=(ev,mine)=>{
     if(ev.rain){ setTimeout(()=>BC.drop(ev.rain),0); SFX.alert(); }
@@ -4435,7 +4438,7 @@ function campHook(cfg){
   };
   hk.act=(who,a)=>{
     if(a.k!=='help') return; const H=SH.H, cp=H.cp, h=a.h;
-    if(!cp.helps.includes(h)||cp.used.includes(h)) return; if(SH.ids.length>1&&H.turn!==who) return;
+    if(!cp.helps.includes(h)||cp.used.includes(h)) return;
     if(h==='martelo') H.hammer[who]=(H.hammer[who]||0)+1;
     else if(h==='swap'){ if(hk.noRegen) return; H.trays[who]=gen3(H.rng[who],SH.o); }
     else if(h==='row'){ const y=a.i|0, B=H.bd.all; if(y<0||y>=N) return; const cl=[];
@@ -4753,7 +4756,7 @@ function specPaint(){
     let reg=null; if(cfg.type==='halves'){ /* mostra as divisões sem escurecer nenhuma */ }
     specDraw($('#spBoard'),v.b,cfg.size||8,{region:reg,marks:v.marks});
     if(rank){ let h=vs?'<h2>Placar</h2>':cfg.type==='camp'&&v.cp?`<h2>${CWD(v.cp.w).phases[v.cp.ph-1].icon} Mundo ${v.cp.w||1} · Fase ${v.cp.ph} · ${esc(CWD(v.cp.w).phases[v.cp.ph-1].name)}</h2><p class="spobj">${esc(v.cp.txt)}</p>`:`<h2>Pontos da equipe</h2><div class="spteam">${fmtN(v.sc||0)}</div>`;
-      h+=ids.map((id,k)=>`<div class="kv big${v.turn===id&&cfg.type!=='halves'?' turn':''}"><span>${avatarHTML(id,28)}${esc(nm(id))}${cfg.type==='halves'&&ids.length>2?` <small class="muted">${['↖','↗','↙','↘'][k]}</small>`:''}${v.stuck&&v.stuck[id]?' <small class="muted">sem jogada</small>':''}</span><b>${vs?fmtN(v.scs[id]||0):v.turn===id&&isTurnType(cfg.type)?'vez':''}</b></div>`).join('');
+      h+=ids.map((id,k)=>`<div class="kv big${v.turn===id&&isTurnType(cfg.type)?' turn':''}"><span>${avatarHTML(id,28)}${esc(nm(id))}${(cfg.type==='halves'||cfg.type==='camp')&&ids.length>2?` <small class="muted">${['↖','↗','↙','↘'][k]}</small>`:''}${v.stuck&&v.stuck[id]?' <small class="muted">sem jogada</small>':''}</span><b>${vs?fmtN(v.scs[id]||0):v.turn===id&&isTurnType(cfg.type)?'vez':''}</b></div>`).join('');
       if(v.combo>=2) h+=`<p class="spcombo">🔥 Combo x${v.combo}</p>`;
       rank.innerHTML=h; }
   }
