@@ -530,6 +530,11 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 .bossdmg{position:fixed;z-index:6;pointer-events:none;font-weight:800;font-size:26px;color:#ff4d3d;text-shadow:0 2px 0 #fff,0 0 8px rgba(255,255,255,.8);animation:dmgUp 1.1s ease forwards;transform:translate(-50%,0)}
 @keyframes dmgUp{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.25)}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}}
 .bossspark{position:fixed;z-index:6;pointer-events:none;color:#ffd23f;font-size:16px;text-shadow:0 0 4px #fff;animation:spark .7s ease-out forwards}
+/* estrelinha do tema dourado */
+.gtw{position:fixed;z-index:6;pointer-events:none;color:#fff;line-height:1;text-shadow:0 0 6px #fff6c0,0 0 12px #ffd23f;transform:translate(-50%,-50%) scale(0);animation:gtw 1.1s ease both}
+@keyframes gtw{0%{transform:translate(-50%,-50%) scale(0) rotate(0);opacity:0}45%{transform:translate(-50%,-50%) scale(1.15) rotate(45deg);opacity:1}100%{transform:translate(-50%,-50%) scale(0) rotate(90deg);opacity:0}}
+.skinopt.gold .skp{animation:goldGlow 2.4s ease-in-out infinite}
+@keyframes goldGlow{0%,100%{filter:brightness(1) drop-shadow(0 0 0 rgba(255,210,63,0))}50%{filter:brightness(1.18) drop-shadow(0 0 6px rgba(255,210,63,.85))}}
 @keyframes spark{0%{transform:translate(-50%,-50%) scale(.4);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1);opacity:0}}
 .bossbubble{position:fixed;z-index:7;pointer-events:none;max-width:220px;background:#fff;color:#3b2413;font-weight:700;font-size:14px;line-height:1.25;padding:9px 13px;border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.28);animation:bubIn .35s cubic-bezier(.3,1.6,.5,1) both}
 .bossbubble::after{content:'';position:absolute;width:14px;height:14px;background:#fff;transform:rotate(45deg)}
@@ -1000,7 +1005,7 @@ class Engine{
 
 /* ===================== utilidades ===================== */
 const PALETTE=['#e5483f','#f08c25','#f3c22f','#4cbb47','#2cb4d6','#3e6fe0','#8a52d8'];
-const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#e3ad1f', RIPEC='#ff4b3e', ROTC='#8d5a2b';
+const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#eab526', RIPEC='#ff4b3e', ROTC='#8d5a2b';
 /* fases de um mundo usam o tema dele, por cima do que a pessoa escolheu */
 let FORCE_SKIN=null;
 function effSkin(){ return FORCE_SKIN||SET.skin; }
@@ -1124,20 +1129,31 @@ const GOLD_DECO={
     rrect(x,iw,r); x.fillStyle=g; x.fill(); x.lineWidth=Math.max(1,w*.025); x.strokeStyle='#b07c10'; x.stroke();
     x.fillStyle='rgba(255,255,255,.75)'; x.beginPath(); x.ellipse(iw*.34,iw*.26,iw*.2,iw*.09,-.5,0,7); x.fill(); x.beginPath(); x.arc(iw*.74,iw*.7,iw*.06,0,7); x.fillStyle='rgba(255,255,255,.55)'; x.fill(); x.restore(); },
   /* joaninha: casco de ouro com as bolinhas na cor da peça */
-  bug:(x,w,c)=>{ BUG_SPOTS.forEach(([sx,sy,sr])=>{ const g=x.createRadialGradient(w*(sx-sr*.3),w*(sy-sr*.3),0,w*sx,w*sy,w*sr*1.15); g.addColorStop(0,mix(c,'#ffffff',.5)); g.addColorStop(1,c);
+  bug:(x,w,c)=>{ x.save(); x.beginPath(); x.rect(0,0,w,w*.255); x.clip();
+    const hg=x.createRadialGradient(w*.44,w*.12,0,w*.5,w*.2,w*.22); hg.addColorStop(0,'#fff6c8'); hg.addColorStop(.5,'#e9b22a'); hg.addColorStop(1,'#8a5a06');
+    x.fillStyle=hg; x.beginPath(); x.arc(w*.5,w*.2,w*.19,0,7); x.fill(); x.restore();
+    x.fillStyle='#fff'; [[.42,.16],[.58,.16]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(w*ex,w*ey,w*.04,0,7); x.fill(); }); x.fillStyle='#5a3a06'; [[.42,.165],[.58,.165]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(w*ex,w*ey,w*.018,0,7); x.fill(); });
+    x.strokeStyle='#c8901a'; x.lineWidth=Math.max(1,w*.028); x.lineCap='round'; x.beginPath(); x.moveTo(w*.42,w*.06); x.quadraticCurveTo(w*.36,w*.01,w*.3,w*.03); x.moveTo(w*.58,w*.06); x.quadraticCurveTo(w*.64,w*.01,w*.7,w*.03); x.stroke();
+    BUG_SPOTS.forEach(([sx,sy,sr])=>{ const g=x.createRadialGradient(w*(sx-sr*.3),w*(sy-sr*.3),0,w*sx,w*sy,w*sr*1.15); g.addColorStop(0,mix(c,'#ffffff',.5)); g.addColorStop(1,c);
     x.beginPath(); x.arc(w*sx,w*sy,w*sr*1.15,0,7); x.fillStyle=g; x.fill(); x.lineWidth=Math.max(1,w*.015); x.strokeStyle='#8a5a06'; x.stroke(); }); }
 };
+/* estrelinha de 4 pontas com brilho em volta */
+function sparkle(x,sx,sy,sz,a=1){ x.save(); x.globalAlpha=a; x.shadowColor='rgba(255,250,210,.95)'; x.shadowBlur=sz*1.4; x.fillStyle='#fff';
+  x.beginPath(); x.moveTo(sx,sy-sz); x.quadraticCurveTo(sx,sy,sx+sz,sy); x.quadraticCurveTo(sx,sy,sx,sy+sz); x.quadraticCurveTo(sx,sy,sx-sz,sy); x.quadraticCurveTo(sx,sy,sx,sy-sz); x.fill(); x.restore(); }
 function drawGoldBlock(base,c,w,dpr,lite){
   const cv=drawBlock(base,GOLDSK,null,w,dpr,lite), x=cv.getContext('2d');
+  /* ouro polido: faixas claras e escuras na diagonal (reflexo de metal) e um ponto de luz forte */
   x.save(); x.globalCompositeOperation='source-atop';
-  const g=x.createLinearGradient(0,0,w,w); g.addColorStop(0,'rgba(255,248,200,.55)'); g.addColorStop(.38,'rgba(255,240,170,0)'); g.addColorStop(.62,'rgba(120,70,0,0)'); g.addColorStop(1,'rgba(120,70,0,.3)');
+  const g=x.createLinearGradient(0,0,w,w);
+  g.addColorStop(0,'rgba(255,253,225,.75)'); g.addColorStop(.2,'rgba(255,240,160,.1)'); g.addColorStop(.38,'rgba(110,60,0,.32)'); g.addColorStop(.5,'rgba(255,250,215,.6)');
+  g.addColorStop(.58,'rgba(255,235,150,.05)'); g.addColorStop(.8,'rgba(110,60,0,.3)'); g.addColorStop(1,'rgba(255,240,170,.45)');
   x.fillStyle=g; x.fillRect(0,0,w,w);
-  x.fillStyle=`rgba(255,255,240,${base==='jelly'?.45:.22})`; x.beginPath(); x.moveTo(w*.12,w*.72); x.lineTo(w*.3,w*.72); x.lineTo(w*.78,w*.12); x.lineTo(w*.66,w*.12); x.closePath(); x.fill();
+  const hl=x.createRadialGradient(w*.3,w*.26,0,w*.3,w*.26,w*.36); hl.addColorStop(0,'rgba(255,255,255,.85)'); hl.addColorStop(.35,'rgba(255,250,220,.35)'); hl.addColorStop(1,'rgba(255,250,220,0)');
+  x.fillStyle=hl; x.fillRect(0,0,w,w);
   x.restore();
   (GOLD_DECO[base]||((x2,w2,c2)=>drawGem(x2,w2*.5,w2*.5,w2*.18,c2)))(x,w,c);
-  /* brilhinho */
-  if(!lite){ x.fillStyle='rgba(255,255,255,.95)'; const sp=(sx,sy,s)=>{ x.beginPath(); x.moveTo(sx,sy-s); x.quadraticCurveTo(sx,sy,sx+s,sy); x.quadraticCurveTo(sx,sy,sx,sy+s); x.quadraticCurveTo(sx,sy,sx-s,sy); x.quadraticCurveTo(sx,sy,sx,sy-s); x.fill(); };
-    sp(w*.82,w*.8,w*.07); sp(w*.18,w*.86,w*.04); }
+  /* brilhinhos */
+  sparkle(x,w*.82,w*.8,w*.085); sparkle(x,w*.25,w*.24,w*.06,.9); if(!lite) sparkle(x,w*.16,w*.86,w*.04,.8);
   return cv;
 }
 function drawBlock(skin,c,fr,w,dpr,lite){
@@ -2132,6 +2148,15 @@ function spawnClear(i,c,s,delay){
   else at(240,(px,py)=>{ burst(px,py,col,4,1.6); burst(px,py,'#fff',1,1.2,{round:true,size:CS*.1}); });
   setTimeout(()=>d.remove(),delay+950);
 }
+/* tema dourado: de vez em quando uma estrelinha pisca em cima de uma peça do tabuleiro */
+setInterval(()=>{
+  if(SET.lite||document.hidden||!isGold(effSkin())||!$('#game').classList.contains('active')) return;
+  const on=[]; for(let i=0;i<N*N;i++){ const c=CELL[i]; if(c&&c.mode===1&&/^[0-6]$/.test(c.key)) on.push(i); }
+  if(!on.length) return; const gr=GR();
+  for(let k=0;k<Math.min(2,Math.ceil(on.length/12));k++){ const i=on[Math.floor(Math.random()*on.length)], d=document.createElement('div'); d.className='gtw';
+    d.style.left=(gr.left+(i%N+.2+Math.random()*.6)*CS)+'px'; d.style.top=(gr.top+(((i/N)|0)+.2+Math.random()*.6)*CS)+'px'; d.style.fontSize=Math.round(CS*.42)+'px';
+    d.style.animationDelay=(k*260)+'ms'; d.textContent='✦'; $('#fxl').appendChild(d); setTimeout(()=>d.remove(),1300+k*260); }
+},1100);
 function floatText(t,x,y){ const d=document.createElement('div'); d.className='ft'; d.textContent=t; d.style.left=x+'px'; d.style.top=y+'px'; $('#fxl').appendChild(d); setTimeout(()=>d.remove(),1000); }
 function letters(t){ let i=0; return String(t).split(' ').map(w=>`<span class="wd">${[...w].map(c=>`<span class="ch" style="--i:${i++}">${esc(c)}</span>`).join('')}</span>`).join(' '); }
 function praise(t,sub,big,level=0){
@@ -3704,57 +3729,62 @@ const BEAR_SVG=`<svg viewBox="0 0 200 236" class="bearsvg" aria-hidden="true">
 </svg>`.replace('#cf a273','#cfa273');
 /* Rainha Jujuba (chefona do Mundo 2): mesma estrutura de peças do Ursão, então as mesmas animações servem */
 const QUEEN_SVG=`<svg viewBox="0 0 200 236" class="bearsvg" aria-hidden="true">
-<defs><radialGradient id="qJel" cx="40%" cy="30%" r="78%"><stop offset="0" stop-color="#ffb3d9"/><stop offset=".6" stop-color="#e8459a"/><stop offset="1" stop-color="#97125a"/></radialGradient>
+<defs><radialGradient id="qJel" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="#ffc2e1"/><stop offset=".55" stop-color="#e8459a"/><stop offset="1" stop-color="#8e1052"/></radialGradient>
 <linearGradient id="qGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#f3c22f"/><stop offset="1" stop-color="#b9820f"/></linearGradient></defs>
-<g class="b-legs"><ellipse cx="70" cy="215" rx="27" ry="17" fill="url(#qJel)"/><ellipse cx="130" cy="215" rx="27" ry="17" fill="url(#qJel)"/><ellipse cx="62" cy="209" rx="10" ry="4" fill="#fff" opacity=".45"/><ellipse cx="122" cy="209" rx="10" ry="4" fill="#fff" opacity=".45"/></g>
-<g class="b-arm b-arm-l"><rect x="17" y="86" width="7" height="100" rx="3.5" fill="url(#qGold)"/><circle cx="20.5" cy="78" r="17" fill="#7fd8c4" stroke="#fff" stroke-width="2"/><path d="M20.5 78 m-11 0 a11 11 0 1 1 22 0 a7.5 7.5 0 1 1 -15 0 a3.8 3.8 0 1 1 7.6 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><ellipse cx="40" cy="146" rx="19" ry="36" fill="url(#qJel)"/><ellipse cx="34" cy="132" rx="5" ry="13" fill="#fff" opacity=".35"/><ellipse cx="32" cy="176" rx="14" ry="10" fill="#ff8cc4"/></g>
-<g class="b-arm b-arm-r"><ellipse cx="160" cy="146" rx="19" ry="36" fill="url(#qJel)"/><ellipse cx="154" cy="132" rx="5" ry="13" fill="#fff" opacity=".35"/><ellipse cx="160" cy="176" rx="13" ry="10" fill="#ff8cc4"/></g>
-<ellipse cx="100" cy="154" rx="64" ry="62" fill="url(#qJel)"/>
-<ellipse cx="72" cy="132" rx="12" ry="24" fill="#fff" opacity=".22"/>
-<path d="M38 160 Q100 190 162 160" stroke="url(#qGold)" stroke-width="9" fill="none" stroke-linecap="round"/>
-<circle cx="100" cy="175" r="9" fill="#7fd8c4" stroke="#b9820f" stroke-width="3"/><circle cx="97" cy="172" r="2.5" fill="#fff" opacity=".8"/>
-<g fill="#fff" opacity=".7"><rect x="120" y="128" width="3" height="3" rx="1"/><rect x="134" y="140" width="3" height="3" rx="1"/><rect x="62" y="186" width="3" height="3" rx="1"/><rect x="128" y="194" width="3" height="3" rx="1"/><rect x="88" y="136" width="3" height="3" rx="1"/></g>
+<g class="b-legs"><ellipse cx="72" cy="223" rx="20" ry="11" fill="#c42a78"/><ellipse cx="128" cy="223" rx="20" ry="11" fill="#c42a78"/><ellipse cx="66" cy="219" rx="7" ry="3" fill="#fff" opacity=".4"/><ellipse cx="122" cy="219" rx="7" ry="3" fill="#fff" opacity=".4"/></g>
+<g class="b-arm b-arm-l"><rect x="10" y="78" width="7" height="104" rx="3.5" fill="url(#qGold)"/><circle cx="13.5" cy="70" r="17" fill="#7fd8c4" stroke="#fff" stroke-width="2"/><path d="M13.5 70 m-11 0 a11 11 0 1 1 22 0 a7.5 7.5 0 1 1 -15 0 a3.8 3.8 0 1 1 7.6 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><ellipse cx="32" cy="148" rx="13" ry="30" fill="url(#qJel)"/><circle cx="22" cy="174" r="10" fill="#ff8cc4"/></g>
+<g class="b-arm b-arm-r"><ellipse cx="168" cy="148" rx="13" ry="30" fill="url(#qJel)"/><circle cx="174" cy="174" r="10" fill="#ff8cc4"/></g>
+<path d="M26 204 C24 146 44 76 100 50 C156 76 176 146 174 204 C174 222 150 228 100 228 C50 228 26 222 26 204 Z" fill="url(#qJel)"/>
+<path d="M30 200 C30 214 56 220 100 220 C144 220 170 214 170 200" stroke="#8e1052" stroke-width="3" fill="none" opacity=".35"/>
+<path d="M52 150 C50 110 66 82 92 64" stroke="#fff" stroke-width="11" fill="none" stroke-linecap="round" opacity=".38"/><circle cx="62" cy="176" r="5" fill="#fff" opacity=".35"/>
+<g fill="#fff" opacity=".85"><rect x="70" y="80" width="3.5" height="3.5" rx="1" transform="rotate(20 70 80)"/><rect x="128" y="86" width="3.5" height="3.5" rx="1" transform="rotate(40 128 86)"/><rect x="146" y="120" width="3.5" height="3.5" rx="1"/><rect x="48" y="186" width="3.5" height="3.5" rx="1" transform="rotate(30 48 186)"/><rect x="150" y="186" width="3.5" height="3.5" rx="1"/><rect x="96" y="196" width="3.5" height="3.5" rx="1" transform="rotate(15 96 196)"/><rect x="118" y="168" width="3.5" height="3.5" rx="1" transform="rotate(50 118 168)"/><rect x="74" y="164" width="3" height="3" rx="1"/><rect x="138" y="150" width="3" height="3" rx="1" transform="rotate(25 138 150)"/><rect x="108" y="70" width="3" height="3" rx="1"/><rect x="40" y="130" width="3" height="3" rx="1"/><rect x="160" y="160" width="3" height="3" rx="1"/></g>
 <g class="b-head">
-<circle cx="100" cy="80" r="58" fill="url(#qJel)"/>
-<ellipse cx="74" cy="52" rx="20" ry="10" fill="#fff" opacity=".4" transform="rotate(-25 74 52)"/>
-<path d="M60 38 L63 9 L81 26 L100 5 L119 26 L137 9 L140 38 Q100 30 60 38Z" fill="url(#qGold)" stroke="#b9820f" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="63" cy="8" r="4.5" fill="#fff2a8" stroke="#b9820f" stroke-width="2"/><circle cx="100" cy="5" r="4.5" fill="#fff2a8" stroke="#b9820f" stroke-width="2"/><circle cx="137" cy="8" r="4.5" fill="#fff2a8" stroke="#b9820f" stroke-width="2"/>
-<circle cx="100" cy="26" r="5.5" fill="#e5483f"/><circle cx="80" cy="32" r="3.6" fill="#2cb4d6"/><circle cx="120" cy="32" r="3.6" fill="#4cbb47"/>
-<ellipse cx="64" cy="96" rx="11" ry="7" fill="#ff7ab8" opacity=".85"/><ellipse cx="136" cy="96" rx="11" ry="7" fill="#ff7ab8" opacity=".85"/>
-<g class="b-eyes"><circle class="b-eye" cx="77" cy="72" r="8"/><circle class="b-eye" cx="123" cy="72" r="8"/><circle cx="79.5" cy="69.5" r="2.6" fill="#fff"/><circle cx="125.5" cy="69.5" r="2.6" fill="#fff"/><path d="M68 66 l-5 -4 M71 63 l-3 -5 M132 66 l5 -4 M129 63 l3 -5" stroke="#4a0c2c" stroke-width="2.4" stroke-linecap="round"/></g>
-<g class="b-x" stroke="#4a0c2c" stroke-width="4" stroke-linecap="round"><path d="M70 65 l14 14 M84 65 l-14 14"/><path d="M116 65 l14 14 M130 65 l-14 14"/></g>
-<path class="b-brow" d="M63 56 Q76 50 90 61 M137 56 Q124 50 110 61" stroke="#4a0c2c" stroke-width="5" stroke-linecap="round" fill="none"/>
-<path class="b-mouth" d="M86 106 Q100 116 114 106" stroke="#4a0c2c" stroke-width="4" fill="none" stroke-linecap="round"/>
-<g class="b-roar"><ellipse cx="100" cy="110" rx="14" ry="11" fill="#5b0f33"/><ellipse cx="100" cy="115" rx="8" ry="4" fill="#ff7ab8"/><path d="M88 104 Q100 98 112 104" stroke="#c2185b" stroke-width="3" fill="none"/></g>
+<path d="M64 56 L67 24 L84 42 L100 18 L116 42 L133 24 L136 56 Q100 46 64 56Z" fill="url(#qGold)" stroke="#b9820f" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="67" cy="23" r="4.5" fill="#fff2a8" stroke="#b9820f" stroke-width="2"/><circle cx="100" cy="17" r="4.5" fill="#fff2a8" stroke="#b9820f" stroke-width="2"/><circle cx="133" cy="23" r="4.5" fill="#fff2a8" stroke="#b9820f" stroke-width="2"/>
+<circle cx="100" cy="42" r="5.5" fill="#e5483f"/><circle cx="82" cy="49" r="3.6" fill="#2cb4d6"/><circle cx="118" cy="49" r="3.6" fill="#4cbb47"/>
+<ellipse cx="62" cy="140" rx="11" ry="7" fill="#ff7ab8" opacity=".9"/><ellipse cx="138" cy="140" rx="11" ry="7" fill="#ff7ab8" opacity=".9"/>
+<g class="b-eyes"><circle class="b-eye" cx="78" cy="116" r="8.5"/><circle class="b-eye" cx="122" cy="116" r="8.5"/><circle cx="80.5" cy="113.5" r="2.8" fill="#fff"/><circle cx="124.5" cy="113.5" r="2.8" fill="#fff"/><path d="M68 110 l-6 -4 M71 106 l-3 -6 M132 110 l6 -4 M129 106 l3 -6" stroke="#4a0c2c" stroke-width="2.4" stroke-linecap="round"/></g>
+<g class="b-x" stroke="#4a0c2c" stroke-width="4" stroke-linecap="round"><path d="M71 109 l14 14 M85 109 l-14 14"/><path d="M115 109 l14 14 M129 109 l-14 14"/></g>
+<path class="b-brow" d="M63 99 Q77 92 91 103 M137 99 Q123 92 109 103" stroke="#4a0c2c" stroke-width="5" stroke-linecap="round" fill="none"/>
+<path class="b-mouth" d="M86 150 Q100 160 114 150" stroke="#4a0c2c" stroke-width="4" fill="none" stroke-linecap="round"/>
+<g class="b-roar"><ellipse cx="100" cy="154" rx="14" ry="11" fill="#5b0f33"/><ellipse cx="100" cy="159" rx="8" ry="4" fill="#ff7ab8"/><path d="M88 148 Q100 142 112 148" stroke="#c2185b" stroke-width="3" fill="none"/></g>
 </g>
-<g class="b-steam"><circle cx="38" cy="18" r="9"/><circle cx="162" cy="18" r="9"/><circle cx="30" cy="4" r="6"/><circle cx="170" cy="4" r="6"/></g>
-<g class="b-stars" fill="#f3c22f"><path d="M60 12 l4 9 10 1 -8 6 3 10 -9-6 -9 6 3-10 -8-6 10-1z"/><path d="M140 6 l3 7 8 1 -6 5 2 8 -7-5 -7 5 2-8 -6-5 8-1z"/></g>
+<g class="b-steam"><circle cx="40" cy="30" r="9"/><circle cx="160" cy="30" r="9"/><circle cx="32" cy="16" r="6"/><circle cx="168" cy="16" r="6"/></g>
+<g class="b-stars" fill="#f3c22f"><path d="M44 20 l4 9 10 1 -8 6 3 10 -9-6 -9 6 3-10 -8-6 10-1z"/><path d="M156 14 l3 7 8 1 -6 5 2 8 -7-5 -7 5 2-8 -6-5 8-1z"/></g>
 </svg>`;
-/* Lagartão Guloso (chefão do Mundo 3) */
+/* Lagartão Guloso (chefão do Mundo 3): um lagarto de cabeça larga, olhos saltados e rabo enrolado */
 const CAT_SVG=`<svg viewBox="0 0 200 236" class="bearsvg" aria-hidden="true">
-<defs><radialGradient id="lGrn" cx="40%" cy="30%" r="78%"><stop offset="0" stop-color="#c8ef7e"/><stop offset=".6" stop-color="#6fb83a"/><stop offset="1" stop-color="#36701b"/></radialGradient></defs>
-<g class="b-legs"><ellipse cx="70" cy="215" rx="27" ry="16" fill="url(#lGrn)"/><ellipse cx="130" cy="215" rx="27" ry="16" fill="url(#lGrn)"/><path d="M58 222 v6 M70 223 v6 M82 222 v6 M118 222 v6 M130 223 v6 M142 222 v6" stroke="#36701b" stroke-width="3" stroke-linecap="round"/></g>
-<g class="b-arm b-arm-l"><ellipse cx="40" cy="146" rx="17" ry="33" fill="url(#lGrn)"/><path d="M30 130 q10 4 20 0 M28 146 q12 4 24 0 M30 162 q10 4 20 0" stroke="#36701b" stroke-width="2.5" fill="none" opacity=".6"/><ellipse cx="40" cy="175" rx="12" ry="9" fill="#d7f08f"/></g>
-<g class="b-arm b-arm-r"><ellipse cx="160" cy="146" rx="17" ry="33" fill="url(#lGrn)"/><path d="M150 130 q10 4 20 0 M148 146 q12 4 24 0 M150 162 q10 4 20 0" stroke="#36701b" stroke-width="2.5" fill="none" opacity=".6"/>
+<defs><radialGradient id="lGrn" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#b9e86a"/><stop offset=".6" stop-color="#5fae3a"/><stop offset="1" stop-color="#2f6a1a"/></radialGradient>
+<linearGradient id="lBel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6b8"/><stop offset="1" stop-color="#e8cf6a"/></linearGradient></defs>
+<path d="M132 206 C170 214 196 196 190 166 C186 146 168 140 158 150 C150 158 158 170 168 166" stroke="#3f8a24" stroke-width="20" fill="none" stroke-linecap="round"/>
+<path d="M132 206 C170 214 196 196 190 166 C186 146 168 140 158 150" stroke="#7cc84a" stroke-width="7" fill="none" stroke-linecap="round" opacity=".6"/>
+<path d="M150 218 l4 -12 l6 10 M170 216 l6 -12 l4 12 M186 204 l10 -6 l-2 12 M196 182 l8 -2 l-6 10" fill="#ff8a3d" stroke="#c4561a" stroke-width="1.5" stroke-linejoin="round"/>
+<g class="b-legs"><ellipse cx="64" cy="214" rx="24" ry="13" fill="url(#lGrn)" transform="rotate(-12 64 214)"/><ellipse cx="136" cy="214" rx="24" ry="13" fill="url(#lGrn)" transform="rotate(12 136 214)"/>
+<circle cx="42" cy="222" r="6" fill="#4f9a2e"/><circle cx="54" cy="227" r="6" fill="#4f9a2e"/><circle cx="68" cy="228" r="6" fill="#4f9a2e"/><circle cx="132" cy="228" r="6" fill="#4f9a2e"/><circle cx="146" cy="227" r="6" fill="#4f9a2e"/><circle cx="158" cy="222" r="6" fill="#4f9a2e"/></g>
+<g class="b-arm b-arm-l"><ellipse cx="40" cy="146" rx="11" ry="30" fill="url(#lGrn)"/><circle cx="32" cy="176" r="5.5" fill="#4f9a2e"/><circle cx="40" cy="179" r="5.5" fill="#4f9a2e"/><circle cx="48" cy="176" r="5.5" fill="#4f9a2e"/></g>
+<g class="b-arm b-arm-r"><ellipse cx="160" cy="146" rx="11" ry="30" fill="url(#lGrn)"/>
 <path d="M166 168 c10 -10 30 -4 28 14 c-2 16 -16 22 -26 16 c-12 4 -24 -6 -22 -18 c1 -8 8 -14 20 -12z" fill="#e5483f"/><circle cx="188" cy="176" r="8" fill="#fff3d6"/><path d="M170 167 q2 -8 6 -12" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round"/><ellipse cx="164" cy="174" rx="4" ry="7" fill="#fff" opacity=".45"/>
-<ellipse cx="160" cy="176" rx="12" ry="9" fill="#d7f08f"/></g>
-<ellipse cx="100" cy="156" rx="62" ry="61" fill="url(#lGrn)"/>
-<path d="M44 132 Q100 150 156 132 M40 158 Q100 178 160 158 M46 186 Q100 204 154 186" stroke="#d7f08f" stroke-width="7" fill="none" opacity=".55" stroke-linecap="round"/>
-<circle cx="58" cy="146" r="6" fill="#ffd23f"/><circle cx="142" cy="146" r="6" fill="#ffd23f"/><circle cx="56" cy="174" r="5" fill="#ffd23f"/><circle cx="144" cy="174" r="5" fill="#ffd23f"/>
+<circle cx="152" cy="176" r="5.5" fill="#4f9a2e"/><circle cx="160" cy="179" r="5.5" fill="#4f9a2e"/><circle cx="168" cy="176" r="5.5" fill="#4f9a2e"/></g>
+<ellipse cx="100" cy="162" rx="50" ry="56" fill="url(#lGrn)"/>
+<ellipse cx="100" cy="170" rx="31" ry="42" fill="url(#lBel)"/>
+<path d="M76 146 Q100 154 124 146 M72 164 Q100 172 128 164 M74 182 Q100 190 126 182 M80 199 Q100 205 120 199" stroke="#c9a94a" stroke-width="2.5" fill="none" opacity=".7"/>
+<circle cx="60" cy="140" r="6" fill="#2f6a1a" opacity=".55"/><circle cx="140" cy="140" r="6" fill="#2f6a1a" opacity=".55"/><circle cx="56" cy="168" r="5" fill="#2f6a1a" opacity=".55"/><circle cx="144" cy="168" r="5" fill="#2f6a1a" opacity=".55"/><circle cx="62" cy="194" r="4" fill="#2f6a1a" opacity=".55"/><circle cx="138" cy="194" r="4" fill="#2f6a1a" opacity=".55"/>
 <g class="b-head">
-<path d="M80 32 Q70 14 60 8 M120 32 Q130 14 140 8" stroke="#36701b" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="59" cy="7" r="7" fill="#ff8a3d"/><circle cx="141" cy="7" r="7" fill="#ff8a3d"/>
-<circle cx="100" cy="80" r="57" fill="url(#lGrn)"/>
-<ellipse cx="76" cy="50" rx="19" ry="10" fill="#fff" opacity=".35" transform="rotate(-25 76 50)"/>
-<circle cx="77" cy="71" r="14" fill="#fff"/><circle cx="123" cy="71" r="14" fill="#fff"/>
-<ellipse cx="62" cy="98" rx="11" ry="7" fill="#ff9a6b" opacity=".75"/><ellipse cx="138" cy="98" rx="11" ry="7" fill="#ff9a6b" opacity=".75"/>
-<g class="b-eyes"><circle class="b-eye" cx="79" cy="73" r="7.5"/><circle class="b-eye" cx="121" cy="73" r="7.5"/><circle cx="81.5" cy="70.5" r="2.4" fill="#fff"/><circle cx="123.5" cy="70.5" r="2.4" fill="#fff"/></g>
-<g class="b-x" stroke="#1f3a0e" stroke-width="4" stroke-linecap="round"><path d="M70 64 l14 14 M84 64 l-14 14"/><path d="M116 64 l14 14 M130 64 l-14 14"/></g>
-<path class="b-brow" d="M62 52 L90 60 M138 52 L110 60" stroke="#1f3a0e" stroke-width="6" stroke-linecap="round"/>
-<path class="b-mouth" d="M80 102 Q100 122 120 102" stroke="#1f3a0e" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-<g class="b-roar"><ellipse cx="100" cy="110" rx="20" ry="14" fill="#3a1010"/><path d="M84 101 h32 v6 h-32z" fill="#fff"/><ellipse cx="100" cy="117" rx="10" ry="5" fill="#e5483f"/></g>
+<path d="M70 34 l6 -22 l8 18 l8 -24 l8 22 l8 -22 l8 24 l8 -18 l6 22z" fill="#ff8a3d" stroke="#c4561a" stroke-width="2" stroke-linejoin="round"/>
+<path d="M34 70 Q38 28 100 26 Q162 28 166 70 Q166 104 132 120 Q112 132 100 132 Q88 132 68 120 Q34 104 34 70Z" fill="url(#lGrn)"/>
+<path d="M48 56 Q60 40 84 42" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".22"/>
+<g fill="#2f6a1a" opacity=".35"><circle cx="100" cy="44" r="4"/><circle cx="88" cy="56" r="3"/><circle cx="112" cy="56" r="3"/><circle cx="100" cy="66" r="3"/><circle cx="46" cy="88" r="3"/><circle cx="154" cy="88" r="3"/><circle cx="52" cy="100" r="2.5"/><circle cx="148" cy="100" r="2.5"/></g>
+<ellipse cx="64" cy="70" rx="17" ry="15" fill="#4f9a2e"/><ellipse cx="136" cy="70" rx="17" ry="15" fill="#4f9a2e"/>
+<circle cx="64" cy="71" r="12.5" fill="#f6c445"/><circle cx="136" cy="71" r="12.5" fill="#f6c445"/>
+<ellipse cx="92" cy="106" rx="2.6" ry="3.4" fill="#1f3a0e"/><ellipse cx="108" cy="106" rx="2.6" ry="3.4" fill="#1f3a0e"/>
+<g class="b-eyes"><ellipse class="b-eye" cx="64" cy="71" rx="3.6" ry="10"/><ellipse class="b-eye" cx="136" cy="71" rx="3.6" ry="10"/><circle cx="68" cy="66" r="2.4" fill="#fff"/><circle cx="140" cy="66" r="2.4" fill="#fff"/></g>
+<g class="b-x" stroke="#1f3a0e" stroke-width="4" stroke-linecap="round"><path d="M57 64 l14 14 M71 64 l-14 14"/><path d="M129 64 l14 14 M143 64 l-14 14"/></g>
+<path class="b-brow" d="M44 52 Q62 46 82 58 M156 52 Q138 46 118 58" stroke="#2f6a1a" stroke-width="7" stroke-linecap="round" fill="none"/>
+<path class="b-mouth" d="M62 112 Q100 128 138 112" stroke="#1f3a0e" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<g class="b-roar"><path d="M60 110 Q100 150 140 110 Q100 120 60 110Z" fill="#3a1010"/><path d="M72 113 l4 7 l4 -6 M120 113 l4 7 l4 -6" fill="#fff"/><path d="M100 124 C100 142 94 150 86 154 M100 124 C100 142 106 150 114 154" stroke="#e5483f" stroke-width="5.5" fill="none" stroke-linecap="round"/></g>
 </g>
-<g class="b-steam"><circle cx="38" cy="18" r="9"/><circle cx="162" cy="18" r="9"/><circle cx="30" cy="4" r="6"/><circle cx="170" cy="4" r="6"/></g>
-<g class="b-stars" fill="#f3c22f"><path d="M60 12 l4 9 10 1 -8 6 3 10 -9-6 -9 6 3-10 -8-6 10-1z"/><path d="M140 6 l3 7 8 1 -6 5 2 8 -7-5 -7 5 2-8 -6-5 8-1z"/></g>
+<g class="b-steam"><circle cx="36" cy="22" r="9"/><circle cx="164" cy="22" r="9"/><circle cx="28" cy="8" r="6"/><circle cx="172" cy="8" r="6"/></g>
+<g class="b-stars" fill="#f3c22f"><path d="M40 14 l4 9 10 1 -8 6 3 10 -9-6 -9 6 3-10 -8-6 10-1z"/><path d="M160 8 l3 7 8 1 -6 5 2 8 -7-5 -7 5 2-8 -6-5 8-1z"/></g>
 </svg>`;
 /* cada chefão: desenho, bloco que ele joga, falas e o efeito quando está bravo */
 const BOSSES={
@@ -3762,8 +3792,8 @@ const BOSSES={
     say:{enter:'Ninguém derruba o Ursão! Grrr!',hurt:['Aiii! Isso doeu!','Grr… sorte de vocês!','Meu pelo!','Vocês vão ver só!'],atk:'Grrr! Tomem ursinhos blindados!',atkRage:'Agora fiquei BRAVO! Tomem ursinhos!',atkFrz:'Grrr! Ursinhos blindados… e congelei uma peça por 4 segundos!',rage:'Vocês me deixaram BRAVO!',defeat:'Ai ai… vocês venceram…'}},
   queen:{name:'Rainha Jujuba',art:'a',svg:QUEEN_SVG,min:'gum',minC:GUMC,cell:[-6,null],pitch:1.45,frzI:'🍬',frzT:'peça grudada',angry:'A Rainha Jujuba está BRAVA!',goal:'Limpe linhas para atacar a Rainha Jujuba',
     say:{enter:'Ajoelhem-se diante da Rainha Jujuba!',hurt:['Ai! Minha coroa!','Que falta de educação!','Vou derreter de raiva!','Guardas!!'],atk:'Tomem chiclete! Hihihi!',atkRage:'Chiclete em dobro, plebeus!',atkFrz:'Chiclete… e grudei uma peça por 4 segundos!',rage:'Agora a Rainha ficou BRAVA!',defeat:'Nãão… meu reino de açúcar…'}},
-  cat:{name:'Lagartão Guloso',art:'o',svg:CAT_SVG,min:'rotten',minC:ROTC,cell:[-8,'ice'],pitch:1.2,frzI:'🐛',frzT:'peça mordida',angry:'O Lagartão está FURIOSO!',goal:'Limpe linhas para atacar o Lagartão',
-    say:{enter:'Hora do lanche! Nham nham!',hurt:['Ai! Minha barriguinha!','Isso não é de comer!','Grrr… nham!','Vou contar pra mamãe borboleta!'],atk:'Tomem maçãs bichadas!',atkRage:'Maçã podre pra todo mundo!',atkFrz:'Maçãs bichadas… e mordi uma peça por 4 segundos!',rage:'Fiquei com FOME DE RAIVA!',defeat:'Ai… comi demais… vou virar borboleta…'}}
+  cat:{name:'Lagartão Guloso',art:'o',svg:CAT_SVG,min:'rotten',minC:ROTC,cell:[-8,'ice'],pitch:1.1,frzI:'🦎',frzT:'peça mordida',angry:'O Lagartão está FURIOSO!',goal:'Limpe linhas para atacar o Lagartão',
+    say:{enter:'Hora do lanche! Nham nham!',hurt:['Ai! Minha barriguinha!','Isso não é de comer!','Grrr… nham!','Minhas escamas!'],atk:'Tomem maçãs bichadas!',atkRage:'Maçã podre pra todo mundo!',atkFrz:'Maçãs bichadas… e mordi uma peça por 4 segundos!',rage:'Fiquei com FOME DE RAIVA!',defeat:'Ai… comi demais… vou tirar uma soneca no sol…'}}
 };
 const bossArt=B=>B.art+' '+B.name;
 let BOSS_ID='bear';
@@ -3929,7 +3959,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Cesta cheia',icon:'🧺',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
   {name:'Geada no pomar',icon:'❄️',goal:'clear',setup:'ice',k:14,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:60,three:46}},
   {name:'Fruta passada',icon:'🍐',goal:'clear',setup:'stones',k:8,ripe:{k:1,life:5,every:4},desc:'Limpe os {k} blocos cinza. Cuidado: fruta madura que apodrece vira mais um bloco cinza!',st:{by:'pieces',two:40,three:30}},
-  {name:'Chefão: Lagartão Guloso',icon:'🐛',goal:'boss',hp:50,time:220,ripe:{k:1,life:6,every:5},desc:'Cada linha tira vida do Lagartão; o combo multiplica o dano, e fruta madura colhida tira 3 a mais. Ele joga maçãs bichadas e, bravo, morde uma peça por 4 s.',st:{by:'time',two:140,three:100}}
+  {name:'Chefão: Lagartão Guloso',icon:'🦎',goal:'boss',hp:50,time:220,ripe:{k:1,life:6,every:5},desc:'Cada linha tira vida do Lagartão; o combo multiplica o dano, e fruta madura colhida tira 3 a mais. Ele joga maçãs bichadas e, bravo, morde uma peça por 4 s.',st:{by:'time',two:140,three:100}}
 ]}];
 const CWD=w=>CWORLDS[(w||1)-1]||CWORLDS[0];
 /* chave das estrelas: o Mundo 1 guarda só o número da fase (como sempre foi); os outros, "mundo-fase" */
