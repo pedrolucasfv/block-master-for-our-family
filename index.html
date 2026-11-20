@@ -1311,15 +1311,52 @@ function drawBlock(skin,c,fr,w,dpr,lite){
     inShadow(x,w,r,'rgba(0,0,0,.32)',w*.07,0,-w*.035);
     inShadow(x,w,r,'rgba(255,255,255,.22)',w*.05,0,w*.025);
   } else if(skin==='fruit'){
-    const r=w*.13, f=fr?fr[0]:c; rrect(x,w,r); x.clip();
-    let g=x.createLinearGradient(0,0,0,w); g.addColorStop(0,mix(f,'#ffffff',.78)); g.addColorStop(.58,f); g.addColorStop(1,f); x.fillStyle=g; x.fillRect(0,0,w,w);
-    if(tx) texLayer(x,w,TEX.noiseC,64,0,0,'soft-light',dpr);
-    if(fr){
-      x.fillStyle=fr[2]; x.fillRect(0,w*.78,w,w*.13); x.fillStyle=fr[3]; x.fillRect(0,w*.91,w,w*.09+1);
-      x.fillStyle=fr[1]; [.35,.64].forEach(cx=>{ x.beginPath(); x.ellipse(w*cx,w*.44,w*.05,w*.075,0,0,7); x.fill(); });
-    }
-    inShadow(x,w,r,'rgba(255,255,255,.4)',0,0,w*.05);
-    x.strokeStyle='rgba(0,0,0,.08)'; x.lineWidth=2*dpr; rrect(x,w,r); x.stroke();
+    /* frutinhas: cada cor é uma fruta cortada, num quadradinho com volume (como o bolo de chocolate):
+       vermelho melancia, laranja laranja, amarelo abacaxi, verde kiwi, ciano melão, azul mirtilo, roxo uva */
+    const idx=PALETTE.indexOf(c), ins=w*.04, iw=w-ins*2, r=iw*.18;
+    const box=()=>{ x.beginPath(); x.moveTo(ins+r,ins); x.arcTo(ins+iw,ins,ins+iw,ins+iw,r); x.arcTo(ins+iw,ins+iw,ins,ins+iw,r); x.arcTo(ins,ins+iw,ins,ins,r); x.arcTo(ins,ins,ins+iw,ins,r); x.closePath(); };
+    const shine=()=>{ x.fillStyle='rgba(255,255,255,.45)'; x.beginPath(); x.ellipse(w*.3,w*.17,w*.15,w*.04,-.15,0,7); x.fill(); };
+    const seed=(sx,sy,a,sz,col)=>{ x.save(); x.translate(sx,sy); x.rotate(a); x.fillStyle=col; x.beginPath(); x.ellipse(0,0,sz*.55,sz,0,0,7); x.fill(); x.fillStyle='rgba(255,255,255,.4)'; x.beginPath(); x.ellipse(-sz*.15,-sz*.35,sz*.15,sz*.28,0,0,7); x.fill(); x.restore(); };
+    const ball=(bx,by,br,col,dark)=>{ const g=x.createRadialGradient(bx-br*.35,by-br*.4,br*.1,bx,by,br); g.addColorStop(0,mix(col,'#ffffff',.5)); g.addColorStop(.6,col); g.addColorStop(1,dark); x.fillStyle=g; x.beginPath(); x.arc(bx,by,br,0,7); x.fill(); };
+    x.save(); box(); x.clip();
+    if(idx===0){ /* melancia: polpa vermelha, sementes pretas e a casca (branca e verde) embaixo */
+      const g=x.createLinearGradient(0,0,0,w); g.addColorStop(0,mix(c,'#ffffff',.6)); g.addColorStop(.7,c); x.fillStyle=g; x.fillRect(0,0,w,w);
+      x.fillStyle='#f4f1d8'; x.fillRect(0,w*.72,w,w*.1); x.fillStyle='#4f9a2e'; x.fillRect(0,w*.8,w,w*.2); x.fillStyle='#2f6e1d'; for(let k=0;k<5;k++) x.fillRect(w*(.05+k*.2),w*.8,w*.08,w*.2);
+      [[.28,.36],[.5,.28],[.72,.36],[.36,.56],[.64,.56]].forEach(([a,b2],k)=>seed(w*a,w*b2,(k-2)*.25,w*.055,'#2a1a12')); }
+    else if(idx===1){ /* laranja: casca, gomos com a pele branca entre eles */
+      x.fillStyle=mix(c,'#000000',.85); x.fillRect(0,0,w,w); x.fillStyle='#fff3dc'; x.beginPath(); x.arc(w*.5,w*.52,w*.4,0,7); x.fill();
+      for(let k=0;k<8;k++){ const a0=k*Math.PI/4+.06, a1=(k+1)*Math.PI/4-.06; const g=x.createRadialGradient(w*.5,w*.52,w*.03,w*.5,w*.52,w*.36); g.addColorStop(0,mix(c,'#ffffff',.55)); g.addColorStop(1,c);
+        x.fillStyle=g; x.beginPath(); x.moveTo(w*.5,w*.52); x.arc(w*.5,w*.52,w*.35,a0,a1); x.closePath(); x.fill(); }
+      x.fillStyle='#fff8ea'; x.beginPath(); x.arc(w*.5,w*.52,w*.05,0,7); x.fill(); }
+    else if(idx===2){ /* abacaxi: polpa amarela com o xadrez de losangos e os pontinhos marrons */
+      const g=x.createLinearGradient(0,0,0,w); g.addColorStop(0,mix(c,'#ffffff',.6)); g.addColorStop(1,mix(c,'#000000',.85)); x.fillStyle=g; x.fillRect(0,0,w,w);
+      x.strokeStyle=mix(c,'#000000',.6); x.lineWidth=Math.max(1,w*.025); x.beginPath(); for(let k=-4;k<6;k++){ x.moveTo(k*w*.25,0); x.lineTo(k*w*.25+w,w); x.moveTo(k*w*.25+w,0); x.lineTo(k*w*.25,w); } x.stroke();
+      for(let k=-5;k<5;k++) for(let m=0;m<9;m++){ const px=(k+m+1)*w*.125, py=(m-k)*w*.125; if(px<-w*.05||px>w*1.05||py<-w*.05||py>w*1.05) continue;
+        x.fillStyle='rgba(255,255,255,.25)'; x.beginPath(); x.arc(px,py-w*.02,w*.05,0,7); x.fill(); x.fillStyle='#7a4a12'; x.beginPath(); x.ellipse(px,py+w*.01,w*.026,w*.02,0,0,7); x.fill(); } }
+    else if(idx===3){ /* kiwi: casca marrom, polpa verde com raios, anel de sementes pretas e o miolo claro */
+      x.fillStyle='#8a6a3a'; x.fillRect(0,0,w,w); const g=x.createRadialGradient(w*.5,w*.52,w*.05,w*.5,w*.52,w*.44); g.addColorStop(0,mix(c,'#ffffff',.45)); g.addColorStop(.7,c); g.addColorStop(1,mix(c,'#000000',.8));
+      x.fillStyle=g; x.beginPath(); x.arc(w*.5,w*.52,w*.4,0,7); x.fill();
+      x.strokeStyle='rgba(255,255,255,.3)'; x.lineWidth=Math.max(1,w*.012); x.beginPath(); for(let k=0;k<24;k++){ const a=k*Math.PI/12; x.moveTo(w*.5+Math.cos(a)*w*.12,w*.52+Math.sin(a)*w*.12); x.lineTo(w*.5+Math.cos(a)*w*.37,w*.52+Math.sin(a)*w*.37); } x.stroke();
+      for(let k=0;k<14;k++){ const a=k*Math.PI*2/14; seed(w*.5+Math.cos(a)*w*.17,w*.52+Math.sin(a)*w*.17,a+Math.PI/2,w*.03,'#1e1a14'); }
+      x.fillStyle='#f3f6d8'; x.beginPath(); x.ellipse(w*.5,w*.52,w*.09,w*.07,0,0,7); x.fill(); }
+    else if(idx===4){ /* melão: casca rendada, polpa e o miolo com sementes */
+      x.fillStyle=mix(c,'#000000',.6); x.fillRect(0,0,w,w); x.strokeStyle='rgba(255,255,255,.25)'; x.lineWidth=Math.max(1,w*.012); x.beginPath(); for(let k=0;k<14;k++){ x.moveTo(Math.random()*w,0); x.lineTo(Math.random()*w,w); } x.stroke();
+      const g=x.createRadialGradient(w*.5,w*.5,w*.05,w*.5,w*.5,w*.46); g.addColorStop(0,mix(c,'#ffffff',.35)); g.addColorStop(.75,mix(c,'#ffffff',.75)); g.addColorStop(1,c);
+      x.fillStyle=g; x.beginPath(); if(x.roundRect) x.roundRect(w*.1,w*.1,w*.8,w*.8,w*.16); else x.rect(w*.1,w*.1,w*.8,w*.8); x.fill();
+      x.fillStyle=mix(c,'#fff3c8',.3); x.beginPath(); x.ellipse(w*.5,w*.5,w*.2,w*.15,0,0,7); x.fill();
+      for(let k=0;k<8;k++){ const a=k*Math.PI/4; seed(w*.5+Math.cos(a)*w*.12,w*.5+Math.sin(a)*w*.08,a+Math.PI/2,w*.03,'#fbf1d0'); } }
+    else if(idx===5){ /* mirtilo: frutinhas azuis com a coroinha */
+      x.fillStyle=mix(c,'#000000',.45); x.fillRect(0,0,w,w);
+      [[.3,.3],[.7,.3],[.3,.7],[.7,.7]].forEach(([a,b2])=>{ ball(w*a,w*b2,w*.22,c,mix(c,'#000000',.45)); x.strokeStyle=mix(c,'#000000',.35); x.lineWidth=Math.max(1,w*.02); x.beginPath(); for(let k=0;k<5;k++){ const an=k*Math.PI*2/5; x.moveTo(w*a,w*b2-w*.08); x.lineTo(w*a+Math.cos(an)*w*.05,w*b2-w*.08+Math.sin(an)*w*.05); } x.stroke(); });
+      x.fillStyle='rgba(220,230,255,.25)'; x.fillRect(0,0,w,w); }
+    else if(idx===6){ /* uva: cacho de bolinhas roxas */
+      x.fillStyle=mix(c,'#000000',.4); x.fillRect(0,0,w,w);
+      [[.2,.22],[.5,.18],[.8,.22],[.35,.45],[.65,.45],[.2,.7],[.5,.72],[.8,.7]].forEach(([a,b2])=>ball(w*a,w*b2,w*.17,c,mix(c,'#000000',.45))); }
+    else { const g=x.createLinearGradient(0,0,0,w); g.addColorStop(0,mix(c,'#ffffff',.6)); g.addColorStop(1,c); x.fillStyle=g; x.fillRect(0,0,w,w); }
+    shine(); x.restore();
+    /* volume: sombra embaixo e borda */
+    inShadow(x,w,r,'rgba(0,0,0,.28)',w*.07,0,-w*.04); inShadow(x,w,r,'rgba(255,255,255,.35)',w*.05,0,w*.03);
+    box(); x.strokeStyle='rgba(0,0,0,.25)'; x.lineWidth=Math.max(1,w*.02); x.stroke();
   } else if(skin==='brick'){
     const r=w*.05, m='#ddd6c8'; rrect(x,w,r); x.clip();
     let g=x.createLinearGradient(0,0,0,w); g.addColorStop(0,mix(c,'#ffffff',.9)); g.addColorStop(1,mix(c,'#000000',.84)); x.fillStyle=g; x.fillRect(0,0,w,w);
