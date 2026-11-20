@@ -174,7 +174,7 @@ textarea{width:100%;min-height:70px;font:12px/1.35 ui-monospace,Menlo,monospace;
 .skin-bear .bev,.skp.skin-bear .bev{background:var(--c);border-radius:calc(var(--cs)*.24)}
 .skin-jelly .bev,.skp.skin-jelly .bev{background:radial-gradient(circle at 50% 66%,color-mix(in srgb,var(--c) 55%,#fff),var(--c) 50%,color-mix(in srgb,var(--c) 60%,#000));border-radius:calc(var(--cs)*.3)}
 .skin-bug .bev,.skp.skin-bug .bev{background:radial-gradient(circle at 30% 50%,#2a2320 0 9%,transparent 10%),radial-gradient(circle at 70% 50%,#2a2320 0 9%,transparent 10%),var(--c);border-radius:45% 45% 40% 40%}
-.skin-origami .bev,.skp.skin-origami .bev{background:linear-gradient(135deg,color-mix(in srgb,var(--c) 78%,#fff) 50%,var(--c) 50%);border-radius:calc(var(--cs)*.04)}
+.skin-lantern .bev,.skp.skin-lantern .bev{background:repeating-linear-gradient(#0000 0 14%,rgba(0,0,0,.22) 14% 17%),radial-gradient(ellipse at 45% 45%,color-mix(in srgb,var(--c) 60%,#fff6d8),var(--c) 60%,color-mix(in srgb,var(--c) 62%,#000));border-radius:45%/40%;border-top:calc(var(--cs)*.1) solid #22201f;border-bottom:calc(var(--cs)*.1) solid #22201f}
 .skin-robot .bev,.skp.skin-robot .bev{background:radial-gradient(circle at 34% 46%,#8ff4ff 0 8%,transparent 9%),radial-gradient(circle at 66% 46%,#8ff4ff 0 8%,transparent 9%),linear-gradient(#0000 32%,#1d2430 32% 60%,#0000 60%),var(--c);border-radius:calc(var(--cs)*.16)}
 .skin-bamboo .bev,.skp.skin-bamboo .bev{background:linear-gradient(#0000 47%,color-mix(in srgb,var(--c) 50%,#000) 47% 56%,#0000 56%),linear-gradient(90deg,color-mix(in srgb,var(--c) 55%,#000),color-mix(in srgb,var(--c) 60%,#fff) 30%,var(--c) 55%,color-mix(in srgb,var(--c) 60%,#000));border-radius:calc(var(--cs)*.2)}
 .skin-sushi .bev,.skp.skin-sushi .bev{background:linear-gradient(90deg,#0000 42%,#1f2a22 42% 58%,#0000 58%),linear-gradient(var(--c) 50%,#f4efe4 50%);border-radius:calc(var(--cs)*.3)}
@@ -1057,7 +1057,7 @@ if(SET.theme==='wood') SET.theme='soft';
 if(SET.voiceMode!=='off') SET.voiceMode='pack';
 const THEMES={soft:'Suave',softdark:'Suave escuro',blue:'Azul',night:'Noite',candy:'Doce',forest:'Floresta'};
 const THEME_COLOR={soft:'#e2e7ee',softdark:'#272b33',blue:'#2b4590',night:'#0c0e17',candy:'#f3b0cf',forest:'#5a8757'};
-const SKINS=['velvet','crochet','fruit','brick','candy','origami','classic'], SKIN_L={velvet:'Pelúcia',crochet:'Crochê',fruit:'Frutinhas',brick:'Tijolinhos',candy:'Doces',origami:'Origami',classic:'Clássico',bear:'Ursinho',jelly:'Jujuba',bug:'Joaninha',robot:'Robô',bamboo:'Bambu',sushi:'Sushi'};
+const SKINS=['velvet','crochet','fruit','brick','candy','lantern','classic'], SKIN_L={velvet:'Pelúcia',crochet:'Crochê',fruit:'Frutinhas',brick:'Tijolinhos',candy:'Doces',lantern:'Lanterna',classic:'Clássico',bear:'Ursinho',jelly:'Jujuba',bug:'Joaninha',robot:'Robô',bamboo:'Bambu',sushi:'Sushi'};
 /* temas ganhos vencendo o chefão de cada mundo (na ordem dos mundos) */
 const SKIN_REW=['bear','jelly','bug','robot','bamboo','sushi'];
 const SKINS_ALL=[...SKINS,...SKIN_REW], SKIN_LOCK={bear:'Vença o Ursão na campanha',jelly:'Vença a Rainha Jujuba na campanha',bug:'Vença o Lagartão Guloso na campanha',robot:'Vença o Robozão na campanha',bamboo:'Vença o Pandão na campanha',sushi:'Vença o Gatão da Sorte na campanha'};
@@ -1090,8 +1090,8 @@ const TEX={noise:'none',fiber:'none'};
    por cor num canvas e viram imagens. O navegador só copia a imagem em vez de recalcular as camadas
    de cada bloco a cada mudança no tabuleiro. Refeito só quando o tema ou o tamanho do bloco muda. */
 const SPR={skin:'',lite:null,px:0,urls:[],job:0,cv:{},hl:{},dead:{},ov:{},w:0};
-const SPR_SKINS={velvet:1,crochet:1,fruit:1,brick:1,candy:1,origami:1,classic:1,bear:1,jelly:1,bug:1,robot:1,bamboo:1,sushi:1};
-const SKIN_R={velvet:.3,crochet:.14,fruit:.13,brick:.05,candy:.26,origami:.04,classic:.07,bear:.24,jelly:.3,bug:.36,robot:.16,bamboo:.2,sushi:.3};
+const SPR_SKINS={velvet:1,crochet:1,fruit:1,brick:1,candy:1,lantern:1,classic:1,bear:1,jelly:1,bug:1,robot:1,bamboo:1,sushi:1};
+const SKIN_R={velvet:.3,crochet:.14,fruit:.13,brick:.05,candy:.26,lantern:.4,classic:.07,bear:.24,jelly:.3,bug:.36,robot:.16,bamboo:.2,sushi:.3};
 const skinR=sk=>SKIN_R[baseSkin(sk)]||.15;
 const FRUIT=[['#f2655a','#3b1a12','#f5f0e1','#5fae4a'],['#ffa23a','#ffe3b0','#fff2d8','#ef8a1c'],['#ffdf4d','#fff4bf','#fffbe6','#e3b812'],['#8ccf4a','#1e1a14','#eef6d5','#7a5634'],['#7fd8c4','#b8904a','#eafaf3','#4f9d6b'],['#5b7be0','#26357a','#dfe6ff','#36489e'],['#9a5bd8','#3a1a5c','#f0e5ff','#5f3596']];
 const rgbOf=h=>{ h=h.replace('#',''); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); };
@@ -1128,9 +1128,18 @@ function drawGem(x,cx,cy,r,c){
 /* robô: visor e olhos; bambu: anel do nó e folha; sushi: arroz e peixe (usados também pelos dourados) */
 function robotEyes(x,w,col,glow){ x.save(); if(glow){ x.shadowColor=col; x.shadowBlur=w*.12; } x.fillStyle=col; [[.34,.46],[.66,.46]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(w*ex,w*ey,w*.085,0,7); x.fill(); });
   x.fillRect(w*.32,w*.7,w*.36,w*.05); x.restore(); x.fillStyle='rgba(255,255,255,.85)'; [[.31,.43],[.63,.43]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(w*ex,w*ey,w*.025,0,7); x.fill(); }); }
-function bambooLeaf(x,w,col){ x.save(); x.translate(w*.58,w*.3); x.rotate(-.75); const g=x.createLinearGradient(0,-w*.06,0,w*.06); g.addColorStop(0,mix(col,'#ffffff',.6)); g.addColorStop(1,mix(col,'#000000',.7));
-  x.fillStyle=g; x.beginPath(); x.moveTo(-w*.02,0); x.quadraticCurveTo(w*.13,-w*.1,w*.3,0); x.quadraticCurveTo(w*.13,w*.1,-w*.02,0); x.fill(); x.strokeStyle=mix(col,'#000000',.55); x.lineWidth=Math.max(1,w*.012); x.beginPath(); x.moveTo(0,0); x.lineTo(w*.27,0); x.stroke(); x.restore(); }
-function bambooNode(x,w,col){ const g=x.createLinearGradient(0,w*.47,0,w*.57); g.addColorStop(0,mix(col,'#000000',.55)); g.addColorStop(.5,mix(col,'#ffffff',.6)); g.addColorStop(1,mix(col,'#000000',.6)); x.fillStyle=g; x.fillRect(w*.08,w*.47,w*.84,w*.09); }
+/* feixe de bambus finos: cada vara com sombreado de cilindro e nós em alturas diferentes */
+const BAMBOO_N=[[.3,.72],[.58],[.24,.66],[.46,.86]];
+function bambooBundle(x,w,col,nodeCol,thick){
+  const n=BAMBOO_N.length, sw=w/n;
+  BAMBOO_N.forEach((nodes,k)=>{ const x0=k*sw+sw*.06, x1=(k+1)*sw-sw*.06, bw=x1-x0;
+    const g=x.createLinearGradient(x0,0,x1,0); g.addColorStop(0,mix(col,'#000000',.55)); g.addColorStop(.32,mix(col,'#ffffff',.62)); g.addColorStop(.6,col); g.addColorStop(1,mix(col,'#000000',.5));
+    x.fillStyle=g; x.beginPath(); if(x.roundRect) x.roundRect(x0,w*.02,bw,w*.96,bw*.35); else x.rect(x0,w*.02,bw,w*.96); x.fill();
+    x.strokeStyle=mix(col,'#000000',.45); x.lineWidth=Math.max(1,w*.012); x.stroke();
+    nodes.forEach(ny=>{ const h=w*(thick?.075:.045), y0=w*ny-h/2, ng=x.createLinearGradient(0,y0,0,y0+h);
+      ng.addColorStop(0,mix(nodeCol,'#000000',.5)); ng.addColorStop(.5,mix(nodeCol,'#ffffff',.6)); ng.addColorStop(1,mix(nodeCol,'#000000',.55));
+      x.fillStyle=ng; x.fillRect(x0-w*.01,y0,bw+w*.02,h); }); });
+}
 function sushiFish(x,w,col){ const g=x.createLinearGradient(0,w*.16,0,w*.6); g.addColorStop(0,mix(col,'#ffffff',.55)); g.addColorStop(.6,col); g.addColorStop(1,mix(col,'#000000',.7));
   x.beginPath(); x.moveTo(w*.08,w*.5); x.quadraticCurveTo(w*.06,w*.16,w*.5,w*.14); x.quadraticCurveTo(w*.94,w*.16,w*.92,w*.5); x.quadraticCurveTo(w*.5,w*.62,w*.08,w*.5); x.closePath(); x.fillStyle=g; x.fill();
   x.save(); x.clip(); x.strokeStyle='rgba(255,255,255,.45)'; x.lineWidth=Math.max(1,w*.035); for(let k=0;k<4;k++){ x.beginPath(); x.moveTo(w*(.16+k*.2),w*.12); x.quadraticCurveTo(w*(.26+k*.2),w*.34,w*(.12+k*.2),w*.6); x.stroke(); } x.restore(); }
@@ -1150,9 +1159,11 @@ const GOLD_DECO={
   /* robô: olhos e boca acesos na cor da peça */
   robot:(x,w,c)=>{ x.fillStyle='#1d2430'; x.beginPath(); x.roundRect?x.roundRect(w*.18,w*.32,w*.64,w*.28,w*.1):x.rect(w*.18,w*.32,w*.64,w*.28); x.fill(); robotEyes(x,w,c,true); },
   /* bambu: folha e nó na cor da peça */
-  bamboo:(x,w,c)=>{ bambooNode(x,w,c); bambooLeaf(x,w,c); },
+  bamboo:(x,w,c)=>{ BAMBOO_N.forEach((nodes,k)=>{ const sw=w/BAMBOO_N.length, x0=k*sw+sw*.06-w*.01, bw=sw*.88+w*.02;
+    nodes.forEach(ny=>{ const h=w*.085, y0=w*ny-h/2, ng=x.createLinearGradient(0,y0,0,y0+h); ng.addColorStop(0,mix(c,'#000000',.6)); ng.addColorStop(.5,mix(c,'#ffffff',.55)); ng.addColorStop(1,mix(c,'#000000',.6)); x.fillStyle=ng; x.fillRect(x0,y0,bw,h); }); }); },
   /* sushi: arroz de ouro e o peixe na cor da peça */
-  sushi:(x,w,c)=>{ sushiFish(x,w,c); },
+  sushi:(x,w,c)=>{ const g=x.createLinearGradient(w*.4,0,w*.6,0); g.addColorStop(0,mix(c,'#000000',.6)); g.addColorStop(.35,mix(c,'#ffffff',.6)); g.addColorStop(1,mix(c,'#000000',.7));
+    x.fillStyle=g; x.fillRect(w*.4,w*.11,w*.2,w*.84); x.strokeStyle=mix(c,'#000000',.45); x.lineWidth=Math.max(1,w*.015); x.strokeRect(w*.4,w*.11,w*.2,w*.84); },
   /* joaninha: casco de ouro com as bolinhas na cor da peça */
   bug:(x,w,c)=>{ x.save(); x.beginPath(); x.rect(0,0,w,w*.255); x.clip();
     const hg=x.createRadialGradient(w*.44,w*.12,0,w*.5,w*.2,w*.22); hg.addColorStop(0,'#fff6c8'); hg.addColorStop(.5,'#e9b22a'); hg.addColorStop(1,'#8a5a06');
@@ -1297,18 +1308,20 @@ function drawBlock(skin,c,fr,w,dpr,lite){
       x.fillStyle='#2a170a'; x.beginPath(); x.arc(w*.6,w*.6,w*.06,0,7); x.fill();
       x.fillStyle='#9fd65a'; x.beginPath(); x.arc(w*.66,w*.56,w*.06,0,7); x.fill(); x.fillStyle='#222'; x.beginPath(); x.arc(w*.68,w*.55,w*.014,0,7); x.fill(); }
     else { x.fillStyle='rgba(255,255,255,.6)'; x.beginPath(); x.ellipse(w*.36,w*.44,w*.07,w*.12,-.5,0,7); x.fill(); }
-  } else if(skin==='origami'){
-    /* origami: papel dobrado em diagonal, com vinco e uma pontinha dobrada */
-    const r=w*.04; rrect(x,w,r); x.clip();
-    x.fillStyle=c; x.fillRect(0,0,w,w);
-    x.beginPath(); x.moveTo(0,0); x.lineTo(w,0); x.lineTo(0,w); x.closePath(); x.fillStyle=mix(c,'#ffffff',.78); x.fill();
-    x.beginPath(); x.moveTo(w,w); x.lineTo(w,w*.35); x.lineTo(w*.35,w); x.closePath(); x.fillStyle=mix(c,'#000000',.82); x.fill();
-    x.strokeStyle='rgba(255,255,255,.55)'; x.lineWidth=Math.max(1,w*.02); x.beginPath(); x.moveTo(w,0); x.lineTo(0,w); x.stroke();
-    x.strokeStyle='rgba(0,0,0,.15)'; x.beginPath(); x.moveTo(w*.5,w*.5); x.lineTo(w,w); x.stroke();
-    x.beginPath(); x.moveTo(w*.74,0); x.lineTo(w,0); x.lineTo(w,w*.26); x.closePath(); x.fillStyle=mix(c,'#ffffff',.55); x.fill();
-    x.beginPath(); x.moveTo(w*.74,0); x.lineTo(w*.74,w*.26); x.lineTo(w,w*.26); x.closePath(); x.fillStyle='rgba(0,0,0,.12)'; x.fill();
-    if(tx) texLayer(x,w,TEX.noiseC,64,0,0,'soft-light',dpr);
-    x.strokeStyle='rgba(0,0,0,.18)'; x.lineWidth=Math.max(1,w*.02); rrect(x,w,r); x.stroke();
+  } else if(skin==='lantern'){
+    /* lanterna de papel japonesa (chōchin): gomos na horizontal, tampas pretas e luz acesa por dentro */
+    const cx=w*.5, cy=w*.5, rx=w*.47, ry=w*.39;
+    x.save(); x.shadowColor=mix(c,'#fff6d8',.5); x.shadowBlur=lite?0:w*.08;
+    const g=x.createRadialGradient(w*.45,w*.44,w*.04,cx,cy,w*.6); g.addColorStop(0,mix(c,'#fff6d8',.35)); g.addColorStop(.58,c); g.addColorStop(1,mix(c,'#000000',.6));
+    x.beginPath(); x.ellipse(cx,cy,rx,ry,0,0,7); x.fillStyle=g; x.fill(); x.restore();
+    x.save(); x.beginPath(); x.ellipse(cx,cy,rx,ry,0,0,7); x.clip();
+    x.strokeStyle=mix(c,'#000000',.58); x.lineWidth=Math.max(1,w*.02);
+    for(let k=-3;k<=3;k++){ const yy=cy+k*ry*.28, bow=k*w*.025; x.beginPath(); x.moveTo(cx-rx,yy-bow); x.quadraticCurveTo(cx,yy+bow,cx+rx,yy-bow); x.stroke(); }
+    x.strokeStyle='rgba(0,0,0,.16)'; x.lineWidth=Math.max(1,w*.015); x.beginPath(); x.moveTo(cx,cy-ry); x.lineTo(cx,cy+ry); x.stroke();
+    x.fillStyle='rgba(255,255,255,.38)'; x.beginPath(); x.ellipse(w*.3,w*.38,w*.08,w*.17,-.25,0,7); x.fill();
+    x.restore();
+    const cap=(yy)=>{ const cg=x.createLinearGradient(0,yy,0,yy+w*.13); cg.addColorStop(0,'#4a4542'); cg.addColorStop(1,'#151312'); x.fillStyle=cg; x.beginPath(); if(x.roundRect) x.roundRect(w*.24,yy,w*.52,w*.13,w*.04); else x.rect(w*.24,yy,w*.52,w*.13); x.fill(); x.fillStyle='rgba(255,255,255,.18)'; x.fillRect(w*.28,yy+w*.02,w*.44,w*.02); };
+    cap(w*.04); cap(w*.83);
   } else if(skin==='robot'){
     /* robô: caixinha de metal com parafusos, visor e olhos de luz; tema ganho ao derrotar o Robozão */
     const r=w*.16, ins=w*.04, iw=w-ins*2; x.save(); x.translate(ins,ins);
@@ -1318,20 +1331,19 @@ function drawBlock(skin,c,fr,w,dpr,lite){
     [[.14,.14],[.86,.14],[.14,.86],[.86,.86]].forEach(([sx,sy])=>{ x.fillStyle=mix(c,'#000000',.45); x.beginPath(); x.arc(w*sx,w*sy,w*.045,0,7); x.fill(); x.fillStyle='rgba(255,255,255,.55)'; x.beginPath(); x.arc(w*sx-w*.012,w*sy-w*.012,w*.016,0,7); x.fill(); });
     x.fillStyle='#1d2430'; x.beginPath(); if(x.roundRect) x.roundRect(w*.18,w*.32,w*.64,w*.28,w*.1); else x.rect(w*.18,w*.32,w*.64,w*.28); x.fill();
     robotEyes(x,w,'#8ff4ff',true); x.fillStyle=mix(c,'#000000',.55); x.fillRect(w*.32,w*.7,w*.36,w*.05);
-  } else if(skin==='bamboo'||skin==='stalk'){
-    /* bambu: gomo de bambu na cor da peça, com o nó no meio e uma folhinha (tema ganho ao derrotar o Pandão).
-       "stalk" é o bambu de verdade do Mundo 5, que cresce sozinho */
-    const st=skin==='stalk', r=w*.2, ins=w*.08, iw=w-ins*2;
-    const g=x.createLinearGradient(ins,0,ins+iw,0); g.addColorStop(0,mix(c,'#000000',.55)); g.addColorStop(.3,mix(c,'#ffffff',.6)); g.addColorStop(.55,c); g.addColorStop(1,mix(c,'#000000',.6));
-    x.beginPath(); x.moveTo(ins+r,w*.04); x.arcTo(ins+iw,w*.04,ins+iw,w*.96,r); x.arcTo(ins+iw,w*.96,ins,w*.96,r); x.arcTo(ins,w*.96,ins,w*.04,r); x.arcTo(ins,w*.04,ins+iw,w*.04,r); x.closePath();
-    x.fillStyle=g; x.fill(); x.lineWidth=Math.max(1,w*.02); x.strokeStyle=mix(c,'#000000',.5); x.stroke();
-    x.fillStyle='rgba(255,255,255,.25)'; x.fillRect(w*.3,w*.1,w*.05,w*.34); x.fillRect(w*.3,w*.6,w*.05,w*.3);
-    bambooNode(x,w,c); bambooLeaf(x,w,st?'#4f9a2e':c);
-    if(st){ x.save(); x.translate(w*.28,w*.78); x.rotate(2.4); x.fillStyle='#4f9a2e'; x.beginPath(); x.moveTo(0,0); x.quadraticCurveTo(w*.1,-w*.07,w*.22,0); x.quadraticCurveTo(w*.1,w*.07,0,0); x.fill(); x.restore(); }
+  } else if(skin==='bamboo'){
+    /* bambu: feixe de bambus finos na cor da peça; tema ganho ao derrotar o Pandão */
+    bambooBundle(x,w,c,c,false);
+  } else if(skin==='stalk'){
+    /* bambu de verdade do Mundo 5 (cresce sozinho): uma vara grossa verde com folhinha */
+    const ins=w*.18, bw=w-ins*2, g=x.createLinearGradient(ins,0,ins+bw,0); g.addColorStop(0,mix(c,'#000000',.55)); g.addColorStop(.3,mix(c,'#ffffff',.6)); g.addColorStop(.6,c); g.addColorStop(1,mix(c,'#000000',.55));
+    x.fillStyle=g; x.fillRect(ins,0,bw,w); x.strokeStyle=mix(c,'#000000',.45); x.lineWidth=Math.max(1,w*.02); x.strokeRect(ins,0,bw,w);
+    const ng=x.createLinearGradient(0,w*.46,0,w*.56); ng.addColorStop(0,mix(c,'#000000',.5)); ng.addColorStop(.5,mix(c,'#ffffff',.6)); ng.addColorStop(1,mix(c,'#000000',.55)); x.fillStyle=ng; x.fillRect(ins-w*.03,w*.46,bw+w*.06,w*.1);
+    x.save(); x.translate(ins+bw,w*.46); x.rotate(-.5); x.fillStyle='#4f9a2e'; x.beginPath(); x.moveTo(0,0); x.quadraticCurveTo(w*.12,-w*.1,w*.28,0); x.quadraticCurveTo(w*.12,w*.1,0,0); x.fill(); x.restore();
   } else if(skin==='sushi'){
     /* sushi: bolinho de arroz com o peixe na cor da peça e uma fita de alga; tema ganho ao derrotar o Gatão da Sorte */
     const rg=x.createLinearGradient(0,w*.4,0,w*.94); rg.addColorStop(0,'#ffffff'); rg.addColorStop(1,'#d9d2c3');
-    x.beginPath(); x.moveTo(w*.12,w*.5); x.quadraticCurveTo(w*.04,w*.94,w*.5,w*.93); x.quadraticCurveTo(w*.96,w*.94,w*.88,w*.5); x.closePath(); x.fillStyle=c===GOLDSK?'#f6d77a':rg; x.fill();
+    x.beginPath(); x.moveTo(w*.12,w*.5); x.quadraticCurveTo(w*.04,w*.94,w*.5,w*.93); x.quadraticCurveTo(w*.96,w*.94,w*.88,w*.5); x.closePath(); x.fillStyle=c===GOLDSK?(()=>{ const gg=x.createLinearGradient(0,w*.4,0,w*.94); gg.addColorStop(0,'#fff0b0'); gg.addColorStop(1,'#c88f14'); return gg; })():rg; x.fill();
     x.fillStyle='rgba(150,140,120,.35)'; for(let k=0;k<14;k++){ const px=w*(.18+((k*37)%64)/100), py=w*(.62+((k*23)%28)/100); x.beginPath(); x.ellipse(px,py,w*.03,w*.017,k,0,7); x.fill(); }
     sushiFish(x,w,c);
     x.fillStyle=c===GOLDSK?'#7a5200':'#1f2a22'; x.fillRect(w*.42,w*.12,w*.16,w*.82); x.fillStyle='rgba(255,255,255,.15)'; x.fillRect(w*.44,w*.12,w*.03,w*.82);
@@ -4177,7 +4189,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Neblina',icon:'🌫️',goal:'clear',setup:'ice',k:16,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:66,three:52}},
   {name:'Bambuzal fechado',icon:'🎍',goal:'lines',v:12,setup:'bamboo',k:3,bamboo:{every:2},desc:'Limpe {v} linhas. Começa com {k} pés de bambu, e eles crescem uma casa a cada 2 jogadas.',st:{by:'pieces',two:34,three:26}},
   {name:'Chefão: Pandão',icon:'🐼',goal:'boss',hp:70,time:250,bamboo:{every:4},desc:'Cada linha tira vida do Pandão; o combo multiplica o dano. Ele planta bambu que cresce a cada 4 jogadas e, bravo, abraça uma peça por 4 s.',st:{by:'time',two:160,three:120}}
-]},{w:6,name:'Japão',icon:'⛩️',skin:'origami',boss:'neko',reward:'sushi',card:'sakura',bossC:'#d6334a',phases:[
+]},{w:6,name:'Japão',icon:'⛩️',skin:'lantern',boss:'neko',reward:'sushi',card:'sakura',bossC:'#d6334a',phases:[
   {name:'Torii',icon:'⛩️',goal:'lines',v:14,desc:'Limpe {v} linhas.',st:{by:'pieces',two:34,three:25}},
   {name:'Trem-bala',icon:'🚄',goal:'score',v:1200,time:80,desc:'Faça {v} pontos em até 80 segundos.',st:{by:'time',two:60,three:42}},
   {name:'Hanami',icon:'🌸',goal:'petals',v:5,limit:32,petal:{k:3,life:4,every:2},desc:'Pegue {v} flores de sakura em até {limit} peças: limpe a linha da flor antes de a contagem zerar, senão ela voa embora.',st:{by:'pieces',two:24,three:17}},
