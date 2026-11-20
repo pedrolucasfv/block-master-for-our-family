@@ -173,7 +173,8 @@ textarea{width:100%;min-height:70px;font:12px/1.35 ui-monospace,Menlo,monospace;
 .skin-crochet .bev,.skp.skin-crochet .bev{border:0;border-radius:calc(var(--cs)*.14);background:repeating-linear-gradient(60deg,color-mix(in srgb,var(--c) 75%,#fff) 0 12%,var(--c) 12% 25%),var(--c);background-blend-mode:normal;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
 .skin-bear .bev,.skp.skin-bear .bev{background:var(--c);border-radius:calc(var(--cs)*.24)}
 .skin-jelly .bev,.skp.skin-jelly .bev{background:radial-gradient(circle at 50% 66%,color-mix(in srgb,var(--c) 55%,#fff),var(--c) 50%,color-mix(in srgb,var(--c) 60%,#000));border-radius:calc(var(--cs)*.3)}
-.skin-bearGold .bev,.skin-jellyGold .bev,.skp.skin-bearGold .bev,.skp.skin-jellyGold .bev{background:radial-gradient(circle at 50% 45%,var(--c) 0 17%,#fff3b0 19%,#e3ad1f 40%,#9c6a0c);border-radius:calc(var(--cs)*.26)}
+.skin-bug .bev,.skp.skin-bug .bev{background:radial-gradient(circle at 30% 50%,#2a2320 0 9%,transparent 10%),radial-gradient(circle at 70% 50%,#2a2320 0 9%,transparent 10%),var(--c);border-radius:45% 45% 40% 40%}
+.skin-bearGold .bev,.skin-jellyGold .bev,.skin-bugGold .bev,.skp.skin-bearGold .bev,.skp.skin-jellyGold .bev,.skp.skin-bugGold .bev{background:radial-gradient(circle at 50% 45%,var(--c) 0 17%,#fff3b0 19%,#e3ad1f 40%,#9c6a0c);border-radius:calc(var(--cs)*.26)}
 .skinopt.sel small{color:inherit;opacity:.85}
 .skinopt.gold{box-shadow:0 0 0 2px #e3ad1f,0 0 14px rgba(227,173,31,.55)!important}
 .skin-classic .bev,.skp.skin-classic .bev{background:var(--c);background-size:auto;background-position:0 0;background-repeat:repeat;background-blend-mode:normal;border-radius:calc(var(--cs)*.07);box-shadow:none;
@@ -488,6 +489,8 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 .wtab span{font-size:24px;line-height:1.1}.wtab small{font-size:11px;font-weight:600}
 .wtab.sel{background:#fff;box-shadow:0 0 0 3px var(--wc,#c27bd6),0 3px 10px rgba(120,80,130,.2)}.wtab.locked{opacity:.55}
 #camp[data-w="2"]{--wc:#e8459a;background:linear-gradient(180deg,#ffeef6 0%,#ffd9ea 42%,#dcf5ef 100%);color:#6a3550}
+#camp[data-w="3"]{--wc:#5aa832;background:linear-gradient(180deg,#f2fbe4 0%,#dff3c8 45%,#fde9d6 100%);color:#3d5a24}
+#camp[data-w="3"] h1,#camp[data-w="3"] .muted,#camp[data-w="3"] .card,#camp[data-w="3"] .card .muted,#camp[data-w="3"] .card b,#camp[data-w="3"] .back{color:#3d5a24}
 #camp[data-w="2"] h1,#camp[data-w="2"] .muted,#camp[data-w="2"] .card,#camp[data-w="2"] .card .muted,#camp[data-w="2"] .card b,#camp[data-w="2"] .back{color:#6a3550}
 .stars3{font-size:54px;letter-spacing:6px;line-height:1.1}.stars3 span{color:var(--muted);opacity:.35}.stars3 span.on{color:var(--gold);opacity:1;text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .timebar.hp i{background:linear-gradient(90deg,#e5483f,#ff8a5b);opacity:1}
@@ -687,7 +690,8 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
   <div class="pad">
     <div class="topnav"><button class="back" id="setBack">← Voltar</button></div>
     <h1 id="setTitle">Configurações</h1>
-    <div class="card" id="devCard" hidden><h2>🤖 Modo teste</h2><p class="muted">Ligado. Na sala, quem criou vê "Aparelho de teste": um celular de mentira que entra na sala e joga sozinho. Toque 7 vezes no título para desligar.</p></div>
+    <div class="card" id="devCard" hidden><h2>🤖 Modo teste</h2><p class="muted">Ligado. Na sala, quem criou vê "Aparelho de teste": um celular de mentira que entra na sala e joga sozinho. Toque 7 vezes no título para desligar.</p>
+      <div class="toggles" style="margin-top:12px;grid-template-columns:1fr"><button type="button" class="tog" id="tDevAll"><span>🔓 Liberar tudo</span><small>todos os mundos, fases, temas e versões douradas, só para ver (o progresso de verdade continua guardado)</small></button></div></div>
     <div class="card"><h2>Meu perfil</h2><div id="profBox"></div></div>
     <div class="card">
       <h2>Altura da peça ao arrastar</h2>
@@ -952,7 +956,7 @@ class Engine{
   /* fecha as linhas cheias do tabuleiro (depois de uma peça ou quando um bloco aparece sozinho no último buraco) */
   settle(base){
     const nc=this.o.play===3; /* modo Sem combo */
-    let pts=base, n=0, chain=0, colorLines=0, bombs=0, gold=0;
+    let pts=base, n=0, chain=0, colorLines=0, bombs=0, gold=0, ripe=0;
     const steps=[], rowsC=[], colsC=[], powers=[];
     for(let guard=0;guard<12;guard++){
       const {rows,cols}=this.fullLines(); const k=rows.length+cols.length;
@@ -977,7 +981,7 @@ class Engine{
       const cleared=[];
       for(const i of set){ const y=(i/N)|0, x=i%N, v=this.b[y][x]; if(!v) continue;
         cleared.push([i,v.c,v.s]); if(v.pw){ powers.push(v.pw); v.pw=undefined; }
-        if(v.c===-2) gold++;
+        if(v.c===-2) gold++; if(v.c===-7) ripe++;
         if(v.s==='ice'){ v.s=null; v.cr=1; } else this.b[y][x]=null; }
       n+=k; this.lines+=k;
       pts+=nc?20*k*(k+1)/2*chain*(rows.length&&cols.length?2:1):10*k*(k+1)/2*this.combo*chain;
@@ -989,14 +993,14 @@ class Engine{
     pts+=colorLines*100+bombs*20;
     const perfect=chain>0 && this.b.every(row=>row.every(v=>!v));
     if(perfect) pts+=300;
-    return {pts,n,chain,colorLines,bombs,gold,perfect,steps,placed:[],combo:this.combo,rowsC,colsC,powers};
+    return {pts,n,chain,colorLines,bombs,gold,ripe,perfect,steps,placed:[],combo:this.combo,rowsC,colsC,powers};
   }
 }
 /*ENGINE-END*/
 
 /* ===================== utilidades ===================== */
 const PALETTE=['#e5483f','#f08c25','#f3c22f','#4cbb47','#2cb4d6','#3e6fe0','#8a52d8'];
-const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#e3ad1f';
+const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#e3ad1f', RIPEC='#ff4b3e', ROTC='#8d5a2b';
 /* fases de um mundo usam o tema dele, por cima do que a pessoa escolheu */
 let FORCE_SKIN=null;
 function effSkin(){ return FORCE_SKIN||SET.skin; }
@@ -1038,17 +1042,18 @@ if(SET.theme==='wood') SET.theme='soft';
 if(SET.voiceMode!=='off') SET.voiceMode='pack';
 const THEMES={soft:'Suave',softdark:'Suave escuro',blue:'Azul',night:'Noite',candy:'Doce',forest:'Floresta'};
 const THEME_COLOR={soft:'#e2e7ee',softdark:'#272b33',blue:'#2b4590',night:'#0c0e17',candy:'#f3b0cf',forest:'#5a8757'};
-const SKINS=['velvet','crochet','fruit','brick','candy','classic'], SKIN_L={velvet:'Pelúcia',crochet:'Crochê',fruit:'Frutinhas',brick:'Tijolinhos',candy:'Doces',classic:'Clássico',bear:'Ursinho',jelly:'Jujuba'};
+const SKINS=['velvet','crochet','fruit','brick','candy','classic'], SKIN_L={velvet:'Pelúcia',crochet:'Crochê',fruit:'Frutinhas',brick:'Tijolinhos',candy:'Doces',classic:'Clássico',bear:'Ursinho',jelly:'Jujuba',bug:'Joaninha'};
 /* temas ganhos vencendo o chefão de cada mundo (na ordem dos mundos) */
-const SKIN_REW=['bear','jelly'];
-const SKINS_ALL=[...SKINS,...SKIN_REW], SKIN_LOCK={bear:'Vença o Ursão na campanha',jelly:'Vença a Rainha Jujuba na campanha'};
+const SKIN_REW=['bear','jelly','bug'];
+const SKINS_ALL=[...SKINS,...SKIN_REW], SKIN_LOCK={bear:'Vença o Ursão na campanha',jelly:'Vença a Rainha Jujuba na campanha',bug:'Vença o Lagartão Guloso na campanha'};
 const WON=new Set(store.get('ddb_won',[])); if(store.get('ddb_bear',false)) WON.add('bear');
 /* versão dourada: 3 estrelas em todas as fases do mundo. Fica no nome do tema ("bearGold") */
 const GOLDS=new Set(store.get('ddb_gold',[]));
 SKIN_REW.forEach(k=>{ if(WON.has(k)) SKINS.push(k); });
 const isGold=s=>typeof s==='string'&&s.endsWith('Gold'), baseSkin=s=>isGold(s)?s.slice(0,-4):s;
-if(isGold(SET.skin)&&!GOLDS.has(baseSkin(SET.skin))) SET.skin=baseSkin(SET.skin);
-if(!SKINS.includes(baseSkin(SET.skin))) SET.skin='velvet';
+const hasSkin=k=>SKINS.includes(k)||devAll(), hasGold=k=>SKIN_REW.includes(k)&&(GOLDS.has(k)||devAll());
+function fixSkin(){ if(isGold(SET.skin)&&!hasGold(baseSkin(SET.skin))) SET.skin=baseSkin(SET.skin); if(!hasSkin(baseSkin(SET.skin))) SET.skin='velvet'; }
+fixSkin();
 function unlockSkin(k){ if(WON.has(k)) return false; WON.add(k); store.set('ddb_won',[...WON]); if(k==='bear') store.set('ddb_bear',true); if(!SKINS.includes(k)) SKINS.push(k); return true; }
 function unlockGold(k){ if(GOLDS.has(k)) return false; GOLDS.add(k); store.set('ddb_gold',[...GOLDS]); return true; }
 function saveSet(){ store.set('ddb_set',SET); }
@@ -1070,8 +1075,8 @@ const TEX={noise:'none',fiber:'none'};
    por cor num canvas e viram imagens. O navegador só copia a imagem em vez de recalcular as camadas
    de cada bloco a cada mudança no tabuleiro. Refeito só quando o tema ou o tamanho do bloco muda. */
 const SPR={skin:'',lite:null,px:0,urls:[],job:0,cv:{},hl:{},dead:{},ov:{},w:0};
-const SPR_SKINS={velvet:1,crochet:1,fruit:1,brick:1,candy:1,classic:1,bear:1,jelly:1};
-const SKIN_R={velvet:.3,crochet:.14,fruit:.13,brick:.05,candy:.26,classic:.07,bear:.24,jelly:.3};
+const SPR_SKINS={velvet:1,crochet:1,fruit:1,brick:1,candy:1,classic:1,bear:1,jelly:1,bug:1};
+const SKIN_R={velvet:.3,crochet:.14,fruit:.13,brick:.05,candy:.26,classic:.07,bear:.24,jelly:.3,bug:.36};
 const skinR=sk=>SKIN_R[baseSkin(sk)]||.15;
 const FRUIT=[['#f2655a','#3b1a12','#f5f0e1','#5fae4a'],['#ffa23a','#ffe3b0','#fff2d8','#ef8a1c'],['#ffdf4d','#fff4bf','#fffbe6','#e3b812'],['#8ccf4a','#1e1a14','#eef6d5','#7a5634'],['#7fd8c4','#b8904a','#eafaf3','#4f9d6b'],['#5b7be0','#26357a','#dfe6ff','#36489e'],['#9a5bd8','#3a1a5c','#f0e5ff','#5f3596']];
 const rgbOf=h=>{ h=h.replace('#',''); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); };
@@ -1105,20 +1110,34 @@ function drawGem(x,cx,cy,r,c){
   x.fillStyle='rgba(255,255,255,.9)'; x.beginPath(); x.ellipse(cx-r*.28,cy-r*.42,r*.2,r*.11,-.6,0,7); x.fill();
 }
 /* tema dourado: o mesmo desenho em ouro, com brilho, e uma pedra na cor da peça */
-const GEM_AT={bear:[.5,.3,.155],jelly:[.5,.53,.2]};
+/* bolinhas da joaninha (a versão dourada pinta as mesmas bolinhas na cor da peça) */
+const BUG_SPOTS=[[.3,.47,.085],[.7,.47,.085],[.27,.73,.075],[.73,.73,.075],[.42,.89,.05],[.58,.89,.05]];
+/* tema dourado: o mesmo desenho em ouro, com brilho, e um detalhe na cor da peça para as cores continuarem diferentes */
+const GOLD_DECO={
+  /* ursinho: pedra lapidada na testa e o miolo das orelhas na cor da peça */
+  bear:(x,w,c)=>{ [[.2,.2],[.8,.2]].forEach(([ex,ey])=>{ const g=x.createRadialGradient(w*ex-w*.02,w*ey-w*.02,0,w*ex,w*ey,w*.085); g.addColorStop(0,mix(c,'#ffffff',.6)); g.addColorStop(1,c); x.fillStyle=g; x.beginPath(); x.arc(w*ex,w*ey,w*.08,0,7); x.fill(); });
+    drawGem(x,w*.5,w*.3,w*.155,c); },
+  /* jujuba: casquinha de ouro com um miolo de goma colorida e brilhante */
+  jelly:(x,w,c)=>{ const o=w*.24, iw=w-o*2, r=iw*.34;
+    x.save(); x.translate(o,o+w*.02); x.shadowColor='rgba(90,55,0,.55)'; x.shadowBlur=w*.05; rrect(x,iw,r); x.fillStyle=c; x.fill(); x.restore();
+    x.save(); x.translate(o,o+w*.02); const g=x.createRadialGradient(iw*.42,iw*.36,0,iw*.5,iw*.55,iw*.75); g.addColorStop(0,mix(c,'#ffffff',.42)); g.addColorStop(.55,c); g.addColorStop(1,mix(c,'#000000',.62));
+    rrect(x,iw,r); x.fillStyle=g; x.fill(); x.lineWidth=Math.max(1,w*.025); x.strokeStyle='#b07c10'; x.stroke();
+    x.fillStyle='rgba(255,255,255,.75)'; x.beginPath(); x.ellipse(iw*.34,iw*.26,iw*.2,iw*.09,-.5,0,7); x.fill(); x.beginPath(); x.arc(iw*.74,iw*.7,iw*.06,0,7); x.fillStyle='rgba(255,255,255,.55)'; x.fill(); x.restore(); },
+  /* joaninha: casco de ouro com as bolinhas na cor da peça */
+  bug:(x,w,c)=>{ BUG_SPOTS.forEach(([sx,sy,sr])=>{ const g=x.createRadialGradient(w*(sx-sr*.3),w*(sy-sr*.3),0,w*sx,w*sy,w*sr*1.15); g.addColorStop(0,mix(c,'#ffffff',.5)); g.addColorStop(1,c);
+    x.beginPath(); x.arc(w*sx,w*sy,w*sr*1.15,0,7); x.fillStyle=g; x.fill(); x.lineWidth=Math.max(1,w*.015); x.strokeStyle='#8a5a06'; x.stroke(); }); }
+};
 function drawGoldBlock(base,c,w,dpr,lite){
   const cv=drawBlock(base,GOLDSK,null,w,dpr,lite), x=cv.getContext('2d');
   x.save(); x.globalCompositeOperation='source-atop';
   const g=x.createLinearGradient(0,0,w,w); g.addColorStop(0,'rgba(255,248,200,.55)'); g.addColorStop(.38,'rgba(255,240,170,0)'); g.addColorStop(.62,'rgba(120,70,0,0)'); g.addColorStop(1,'rgba(120,70,0,.3)');
   x.fillStyle=g; x.fillRect(0,0,w,w);
-  x.fillStyle=`rgba(255,255,240,${base==='bear'?.22:.45})`; x.beginPath(); x.moveTo(w*.12,w*.72); x.lineTo(w*.3,w*.72); x.lineTo(w*.78,w*.12); x.lineTo(w*.66,w*.12); x.closePath(); x.fill();
+  x.fillStyle=`rgba(255,255,240,${base==='jelly'?.45:.22})`; x.beginPath(); x.moveTo(w*.12,w*.72); x.lineTo(w*.3,w*.72); x.lineTo(w*.78,w*.12); x.lineTo(w*.66,w*.12); x.closePath(); x.fill();
   x.restore();
-  /* no ursinho, o miolo das orelhas também fica na cor da peça */
-  if(base==='bear'){ [[.2,.2],[.8,.2]].forEach(([ex,ey])=>{ const g2=x.createRadialGradient(w*ex-w*.02,w*ey-w*.02,0,w*ex,w*ey,w*.085); g2.addColorStop(0,mix(c,'#ffffff',.6)); g2.addColorStop(1,c); x.fillStyle=g2; x.beginPath(); x.arc(w*ex,w*ey,w*.08,0,7); x.fill(); }); }
-  const [gx,gy,gr]=GEM_AT[base]||[.5,.5,.18]; drawGem(x,w*gx,w*gy,w*gr,c);
+  (GOLD_DECO[base]||((x2,w2,c2)=>drawGem(x2,w2*.5,w2*.5,w2*.18,c2)))(x,w,c);
   /* brilhinho */
   if(!lite){ x.fillStyle='rgba(255,255,255,.95)'; const sp=(sx,sy,s)=>{ x.beginPath(); x.moveTo(sx,sy-s); x.quadraticCurveTo(sx,sy,sx+s,sy); x.quadraticCurveTo(sx,sy,sx,sy+s); x.quadraticCurveTo(sx,sy,sx-s,sy); x.quadraticCurveTo(sx,sy,sx,sy-s); x.fill(); };
-    sp(w*.8,w*.78,w*.07); sp(w*.2,w*.86,w*.04); }
+    sp(w*.82,w*.8,w*.07); sp(w*.18,w*.86,w*.04); }
   return cv;
 }
 function drawBlock(skin,c,fr,w,dpr,lite){
@@ -1212,6 +1231,31 @@ function drawBlock(skin,c,fr,w,dpr,lite){
     x.fillStyle='rgba(255,255,255,.85)'; x.beginPath(); x.arc(iw*.74,iw*.28,iw*.05,0,7); x.fill();
     if(!lite){ const sz=Math.max(1,w*.028); for(let k=0;k<34;k++){ const px=Math.random()*iw, py=Math.random()*iw; x.fillStyle=`rgba(255,255,255,${.3+Math.random()*.5})`; x.save(); x.translate(px,py); x.rotate(Math.random()*1.6); x.fillRect(-sz/2,-sz/2,sz,sz); x.restore(); } }
     x.restore(); x.lineWidth=Math.max(1,w*.022); x.strokeStyle=mix(c,'#000000',.62); rrect(x,iw,r); x.stroke(); x.restore();
+  } else if(skin==='bug'){
+    /* joaninha: casco na cor da peça, cabecinha preta, risca no meio e bolinhas; tema ganho ao derrotar o Lagartão */
+    x.fillStyle='#2a2320'; x.beginPath(); x.arc(w*.5,w*.2,w*.19,0,7); x.fill();
+    x.fillStyle='#fff'; [[.42,.16],[.58,.16]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(w*ex,w*ey,w*.04,0,7); x.fill(); });
+    x.strokeStyle='#2a2320'; x.lineWidth=Math.max(1,w*.025); x.lineCap='round'; x.beginPath(); x.moveTo(w*.42,w*.06); x.quadraticCurveTo(w*.36,w*.01,w*.3,w*.03); x.moveTo(w*.58,w*.06); x.quadraticCurveTo(w*.64,w*.01,w*.7,w*.03); x.stroke();
+    const ins=w*.05, top=w*.24, iw=w-ins*2, ih=w-top-w*.04, r=iw*.42;
+    x.save(); x.beginPath(); x.moveTo(ins+r,top); x.arcTo(ins+iw,top,ins+iw,top+ih,r); x.arcTo(ins+iw,top+ih,ins,top+ih,r); x.arcTo(ins,top+ih,ins,top,r); x.arcTo(ins,top,ins+iw,top,r); x.closePath();
+    const g=x.createRadialGradient(w*.38,w*.4,w*.04,w*.5,w*.6,w*.62); g.addColorStop(0,mix(c,'#ffffff',.55)); g.addColorStop(.5,c); g.addColorStop(1,mix(c,'#000000',.6));
+    x.fillStyle=g; x.fill(); x.clip();
+    x.fillStyle='#2a2320'; BUG_SPOTS.forEach(([sx,sy,sr])=>{ x.beginPath(); x.arc(w*sx,w*sy,w*sr,0,7); x.fill(); });
+    x.strokeStyle=mix(c,'#000000',.45); x.lineWidth=Math.max(1,w*.035); x.beginPath(); x.moveTo(w*.5,top); x.lineTo(w*.5,top+ih); x.stroke();
+    x.fillStyle='rgba(255,255,255,.4)'; x.beginPath(); x.ellipse(w*.3,w*.36,w*.12,w*.05,-.6,0,7); x.fill(); x.beginPath(); x.ellipse(w*.7,w*.36,w*.12,w*.05,.6,0,7); x.fill();
+    x.restore();
+  } else if(skin==='ripe'||skin==='rotten'){
+    /* maçã: madura (vermelha e brilhante) ou bichada (marrom, com manchas e uma minhoca) */
+    const rot=skin==='rotten', cx=w*.5, cy=w*.56, r=w*.36;
+    const g=x.createRadialGradient(w*.38,w*.42,w*.03,cx,cy,r*1.2); g.addColorStop(0,mix(c,'#ffffff',rot?.75:.5)); g.addColorStop(.55,c); g.addColorStop(1,mix(c,'#000000',.55));
+    x.beginPath(); x.moveTo(cx,cy-r*.72); x.bezierCurveTo(cx+r*.5,cy-r*1.15,cx+r*1.25,cy-r*.7,cx+r*1.02,cy+r*.15); x.bezierCurveTo(cx+r*.88,cy+r*.85,cx+r*.3,cy+r*1.08,cx,cy+r*.9);
+    x.bezierCurveTo(cx-r*.3,cy+r*1.08,cx-r*.88,cy+r*.85,cx-r*1.02,cy+r*.15); x.bezierCurveTo(cx-r*1.25,cy-r*.7,cx-r*.5,cy-r*1.15,cx,cy-r*.72); x.closePath(); x.fillStyle=g; x.fill();
+    x.strokeStyle='#5a3a1a'; x.lineWidth=Math.max(1,w*.04); x.lineCap='round'; x.beginPath(); x.moveTo(cx,cy-r*.68); x.quadraticCurveTo(cx+w*.02,cy-r*1.05,cx+w*.06,cy-r*1.22); x.stroke();
+    x.fillStyle=rot?'#7a8a3a':'#4cbb47'; x.beginPath(); x.ellipse(cx+w*.15,cy-r*1.05,w*.11,w*.05,-.5,0,7); x.fill();
+    if(rot){ x.fillStyle='rgba(50,28,10,.55)'; [[.36,.62,.07],[.62,.72,.05],[.6,.5,.04]].forEach(([a,b,rr])=>{ x.beginPath(); x.arc(w*a,w*b,w*rr,0,7); x.fill(); });
+      x.fillStyle='#2a170a'; x.beginPath(); x.arc(w*.6,w*.6,w*.06,0,7); x.fill();
+      x.fillStyle='#9fd65a'; x.beginPath(); x.arc(w*.66,w*.56,w*.06,0,7); x.fill(); x.fillStyle='#222'; x.beginPath(); x.arc(w*.68,w*.55,w*.014,0,7); x.fill(); }
+    else { x.fillStyle='rgba(255,255,255,.6)'; x.beginPath(); x.ellipse(w*.36,w*.44,w*.07,w*.12,-.5,0,7); x.fill(); }
   } else if(skin==='gum'){
     /* chiclete: massa rosa amassada com uma bolha; gruda nas casas vizinhas */
     const ins=w*.06, iw=w-ins*2, r=iw*.38;
@@ -1260,7 +1304,7 @@ function buildSprites(){
   const dpr=Math.min(2.5,window.devicePixelRatio||1), w=Math.max(16,Math.round(CS*.94*dpr));
   if(SPR.skin===skin&&SPR.lite===SET.lite&&SPR.px===w) return;
   const job=++SPR.job;
-  const list=[...PALETTE.map((c,i)=>[String(i),c,skin==='fruit'?FRUIT[i]:null]),['s',STONE,null],['g',GOLD,null],['w','#fff',null,'wild'],['u',BEARC,null,'bear'],['m',GUMC,null,'gum']];
+  const list=[...PALETTE.map((c,i)=>[String(i),c,skin==='fruit'?FRUIT[i]:null]),['s',STONE,null],['g',GOLD,null],['w','#fff',null,'wild'],['u',BEARC,null,'bear'],['m',GUMC,null,'gum'],['f',RIPEC,null,'ripe'],['r',ROTC,null,'rotten']];
   const out=[]; let i=0;
   const step=()=>{ if(job!==SPR.job) return;
     const t0=performance.now();
@@ -1748,13 +1792,13 @@ function skinPreviews(){
 function renderSettings(){
   renderLift(); renderProfile();
   $('#themeSeg').innerHTML=Object.keys(THEMES).map(k=>`<button type="button" data-k="${k}" class="${SET.theme===k?'sel':''}">${THEMES[k]}</button>`).join('');
-  $('#skinSeg').innerHTML=SKINS_ALL.map(k=>{ const lock=!SKINS.includes(k), sel=baseSkin(SET.skin)===k, gold=sel&&isGold(SET.skin), has=GOLDS.has(k), rw=SKIN_REW.indexOf(k);
+  $('#skinSeg').innerHTML=SKINS_ALL.map(k=>{ const lock=!hasSkin(k), sel=baseSkin(SET.skin)===k, gold=sel&&isGold(SET.skin), has=hasGold(k), rw=SKIN_REW.indexOf(k);
     const sub=lock?esc(SKIN_LOCK[k]||'em breve'):has?(sel?(gold?'✨ dourado · toque para o normal':'toque de novo: ✨ dourado'):'✨ tem versão dourada'):rw>=0?`3⭐ em todo o Mundo ${rw+1}: versão dourada`:'';
     return `<button type="button" data-k="${k}" class="skinopt ${sel?'sel':''}${lock?' locked':''}${gold?' gold':''}"><span class="skp skin-${gold?k+'Gold':k}">${[0,3,5,6].map(c=>`<i data-col="${c}" style="--c:${PALETTE[c]}"><b class="blk bev"></b></i>`).join('')}</span><span>${lock?'🔒 ':''}${SKIN_L[k]}${gold?' dourado':''}</span>${sub?`<small>${sub}</small>`:''}</button>`; }).join('');
   $$('#themeSeg button').forEach(b=>b.addEventListener('click',()=>{ SET.theme=b.dataset.k; saveSet(); applyLook(); renderSettings(); }));
   $$('#skinSeg button').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.k; if(b.classList.contains('locked')){ toast('🔒 '+(SKIN_LOCK[k]||'Tema bloqueado')); return; }
     /* tocar de novo no tema escolhido troca entre o normal e o dourado (se já ganhou o dourado) */
-    if(baseSkin(SET.skin)===k&&GOLDS.has(k)) SET.skin=isGold(SET.skin)?k:k+'Gold'; else SET.skin=k;
+    if(baseSkin(SET.skin)===k&&hasGold(k)) SET.skin=isGold(SET.skin)?k:k+'Gold'; else SET.skin=k;
     saveSet(); applyLook(); renderSettings(); }));
   skinPreviews();
   $('#tAuto').classList.toggle('on',SET.autoSkin); $('#tLite').classList.toggle('on',SET.lite);
@@ -1960,11 +2004,13 @@ function drawCell(c,x,y,bs,sc,al,t,i){
   const img=(c.mode===3?S.hl:S.cv)[c.key];
   if(sc!==1){ const d=bs*sc; x+=(bs-d)/2; y+=(bs-d)/2; bs=d; }
   bx.globalAlpha=al*(c.mode===2?.35:1);
-  if(img) bx.drawImage(img,x,y,bs,bs); else { bx.fillStyle=c.key==='s'?STONE:c.key==='g'?GOLD:c.key==='w'?WILDC:c.key==='u'?BEARC:c.key==='m'?GUMC:(PALETTE[+c.key]||'#999'); rrect2(x,y,bs,bs*.16); bx.fill(); }
+  if(img) bx.drawImage(img,x,y,bs,bs); else { bx.fillStyle=c.key==='s'?STONE:c.key==='g'?GOLD:c.key==='w'?WILDC:c.key==='u'?BEARC:c.key==='m'?GUMC:c.key==='f'?RIPEC:c.key==='r'?ROTC:(PALETTE[+c.key]||'#999'); rrect2(x,y,bs,bs*.16); bx.fill(); }
   if(c.ov&&c.mode===1) for(const o of c.ov){ const im=S.ov&&S.ov[o]; if(im) bx.drawImage(im,x,y,bs,bs); }
   if(c.pw&&c.mode===1){ bx.font=`${Math.round(bs*.56)}px system-ui,sans-serif`; bx.textAlign='center'; bx.textBaseline='middle'; bx.fillText(PWI[c.pw],x+bs/2,y+bs*.54); }
   if(c.tb!=null&&c.mode===1){ bx.font=`${Math.round(bs*.42)}px system-ui,sans-serif`; bx.textAlign='center'; bx.textBaseline='middle'; bx.fillText('💣',x+bs*.36,y+bs*.42);
     bx.font=`700 ${Math.round(bs*.36)}px system-ui,sans-serif`; bx.fillStyle='#fff'; bx.strokeStyle='rgba(0,0,0,.8)'; bx.lineWidth=Math.max(2,bs*.06); bx.strokeText(String(c.tb),x+bs*.72,y+bs*.7); bx.fillText(String(c.tb),x+bs*.72,y+bs*.7); }
+  if(c.rp!=null&&c.mode===1){ const fs=Math.round(bs*.34); bx.font=`700 ${fs}px system-ui,sans-serif`; bx.textAlign='center'; bx.textBaseline='middle'; bx.fillStyle=c.rp<=2?'#ffe14d':'#fff'; bx.strokeStyle='rgba(0,0,0,.8)'; bx.lineWidth=Math.max(2,bs*.06);
+    bx.strokeText(String(c.rp),x+bs*.78,y+bs*.76); bx.fillText(String(c.rp),x+bs*.78,y+bs*.76); }
   if(c.dead){ const k=(t-c.dead-((i/N)|0)*55)/450; if(k<1) anim=true; if(k>0){ const di=S.dead[c.key]; bx.globalAlpha=Math.min(1,k); if(di) bx.drawImage(di,x,y,bs,bs); else { bx.fillStyle='rgba(30,30,36,.7)'; rrect2(x,y,bs,bs*.16); bx.fill(); } } }
   bx.globalAlpha=1; return anim;
 }
@@ -2004,7 +2050,7 @@ function layout(){
   TS=ts; bSize(); buildSlots(); BOSS_Q=null; clearTimeout(SPR.t); SPR.t=setTimeout(()=>{ buildSprites(); buildSlots(); },180);
   root.style.setProperty('--ts',ts.toFixed(3)); root.style.setProperty('--trayH',(ts*5+.25).toFixed(3));
 }
-function cellColor(v){ if(!v) return 'transparent'; if(v.c===-5) return BEARC; if(v.c===-6) return GUMC; if(v.c===-1) return STONE; if(v.c===-2) return GOLD; if(v.s==='wild') return WILDC; return PALETTE[v.c]; }
+function cellColor(v){ if(!v) return 'transparent'; if(v.c===-5) return BEARC; if(v.c===-6) return GUMC; if(v.c===-7) return RIPEC; if(v.c===-8) return ROTC; if(v.c===-1) return STONE; if(v.c===-2) return GOLD; if(v.s==='wild') return WILDC; return PALETTE[v.c]; }
 const reveal={};
 function renderBoard(b,o,pv,extra={}){
   const now=performance.now(), blind=o.play===2;
@@ -2023,11 +2069,11 @@ function renderBoard(b,o,pv,extra={}){
     const y=(i/N)|0, x=i%N, v=b[y][x], c=CELL[i];
     const hidden=blind && v && v.c>=0 && now-v.t>2500 && !(reveal[i]>now);
     const on=!!v && !hidden, gh=ghost.has(i), h=hl.has(i), bad=reveal[i]>now&&!!v, sh=!!reg&&!inReg(reg,y,x);
-    const key=(on?'1':'0')+(gh?'1':'0')+(h?'1':'0')+(sh?'1':'0')+(bad?'1':'0')+'|'+(on?v.c+(v.s||'')+(v.cr?'c':'')+(v.pw||'')+(v.tb!=null?'t'+v.tb:''):'')+'|'+((h||gh)?pv.p.color:'');
+    const key=(on?'1':'0')+(gh?'1':'0')+(h?'1':'0')+(sh?'1':'0')+(bad?'1':'0')+'|'+(on?v.c+(v.s||'')+(v.cr?'c':'')+(v.pw||'')+(v.tb!=null?'t'+v.tb:'')+(v.rp!=null?'r'+v.rp:''):'')+'|'+((h||gh)?pv.p.color:'');
     if(c._k===key) continue; c._k=key; bDirty=true;
     c.mode=h?3:on?1:gh?2:0;
-    c.key=(h||(!on&&gh))?String(pv.p.color):on?(v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.s==='wild'?'w':String(v.c)):'';
-    c.pw=on&&!h?v.pw||'':''; c.tb=on&&v.c===-4?v.tb:null;
+    c.key=(h||(!on&&gh))?String(pv.p.color):on?(v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.c===-7?'f':v.c===-8?'r':v.s==='wild'?'w':String(v.c)):'';
+    c.pw=on&&!h?v.pw||'':''; c.tb=on&&v.c===-4?v.tb:null; c.rp=on&&!h&&v.c===-7?v.rp:null;
     c.ov=on&&!h?((v.s==='bomb'?'b':v.s==='ice'?'i':'')+(v.cr?'c':'')+(v.c===-2?'g':'')):'';
     c.slot=bad?2:sh?1:0;
     if(!on) c.dead=0;
@@ -2068,7 +2114,7 @@ function spawnClear(i,c,s,delay){
   const x=i%N, y=(i/N)|0, d=document.createElement('div');
   const sk=SET.lite?'classic':effSkin(), flip=Math.random()<.5;
   d.className='fxc fx-'+sk+(s==='bomb'?' sp-bomb':'')+(flip?' flip':''); d.dataset.col=s==='wild'?'x':c===-1?'s':c===-2?'g':c>=0?c:'x';
-  d.style.setProperty('--x',x); d.style.setProperty('--y',y); const cc=c===-1?STONE:c===-2?GOLD:c===-5?BEARC:c===-6?GUMC:(PALETTE[c]||WILDC); d.style.setProperty('--c',cc);
+  d.style.setProperty('--x',x); d.style.setProperty('--y',y); const cc=c===-1?STONE:c===-2?GOLD:c===-5?BEARC:c===-6?GUMC:c===-7?RIPEC:c===-8?ROTC:(PALETTE[c]||WILDC); d.style.setProperty('--c',cc);
   d.style.setProperty('--dl',delay+'ms'); d.style.animationDelay=delay+'ms';
   d.innerHTML=sk==='brick'?'<div class="blk bev q q1"></div><div class="blk bev q q2"></div><div class="blk bev q q3"></div><div class="blk bev q q4"></div>'
     :sk==='crochet'?'<div class="blk bev"></div><svg class="yarn" viewBox="0 0 100 100" aria-hidden="true"><path pathLength="100" d="M50 18 C 80 10, 95 40, 120 34 S 160 60, 185 48 S 230 70, 260 66"/><path class="ply" pathLength="100" d="M50 18 C 80 10, 95 40, 120 34 S 160 60, 185 48 S 230 70, 260 66"/></svg>'
@@ -3365,7 +3411,7 @@ function hostPlace(who,src,r,c){
   if(vs) H.scs[who]+=pts; else B.sc+=pts; H.ptsBy[who]=(H.ptsBy[who]||0)+pts;
   const tsec=Math.round(SH.elapsed/1000);
   H.timeline.push(vs?[tsec,...SH.ids.map(id=>H.scs[id])]:ts?[tsec,H.bd.az.sc,H.bd.la.sc]:[tsec,B.sc]);
-  H.ev={id:(H.ev?H.ev.id:0)+1,who,k:ts?k:null,pts,res:{n:res.n,chain:res.chain,colorLines:res.colorLines,bombs:res.bombs,perfect:res.perfect,combo:res.combo},cleared:res.steps.flatMap(s=>s.cleared.map(x=>[x[0],x[1],x[2]])),placed:res.placed,cr:r+p.h/2,cc:c+p.w/2};
+  H.ev={id:(H.ev?H.ev.id:0)+1,who,k:ts?k:null,pts,res:{n:res.n,chain:res.chain,colorLines:res.colorLines,bombs:res.bombs,perfect:res.perfect,combo:res.combo,ripe:res.ripe||0},cleared:res.steps.flatMap(s=>s.cleared.map(x=>[x[0],x[1],x[2]])),placed:res.placed,cr:r+p.h/2,cc:c+p.w/2};
   const tb=tickBombs(eng); if(tb.boom) H.ev.boom={k,cells:tb.added};
   if(ts&&SH.o.attacks&&res.n>=3) hostAttackBoard(otherTeam(k),res.n-1);
   if(ts&&res.powers&&res.powers.length) hostPowers(who,k,res.powers);
@@ -3630,7 +3676,7 @@ function showSharedEnd(info){
 }
 
 function hasBlocks(str){ if(!str) return false; for(let i=0;i<str.length;i+=2) if(str[i]!=='.') return true; return false; }
-/* ===================== chefões: o Ursão (Mundo 1) e a Rainha Jujuba (Mundo 2) =====================
+/* ===================== chefões: Ursão (Mundo 1), Rainha Jujuba (Mundo 2) e Lagartão Guloso (Mundo 3) =====================
    Desenho próprio em SVG, com animações de entrada, ataque, raiva e derrota. */
 const BEAR_SVG=`<svg viewBox="0 0 200 236" class="bearsvg" aria-hidden="true">
 <defs><radialGradient id="bFur" cx="42%" cy="32%" r="75%"><stop offset="0" stop-color="#c99060"/><stop offset=".65" stop-color="#94602f"/><stop offset="1" stop-color="#5d3a1b"/></radialGradient>
@@ -3684,13 +3730,42 @@ const QUEEN_SVG=`<svg viewBox="0 0 200 236" class="bearsvg" aria-hidden="true">
 <g class="b-steam"><circle cx="38" cy="18" r="9"/><circle cx="162" cy="18" r="9"/><circle cx="30" cy="4" r="6"/><circle cx="170" cy="4" r="6"/></g>
 <g class="b-stars" fill="#f3c22f"><path d="M60 12 l4 9 10 1 -8 6 3 10 -9-6 -9 6 3-10 -8-6 10-1z"/><path d="M140 6 l3 7 8 1 -6 5 2 8 -7-5 -7 5 2-8 -6-5 8-1z"/></g>
 </svg>`;
+/* Lagartão Guloso (chefão do Mundo 3) */
+const CAT_SVG=`<svg viewBox="0 0 200 236" class="bearsvg" aria-hidden="true">
+<defs><radialGradient id="lGrn" cx="40%" cy="30%" r="78%"><stop offset="0" stop-color="#c8ef7e"/><stop offset=".6" stop-color="#6fb83a"/><stop offset="1" stop-color="#36701b"/></radialGradient></defs>
+<g class="b-legs"><ellipse cx="70" cy="215" rx="27" ry="16" fill="url(#lGrn)"/><ellipse cx="130" cy="215" rx="27" ry="16" fill="url(#lGrn)"/><path d="M58 222 v6 M70 223 v6 M82 222 v6 M118 222 v6 M130 223 v6 M142 222 v6" stroke="#36701b" stroke-width="3" stroke-linecap="round"/></g>
+<g class="b-arm b-arm-l"><ellipse cx="40" cy="146" rx="17" ry="33" fill="url(#lGrn)"/><path d="M30 130 q10 4 20 0 M28 146 q12 4 24 0 M30 162 q10 4 20 0" stroke="#36701b" stroke-width="2.5" fill="none" opacity=".6"/><ellipse cx="40" cy="175" rx="12" ry="9" fill="#d7f08f"/></g>
+<g class="b-arm b-arm-r"><ellipse cx="160" cy="146" rx="17" ry="33" fill="url(#lGrn)"/><path d="M150 130 q10 4 20 0 M148 146 q12 4 24 0 M150 162 q10 4 20 0" stroke="#36701b" stroke-width="2.5" fill="none" opacity=".6"/>
+<path d="M166 168 c10 -10 30 -4 28 14 c-2 16 -16 22 -26 16 c-12 4 -24 -6 -22 -18 c1 -8 8 -14 20 -12z" fill="#e5483f"/><circle cx="188" cy="176" r="8" fill="#fff3d6"/><path d="M170 167 q2 -8 6 -12" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round"/><ellipse cx="164" cy="174" rx="4" ry="7" fill="#fff" opacity=".45"/>
+<ellipse cx="160" cy="176" rx="12" ry="9" fill="#d7f08f"/></g>
+<ellipse cx="100" cy="156" rx="62" ry="61" fill="url(#lGrn)"/>
+<path d="M44 132 Q100 150 156 132 M40 158 Q100 178 160 158 M46 186 Q100 204 154 186" stroke="#d7f08f" stroke-width="7" fill="none" opacity=".55" stroke-linecap="round"/>
+<circle cx="58" cy="146" r="6" fill="#ffd23f"/><circle cx="142" cy="146" r="6" fill="#ffd23f"/><circle cx="56" cy="174" r="5" fill="#ffd23f"/><circle cx="144" cy="174" r="5" fill="#ffd23f"/>
+<g class="b-head">
+<path d="M80 32 Q70 14 60 8 M120 32 Q130 14 140 8" stroke="#36701b" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="59" cy="7" r="7" fill="#ff8a3d"/><circle cx="141" cy="7" r="7" fill="#ff8a3d"/>
+<circle cx="100" cy="80" r="57" fill="url(#lGrn)"/>
+<ellipse cx="76" cy="50" rx="19" ry="10" fill="#fff" opacity=".35" transform="rotate(-25 76 50)"/>
+<circle cx="77" cy="71" r="14" fill="#fff"/><circle cx="123" cy="71" r="14" fill="#fff"/>
+<ellipse cx="62" cy="98" rx="11" ry="7" fill="#ff9a6b" opacity=".75"/><ellipse cx="138" cy="98" rx="11" ry="7" fill="#ff9a6b" opacity=".75"/>
+<g class="b-eyes"><circle class="b-eye" cx="79" cy="73" r="7.5"/><circle class="b-eye" cx="121" cy="73" r="7.5"/><circle cx="81.5" cy="70.5" r="2.4" fill="#fff"/><circle cx="123.5" cy="70.5" r="2.4" fill="#fff"/></g>
+<g class="b-x" stroke="#1f3a0e" stroke-width="4" stroke-linecap="round"><path d="M70 64 l14 14 M84 64 l-14 14"/><path d="M116 64 l14 14 M130 64 l-14 14"/></g>
+<path class="b-brow" d="M62 52 L90 60 M138 52 L110 60" stroke="#1f3a0e" stroke-width="6" stroke-linecap="round"/>
+<path class="b-mouth" d="M80 102 Q100 122 120 102" stroke="#1f3a0e" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<g class="b-roar"><ellipse cx="100" cy="110" rx="20" ry="14" fill="#3a1010"/><path d="M84 101 h32 v6 h-32z" fill="#fff"/><ellipse cx="100" cy="117" rx="10" ry="5" fill="#e5483f"/></g>
+</g>
+<g class="b-steam"><circle cx="38" cy="18" r="9"/><circle cx="162" cy="18" r="9"/><circle cx="30" cy="4" r="6"/><circle cx="170" cy="4" r="6"/></g>
+<g class="b-stars" fill="#f3c22f"><path d="M60 12 l4 9 10 1 -8 6 3 10 -9-6 -9 6 3-10 -8-6 10-1z"/><path d="M140 6 l3 7 8 1 -6 5 2 8 -7-5 -7 5 2-8 -6-5 8-1z"/></g>
+</svg>`;
 /* cada chefão: desenho, bloco que ele joga, falas e o efeito quando está bravo */
 const BOSSES={
-  bear:{name:'Ursão',svg:BEAR_SVG,min:'bear',minC:BEARC,cell:[-5,'ice'],pitch:1,frzI:'❄️',frzT:'peça congelada',angry:'O Ursão está BRAVO!',goal:'Limpe linhas para atacar o Ursão',
+  bear:{name:'Ursão',art:'o',svg:BEAR_SVG,min:'bear',minC:BEARC,cell:[-5,'ice'],pitch:1,frzI:'❄️',frzT:'peça congelada',angry:'O Ursão está BRAVO!',goal:'Limpe linhas para atacar o Ursão',
     say:{enter:'Ninguém derruba o Ursão! Grrr!',hurt:['Aiii! Isso doeu!','Grr… sorte de vocês!','Meu pelo!','Vocês vão ver só!'],atk:'Grrr! Tomem ursinhos blindados!',atkRage:'Agora fiquei BRAVO! Tomem ursinhos!',atkFrz:'Grrr! Ursinhos blindados… e congelei uma peça por 4 segundos!',rage:'Vocês me deixaram BRAVO!',defeat:'Ai ai… vocês venceram…'}},
-  queen:{name:'Rainha Jujuba',svg:QUEEN_SVG,min:'gum',minC:GUMC,cell:[-6,null],pitch:1.45,frzI:'🍬',frzT:'peça grudada',angry:'A Rainha Jujuba está BRAVA!',goal:'Limpe linhas para atacar a Rainha Jujuba',
-    say:{enter:'Ajoelhem-se diante da Rainha Jujuba!',hurt:['Ai! Minha coroa!','Que falta de educação!','Vou derreter de raiva!','Guardas!!'],atk:'Tomem chiclete! Hihihi!',atkRage:'Chiclete em dobro, plebeus!',atkFrz:'Chiclete… e grudei uma peça por 4 segundos!',rage:'Agora a Rainha ficou BRAVA!',defeat:'Nãão… meu reino de açúcar…'}}
+  queen:{name:'Rainha Jujuba',art:'a',svg:QUEEN_SVG,min:'gum',minC:GUMC,cell:[-6,null],pitch:1.45,frzI:'🍬',frzT:'peça grudada',angry:'A Rainha Jujuba está BRAVA!',goal:'Limpe linhas para atacar a Rainha Jujuba',
+    say:{enter:'Ajoelhem-se diante da Rainha Jujuba!',hurt:['Ai! Minha coroa!','Que falta de educação!','Vou derreter de raiva!','Guardas!!'],atk:'Tomem chiclete! Hihihi!',atkRage:'Chiclete em dobro, plebeus!',atkFrz:'Chiclete… e grudei uma peça por 4 segundos!',rage:'Agora a Rainha ficou BRAVA!',defeat:'Nãão… meu reino de açúcar…'}},
+  cat:{name:'Lagartão Guloso',art:'o',svg:CAT_SVG,min:'rotten',minC:ROTC,cell:[-8,'ice'],pitch:1.2,frzI:'🐛',frzT:'peça mordida',angry:'O Lagartão está FURIOSO!',goal:'Limpe linhas para atacar o Lagartão',
+    say:{enter:'Hora do lanche! Nham nham!',hurt:['Ai! Minha barriguinha!','Isso não é de comer!','Grrr… nham!','Vou contar pra mamãe borboleta!'],atk:'Tomem maçãs bichadas!',atkRage:'Maçã podre pra todo mundo!',atkFrz:'Maçãs bichadas… e mordi uma peça por 4 segundos!',rage:'Fiquei com FOME DE RAIVA!',defeat:'Ai… comi demais… vou virar borboleta…'}}
 };
+const bossArt=B=>B.art+' '+B.name;
 let BOSS_ID='bear';
 const BOSS=()=>BOSSES[BOSS_ID]||BOSSES.bear;
 /* o chefão vira peças prontas (corpo, braços, olhos, boca, fumaça…), desenhadas uma vez na resolução da tela.
@@ -3844,19 +3919,33 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Pudim gelado',icon:'🍮',goal:'clear',setup:'ice',k:12,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:55,three:42}},
   {name:'Chiclete grudento',icon:'🍬',goal:'lines',v:10,setup:'gum',k:2,gum:2,desc:'Limpe {v} linhas. Começa com {k} chicletes, e a cada {gum} jogadas um gruda numa casa vizinha.',st:{by:'pieces',two:30,three:22}},
   {name:'Chefona: Rainha Jujuba',icon:'👑',goal:'boss',hp:40,time:200,gum:4,desc:'Cada linha tira vida da Rainha; o combo multiplica o dano. Ela joga chicletes que se espalham e, brava, gruda uma peça por 4 s.',st:{by:'time',two:120,three:85}}
+]},{w:3,name:'Pomar',icon:'🍎',skin:'fruit',boss:'cat',reward:'bug',card:'leaf',bossC:'#6fb83a',phases:[
+  {name:'Pomar em flor',icon:'🌸',goal:'lines',v:10,desc:'Limpe {v} linhas.',st:{by:'pieces',two:26,three:20}},
+  {name:'Feira',icon:'🍉',goal:'score',v:800,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:65,three:45}},
+  {name:'Colheita',icon:'🧺',goal:'harvest',v:4,limit:30,ripe:{k:2,life:7,every:3},desc:'Colha {v} frutas maduras em até {limit} peças: limpe a fruta antes de a contagem chegar a zero, senão ela apodrece e vira bloco cinza.',st:{by:'pieces',two:22,three:16}},
+  {name:'Joaninhas douradas',icon:'🐞',goal:'golds',setup:'golds',k:7,limit:38,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:30,three:23}},
+  {name:'Suco duplo',icon:'🥤',goal:'combo',v:4,limit:32,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:22,three:15}},
+  {name:'Ventania',icon:'🍃',goal:'survive',time:150,rain:12,mt:7,desc:'Aguente 2 minutos e meio. Cai um bloco cinza a cada {rain} segundos, e você tem 7 segundos por jogada.',st:{by:'lines',two:16,three:24}},
+  {name:'Cesta cheia',icon:'🧺',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
+  {name:'Geada no pomar',icon:'❄️',goal:'clear',setup:'ice',k:14,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:60,three:46}},
+  {name:'Fruta passada',icon:'🍐',goal:'clear',setup:'stones',k:8,ripe:{k:1,life:5,every:4},desc:'Limpe os {k} blocos cinza. Cuidado: fruta madura que apodrece vira mais um bloco cinza!',st:{by:'pieces',two:40,three:30}},
+  {name:'Chefão: Lagartão Guloso',icon:'🐛',goal:'boss',hp:50,time:220,ripe:{k:1,life:6,every:5},desc:'Cada linha tira vida do Lagartão; o combo multiplica o dano, e fruta madura colhida tira 3 a mais. Ele joga maçãs bichadas e, bravo, morde uma peça por 4 s.',st:{by:'time',two:140,three:100}}
 ]}];
 const CWD=w=>CWORLDS[(w||1)-1]||CWORLDS[0];
 /* chave das estrelas: o Mundo 1 guarda só o número da fase (como sempre foi); os outros, "mundo-fase" */
 const ck=(w,ph)=>(w||1)===1?String(ph):w+'-'+ph;
 const campSkin=cfg=>CWD(cfg&&cfg.camp&&cfg.camp.w).skin;
+/* fruta madura: aparece com uma contagem de jogadas; colhida (limpa) antes de zerar conta ponto, senão apodrece e vira bloco cinza */
+function ripeAdd(eng,n,life){ const idx=eng.addStones(Math.random,n,-7); idx.forEach(i=>{ eng.b[(i/N)|0][i%N].rp=life; }); return idx; }
+function ripeTick(eng){ const rot=[]; for(let y=0;y<N;y++) for(let x=0;x<N;x++){ const v=eng.b[y][x]; if(v&&v.c===-7){ v.rp--; if(v.rp<=0){ eng.b[y][x]={c:-1,s:null,t:0}; rot.push(y*N+x); } } } return rot; }
 const CHELPS=[{k:'martelo',i:'🔨',n:'Martelo',need:6,d:'quebra 1 bloco'},{k:'swap',i:'🔀',n:'Trocar peças',need:12,d:'troca as suas 3 peças'},{k:'row',i:'💥',n:'Bomba de linha',need:18,d:'limpa uma linha inteira'}];
 function campLoad(slot){ return Object.assign({stars:{},att:{}},store.get('ddb_camp_'+slot,{})); }
 function campSave(slot,st){ store.set('ddb_camp_'+slot,st); }
 function campTotal(st){ return Object.values(st.stars).reduce((a,b)=>a+b,0); }
 function campWTotal(st,w){ return CWD(w).phases.reduce((a,_,i)=>a+(st.stars[ck(w,i+1)]||0),0); }
 /* um mundo abre quando o chefão do mundo anterior é vencido */
-function campWOpen(st,w){ return w===1||(st.stars[ck(w-1,CWD(w-1).phases.length)]||0)>0; }
-function campOpen(st,w,n){ return campWOpen(st,w)&&(n===1||(st.stars[ck(w,n-1)]||0)>0); }
+function campWOpen(st,w){ return w===1||devAll()||(st.stars[ck(w-1,CWD(w-1).phases.length)]||0)>0; }
+function campOpen(st,w,n){ return campWOpen(st,w)&&(n===1||devAll()||(st.stars[ck(w,n-1)]||0)>0); }
 function campAllGold(st,w){ return CWD(w).phases.every((_,i)=>(st.stars[ck(w,i+1)]||0)>=3); }
 /* chiclete: um chiclete do tabuleiro gruda numa casa vizinha vazia (sem fechar linha sozinho) */
 function gumSpread(eng){
@@ -3864,7 +3953,7 @@ function gumSpread(eng){
     [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dy,dx])=>{ const ny=y+dy, nx=x+dx; if(ny>=0&&ny<N&&nx>=0&&nx<N&&!eng.b[ny][nx]&&!eng.wouldFill(ny,nx)) c.push(ny*N+nx); }); }
   if(!c.length) return -1; const i=c[Math.floor(Math.random()*c.length)]; eng.b[(i/N)|0][i%N]={c:-6,s:null,t:0}; return i;
 }
-function campHelps(st){ const t=campTotal(st); return CHELPS.filter(h=>t>=h.need).map(h=>h.k); }
+function campHelps(st){ const t=campTotal(st); return CHELPS.filter(h=>t>=h.need||devAll()).map(h=>h.k); }
 /* mais jogadores, metas maiores (há mais variedade de peças e mais cabeças pensando) */
 function campScale(def,P){
   const m=[1,1.25,1.4,1.55][Math.max(0,Math.min(3,P-1))], pm=1+(m-1)*.8, r=x=>Math.round(x);
@@ -3916,10 +4005,11 @@ function campHook(cfg){
     if(def.setup==='stones') e.addStones(rnd,def.k);
     if(def.setup==='golds') e.addStones(rnd,def.k,-2);
     if(def.setup==='gum') e.addStones(rnd,def.k,-6);
+    if(def.ripe) for(let k=0;k<def.ripe.k;k++) ripeAdd(e,1,def.ripe.life+k*2);
     if(def.setup==='ice'){ const idx=e.addStones(rnd,def.k,0); idx.forEach(i=>{ e.b[(i/N)|0][i%N]={c:Math.floor(rnd()*NCOL),s:'ice',t:0,ic:1}; }); }
     if(def.setup==='puzzle'){ const pz=makePuzzle(w===1?'W1P7':'W'+w+'P'+ph,def.bands); e.b=pz.board; const q={}; SH.ids.forEach(id=>q[id]=[]); pz.pieces.forEach((p,i)=>q[SH.ids[i%SH.ids.length]].push(p));
       SH.ids.forEach(id=>{ H.trays[id]=[null,null,null]; for(let s=0;s<3&&q[id].length;s++) H.trays[id][s]=q[id].shift(); }); H.campQ=q; }
-    H.cp={w,gumN:0,gum:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
+    H.cp={w,gumN:0,gum:0,ripe:0,ripeN:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
     hk.progress(H);
   };
   hk.progress=H=>{
@@ -3935,6 +4025,7 @@ function campHook(cfg){
       case 'score': win=cp.score>=sc.v; cp.txt=`${fmtN(cp.score)} de ${fmtN(sc.v)} pontos`; break;
       case 'clear': win=cp.left===0; cp.txt=`${{ice:'Gelo',gum:'Chicletes'}[def.setup]||'Blocos cinza'}: faltam ${cp.left} · ${cp.placed} peças`; break;
       case 'golds': win=cp.left===0; cp.txt=`Estrelas: ${def.k-cp.left}/${def.k} · peças ${cp.placed}/${sc.limit}`; break;
+      case 'harvest': win=cp.ripe>=def.v; cp.txt=`Frutas colhidas: ${cp.ripe}/${def.v} · peças ${cp.placed}/${sc.limit}`; break;
       case 'combo': win=cp.combo>=def.v; cp.txt=`Maior combo: x${cp.combo} de x${def.v} · peças ${cp.placed}/${sc.limit}`; break;
       case 'colorLines': win=cp.colorLines>=def.v; cp.txt=`Linhas de uma cor: ${cp.colorLines}/${def.v} · peças ${cp.placed}/${sc.limit}`; break;
       case 'survive': cp.txt=`Aguente firme! ${cp.lines} linhas limpas`; break;
@@ -3949,13 +4040,16 @@ function campHook(cfg){
   hk.canDrag=src=>{ const cp=SH.view&&SH.view.cp; return !(frzOn(cp)&&cp.frz.id===SH.me&&src!=='h'&&cp.frz.slot===src); };
   hk.dimSlot=i=>{ const cp=SH.view&&SH.view.cp; return !!(frzOn(cp)&&cp.frz.id===SH.me&&cp.frz.slot===i); };
   hk.afterPlace=(who,res,pts,B)=>{
-    const H=SH.H, cp=H.cp; if(cp.mt) cp.moveAt=SH.elapsed+cp.mt; cp.placed++; cp.lines+=res.n; cp.score+=pts; cp.combo=Math.max(cp.combo,res.combo||0); cp.colorLines+=res.colorLines||0;
+    const H=SH.H, cp=H.cp; if(cp.mt) cp.moveAt=SH.elapsed+cp.mt; cp.placed++; cp.ripe+=res.ripe||0; cp.lines+=res.n; cp.score+=pts; cp.combo=Math.max(cp.combo,res.combo||0); cp.colorLines+=res.colorLines||0;
     if(def.goal==='boss'){
-      if(res.n>0){ const dmg=res.n*Math.max(1,res.combo||1)*(res.chain||1); cp.hp-=dmg; H.ev.dmg=dmg; }
+      if(res.n>0){ const dmg=res.n*Math.max(1,res.combo||1)*(res.chain||1)+(res.ripe||0)*3; cp.hp-=dmg; H.ev.dmg=dmg; }
       if(cp.hp>0){ cp.bossN++; const rage=cp.hp<=cp.hpMax/2; if(rage&&!cp.rage){ cp.rage=1; H.ev.rage=1; }
         if(cp.bossN>=(rage?4:5)){ cp.bossN=0; const added=B.eng.addStones(Math.random,2,BS.cell[0],BS.cell[1]); H.ev.boss={cells:added}; if(rage) cp.frzPending=1; } }
     }
     /* chiclete gruda numa casa vizinha a cada def.gum jogadas (só conta enquanto houver chiclete) */
+    if(def.ripe){ const rot=ripeTick(B.eng); if(rot.length) H.ev.rot=rot; cp.ripeN++;
+      const have=B.eng.b.reduce((a,row)=>a+row.filter(v=>v&&v.c===-7).length,0);
+      if(have<def.ripe.k&&cp.ripeN>=def.ripe.every){ cp.ripeN=0; const add=ripeAdd(B.eng,1,def.ripe.life); if(add.length) H.ev.ripe=add; } }
     if(def.gum&&B.eng.b.some(row=>row.some(v=>v&&v.c===-6))){ cp.gumN++; if(cp.gumN>=def.gum){ cp.gumN=0; const i=gumSpread(B.eng); if(i>=0) H.ev.gum=[i]; } }
     if(hk.noRegen){ const q=H.campQ[who]; if(H.trays[who].every(x=>!x)&&q.length) for(let s=0;s<3&&q.length;s++) H.trays[who][s]=q.shift(); }
     if(hk.progress(H)){ hk.finish(true); return; }
@@ -4007,6 +4101,9 @@ function campHook(cfg){
   hk.ev=(ev,mine)=>{
     if(ev.rain){ setTimeout(()=>BC.drop(ev.rain),0); SFX.alert(); }
     if(ev.gum){ setTimeout(()=>{ BC.drop(ev.gum,0); SFX.pick(); },ev.boss?1500:ev.dmg?300:120); }
+    if(ev.ripe) setTimeout(()=>{ BC.drop(ev.ripe,0); SFX.pick(); },ev.boss?1500:200);
+    if(ev.rot){ setTimeout(()=>{ BC.glow(ev.rot); SFX.thud(); },150); if(mine) toast('🍂 Uma fruta apodreceu e virou bloco cinza'); }
+    if(ev.res&&ev.res.ripe) toast(def.goal==='boss'?'🧺 Fruta colhida: +3 de dano!':'🧺 Fruta colhida!');
     if(ev.dmg) bossHurt(ev.dmg);
     if(ev.boss){ const later=ev.dmg?650:0; setTimeout(()=>{ if(!SH||SH.over) return; BC.drop(ev.boss.cells,1000); bossShow('attack',{cells:ev.boss.cells,rage:!!(SH.view&&SH.view.cp&&SH.view.cp.rage)||!!ev.rage});
         setTimeout(()=>bossSay(ev.boss.frz?BS.say.atkFrz:ev.rage?BS.say.atkRage:BS.say.atk,1500),260);
@@ -4055,7 +4152,7 @@ function campEnd(info,cfg){
   let body=`<p class="reason">${def.icon} Mundo ${w} · Fase ${ph} · ${esc(def.name)}</p>`;
   if(info.win){ body+=`<div class="stars3">${[1,2,3].map(i=>`<span class="${i<=info.stars?'on':''}">★</span>`).join('')}</div><div class="winner win">Fase concluída!</div>`;
     const tx=campStarTxt(def,sc); body+=`<p class="muted">★★ ${tx[0]} · ★★★ ${tx[1]}${cp.used?' · com ajuda, no máximo ★★':''}</p>`;
-    if(info.won&&def.goal==='boss') body+=`<p class="newbest">🏆 Você derrotou ${esc(BOSSES[W.boss].name==='Ursão'?'o Ursão':'a '+BOSSES[W.boss].name)}! Novo tema de peças liberado: ${SKIN_L[W.reward]} (nas Configurações).${CWORLDS[w]?` O Mundo ${w+1} · ${CWORLDS[w].icon} ${esc(CWORLDS[w].name)} foi aberto!`:''}</p>`;
+    if(info.won&&def.goal==='boss') body+=`<p class="newbest">🏆 Você derrotou ${esc(bossArt(BOSSES[W.boss]))}! Novo tema de peças liberado: ${SKIN_L[W.reward]} (nas Configurações).${CWORLDS[w]?` O Mundo ${w+1} · ${CWORLDS[w].icon} ${esc(CWORLDS[w].name)} foi aberto!`:''}</p>`;
     if(info.goldNew) body+=`<p class="newbest">✨ 3 estrelas em todas as fases do Mundo ${w}! ${SKIN_L[W.reward]} dourado liberado: nas Configurações, toque de novo no tema ${SKIN_L[W.reward]} para trocar.</p>`; }
   else body+=`<div class="winner lose">${esc(info.msg||'Não foi dessa vez')}</div><p class="muted">Tente de novo: as tentativas são ilimitadas.</p>`;
   body+=statsHTML([[cp.placed||0,'peças'],[cp.lines||0,'linhas'],[fmtT(cp.el||0),'tempo']]);
@@ -4099,10 +4196,21 @@ function candyRect(W,H,c){
   const hl=x.createLinearGradient(0,0,0,H*.4); hl.addColorStop(0,'rgba(255,255,255,.45)'); hl.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle=hl; x.fillRect(0,0,W,H*.4);
   return cv;
 }
+/* cartão de folhas: verde com folhinhas e frutinhas espalhadas */
+function leafRect(W,H,c){
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,mix(c,'#ffffff',.55)); g.addColorStop(.55,c); g.addColorStop(1,mix(c,'#000000',.75)); x.fillStyle=g; x.fillRect(0,0,W,H);
+  for(let k=0;k<Math.round(W*H/2200);k++){ const px=Math.random()*W, py=Math.random()*H, a=Math.random()*6.28, L=H*(.08+Math.random()*.06);
+    x.save(); x.translate(px,py); x.rotate(a); x.globalAlpha=.22; x.fillStyle=k%7===0?'#e5483f':k%2?'#ffffff':mix(c,'#000000',.6);
+    if(k%7===0){ x.beginPath(); x.arc(0,0,H*.035,0,7); x.fill(); } else { x.beginPath(); x.moveTo(-L,0); x.quadraticCurveTo(0,-L*.5,L,0); x.quadraticCurveTo(0,L*.5,-L,0); x.fill(); }
+    x.restore(); }
+  const hl=x.createLinearGradient(0,0,0,H*.4); hl.addColorStop(0,'rgba(255,255,255,.4)'); hl.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle=hl; x.fillRect(0,0,W,H*.4);
+  return cv;
+}
 const CCARD={};
 function campCard(w,n,open){ const W=CWD(w), boss=n===W.phases.length, k=w+'|'+(open?(boss?'b':n):'x');
   if(CCARD[k]==null){ try{ const c=open?(boss?W.bossC:hexOf(mix(PALETTE[(n-1)%PALETTE.length],'#ffffff',.85))):'#a7adbd', cw=boss?720:640, chh=boss?150:140;
-    CCARD[k]=(W.card==='candy'?candyRect(cw,chh,c):plushRect(cw,chh,c)).toDataURL('image/jpeg',.82); }catch(e){ CCARD[k]=''; } } return CCARD[k]; }
+    CCARD[k]=(W.card==='candy'?candyRect(cw,chh,c):W.card==='leaf'?leafRect(cw,chh,c):plushRect(cw,chh,c)).toDataURL('image/jpeg',.82); }catch(e){ CCARD[k]=''; } } return CCARD[k]; }
 function campNodes(st,w){
   const W=CWD(w);
   return W.phases.map((d,i)=>{ const n=i+1, open=campOpen(st,w,n), s=st.stars[ck(w,n)]||0, pl=campCard(w,n,open);
@@ -4111,9 +4219,9 @@ function campNodes(st,w){
 /* abas dos mundos (no mapa e na sala) */
 function campWTabs(st,cur){
   return CWORLDS.map(x=>{ const op=campWOpen(st,x.w); return `<button type="button" class="wtab${x.w===cur?' sel':''}${op?'':' locked'}" data-w="${x.w}"><span>${op?x.icon:'🔒'}</span><small>Mundo ${x.w}</small></button>`; }).join('')
-    +`<button type="button" class="wtab locked soon"><span>🐼</span><small>em breve</small></button>`;
+    +`<button type="button" class="wtab locked soon"><span>🧱</span><small>em breve</small></button>`;
 }
-function campWLockMsg(w){ const P=CWD(w-1), B=BOSSES[P.boss]; return `🔒 Vença ${B.name==='Ursão'?'o Ursão':'a '+B.name} no Mundo ${w-1} para abrir`; }
+function campWLockMsg(w){ const P=CWD(w-1), B=BOSSES[P.boss]; return `🔒 Vença ${bossArt(B)} no Mundo ${w-1} para abrir`; }
 /* quem já tinha 3 estrelas em tudo antes da versão dourada existir também ganha */
 function campGoldCheck(st){ CWORLDS.forEach(W=>{ if(campAllGold(st,W.w)){ unlockSkin(W.reward); if(unlockGold(W.reward)) toast(`✨ ${SKIN_L[W.reward]} dourado liberado! Toque de novo no tema nas Configurações.`); } }); }
 let CAMP_W=store.get('ddb_campw',1);
@@ -4125,9 +4233,10 @@ function openCamp(w){
   $('#campWorlds').innerHTML=campWTabs(st,W.w);
   $('#campWLabel').textContent=`Mundo ${W.w}`; $('#campWName').textContent=`${W.icon} ${W.name}`;
   $('#campStars').textContent=`${campWTotal(st,W.w)} ⭐ de ${W.phases.length*3}`;
-  $('#campPrize').innerHTML=`🏆 Vença ${esc(B.name==='Ursão'?'o Ursão':'a '+B.name)}: tema ${SKIN_L[W.reward]}${WON.has(W.reward)?' ✓':''} · ✨ 3⭐ em todas: ${SKIN_L[W.reward]} dourado${GOLDS.has(W.reward)?' ✓':''}`;
+  $('#campPrize').innerHTML=`🏆 Vença ${esc(bossArt(B))}: tema ${SKIN_L[W.reward]}${WON.has(W.reward)?' ✓':''} · ✨ 3⭐ em todas: ${SKIN_L[W.reward]} dourado${GOLDS.has(W.reward)?' ✓':''}`;
   $('#campHelps').innerHTML=`Ajudas (${campTotal(st)}⭐ no total): `+CHELPS.map(h=>`<span class="${hs.includes(h.k)?'':'off'}">${h.i} ${h.n} ${hs.includes(h.k)?'✓':`(${h.need}⭐)`}</span>`).join(' · ');
   $('#campMap').innerHTML=campNodes(st,W.w);
+  if(devAll()) $('#campPrize').insertAdjacentHTML('beforeend','<br>🔓 Modo teste: tudo liberado');
   $$('#campMap .cnode').forEach(b=>b.addEventListener('click',()=>campIntro(+b.dataset.w,+b.dataset.ph)));
   $$('#campWorlds .wtab').forEach(b=>b.addEventListener('click',()=>{ if(b.classList.contains('soon')){ toast('🐼 Novos mundos chegando!'); return; }
     if(b.classList.contains('locked')){ toast(campWLockMsg(+b.dataset.w)); return; } openCamp(+b.dataset.w); }));
@@ -4237,7 +4346,7 @@ function specDraw(cv,b,n,o={}){
     x.fillStyle=slot; x.globalAlpha=shade?.45:1; x.beginPath(); const p=cs*.07, w=cs-2*p, rr=w*.2;
     x.moveTo(px+p+rr,py+p); x.arcTo(px+p+w,py+p,px+p+w,py+p+w,rr); x.arcTo(px+p+w,py+p+w,px+p,py+p+w,rr); x.arcTo(px+p,py+p+w,px+p,py+p,rr); x.arcTo(px+p,py+p,px+p+w,py+p,rr); x.fill(); x.globalAlpha=1;
     const v=b[r]&&b[r][c]; if(!v) continue;
-    const key=v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.s==='wild'?'w':String(v.c), img=SPR.cv&&SPR.cv[key];
+    const key=v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.c===-7?'f':v.c===-8?'r':v.s==='wild'?'w':String(v.c), img=SPR.cv&&SPR.cv[key];
     if(img) x.drawImage(img,px+cs*.03,py+cs*.03,cs*.94,cs*.94); else { x.fillStyle=v.c===-1?STONE:v.c===-2?GOLD:(PALETTE[v.c]||'#999'); x.fillRect(px+cs*.06,py+cs*.06,cs*.88,cs*.88); }
     const ov=SPR.ov||{}; if(v.s==='ice'&&ov.i) x.drawImage(ov.i,px+cs*.03,py+cs*.03,cs*.94,cs*.94); if(v.s==='bomb'&&ov.b) x.drawImage(ov.b,px+cs*.03,py+cs*.03,cs*.94,cs*.94); if(v.cr&&ov.c) x.drawImage(ov.c,px+cs*.03,py+cs*.03,cs*.94,cs*.94);
   }
@@ -4326,10 +4435,14 @@ loadVoices();
    Ele joga sozinho; o botão da esquerda troca a tela para você jogar por ele. */
 let SIMS=[], SIMV=-1, simNext=0;
 function devOn(){ return !SIM&&!!store.get('ddb_dev',false); }
-function renderDev(){ $('#devCard').hidden=!devOn(); }
+/* "liberar tudo": mundos, fases, temas e dourados abertos só para ver. Não grava nada como ganho. */
+function devAll(){ return devOn()&&!!store.get('ddb_devall',false); }
+function renderDev(){ $('#devCard').hidden=!devOn(); const b=$('#tDevAll'); if(b) b.classList.toggle('on',devAll()); }
+function setDevAll(on){ store.set('ddb_devall',!!on); fixSkin(); saveSet(); applyLook(); renderDev(); if($('#settings').classList.contains('active')) renderSettings(); }
+$('#tDevAll').addEventListener('click',()=>{ setDevAll(!devAll()); toast(devAll()?'🔓 Tudo liberado para teste':'🔒 Voltou ao progresso de verdade'); });
 renderDev();
 { let taps=0, tt=0; $('#setTitle').addEventListener('click',()=>{ if(SIM) return; const n=performance.now(); taps=n-tt<1500?taps+1:1; tt=n;
-  if(taps>=7){ taps=0; const on=!devOn(); store.set('ddb_dev',on); renderDev(); toast(on?'🤖 Modo teste ligado':'Modo teste desligado'); if(!on) SIMS.slice().forEach(simRemove); } }); }
+  if(taps>=7){ taps=0; const on=!devOn(); store.set('ddb_dev',on); renderDev(); toast(on?'🤖 Modo teste ligado':'Modo teste desligado'); if(!on){ SIMS.slice().forEach(simRemove); setDevAll(false); } } }); }
 function simUrl(n){ const u=new URL(location.href); u.hash=''; u.searchParams.set('sim',n); return u.href; }
 function simAdd(){
   if(NET.role!=='A') return;
