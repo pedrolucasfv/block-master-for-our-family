@@ -1129,16 +1129,34 @@ function drawGem(x,cx,cy,r,c){
 function robotEyes(x,w,col,glow){ x.save(); if(glow){ x.shadowColor=col; x.shadowBlur=w*.12; } x.fillStyle=col; [[.34,.46],[.66,.46]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(w*ex,w*ey,w*.085,0,7); x.fill(); });
   x.fillRect(w*.32,w*.7,w*.36,w*.05); x.restore(); x.fillStyle='rgba(255,255,255,.85)'; [[.31,.43],[.63,.43]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(w*ex,w*ey,w*.025,0,7); x.fill(); }); }
 /* feixe de bambus finos: cada vara com sombreado de cilindro e nós em alturas diferentes */
-const BAMBOO_N=[[.3,.72],[.58],[.24,.66],[.46,.86]];
-function bambooBundle(x,w,col,nodeCol,thick){
-  const n=BAMBOO_N.length, sw=w/n;
-  BAMBOO_N.forEach((nodes,k)=>{ const x0=k*sw+sw*.06, x1=(k+1)*sw-sw*.06, bw=x1-x0;
-    const g=x.createLinearGradient(x0,0,x1,0); g.addColorStop(0,mix(col,'#000000',.55)); g.addColorStop(.32,mix(col,'#ffffff',.62)); g.addColorStop(.6,col); g.addColorStop(1,mix(col,'#000000',.5));
-    x.fillStyle=g; x.beginPath(); if(x.roundRect) x.roundRect(x0,w*.02,bw,w*.96,bw*.35); else x.rect(x0,w*.02,bw,w*.96); x.fill();
-    x.strokeStyle=mix(col,'#000000',.45); x.lineWidth=Math.max(1,w*.012); x.stroke();
-    nodes.forEach(ny=>{ const h=w*(thick?.075:.045), y0=w*ny-h/2, ng=x.createLinearGradient(0,y0,0,y0+h);
-      ng.addColorStop(0,mix(nodeCol,'#000000',.5)); ng.addColorStop(.5,mix(nodeCol,'#ffffff',.6)); ng.addColorStop(1,mix(nodeCol,'#000000',.55));
-      x.fillStyle=ng; x.fillRect(x0-w*.01,y0,bw+w*.02,h); }); });
+/* feixe de bambu: 3 varas finas atrás (mais escuras) e 4 na frente, cada uma com o topo cortado em alturas diferentes */
+const BAMBOO_BACK=[{x:.16,w:.13,top:.03},{x:.43,w:.12,top:.0},{x:.66,w:.13,top:.05}];
+const BAMBOO_FRONT=[{x:.02,w:.23,top:.2,nodes:[.48,.84]},{x:.26,w:.24,top:.09,nodes:[.36,.74]},{x:.51,w:.22,top:.25,nodes:[.55,.9]},{x:.74,w:.24,top:.14,nodes:[.42,.8]}];
+function bambooStalk(x,w,st,col,dark){
+  const x0=w*st.x, bw=w*st.w, top=w*st.top, ry=bw*.24, c2=dark?'#'+rgbOf(col).map(v=>Math.round(v*.62).toString(16).padStart(2,'0')).join(''):col;
+  const g=x.createLinearGradient(x0,0,x0+bw,0); g.addColorStop(0,mix(c2,'#000000',.5)); g.addColorStop(.3,mix(c2,'#ffffff',.6)); g.addColorStop(.6,c2); g.addColorStop(1,mix(c2,'#000000',.45));
+  /* sombra da vara na de trás */
+  if(!dark){ x.fillStyle='rgba(0,0,0,.22)'; x.fillRect(x0+bw*.85,top+ry,bw*.3,w-top); }
+  x.fillStyle=g; x.fillRect(x0,top,bw,w-top+1);
+  x.strokeStyle=mix(c2,'#000000',.4); x.lineWidth=Math.max(1,w*.01); x.beginPath(); x.moveTo(x0,top); x.lineTo(x0,w); x.moveTo(x0+bw,top); x.lineTo(x0+bw,w); x.stroke();
+  /* topo cortado: anel claro e o oco escuro */
+  x.beginPath(); x.ellipse(x0+bw/2,top,bw/2,ry,0,0,7); x.fillStyle=mix(c2,'#ffffff',.42); x.fill(); x.stroke();
+  x.beginPath(); x.ellipse(x0+bw/2,top+ry*.08,bw*.3,ry*.55,0,0,7); x.fillStyle=mix(c2,'#000000',.4); x.fill();
+}
+function bambooNodes(x,w,col,thick){
+  BAMBOO_FRONT.forEach(st=>{ const x0=w*st.x, bw=w*st.w; st.nodes.forEach(ny=>{ const h=w*(thick?.08:.05), y0=w*ny-h/2, g=x.createLinearGradient(0,y0,0,y0+h);
+    g.addColorStop(0,mix(col,'#000000',.5)); g.addColorStop(.5,mix(col,'#ffffff',.58)); g.addColorStop(1,mix(col,'#000000',.55));
+    const l=x0-w*.01, r=x0+bw+w*.01, cx=x0+bw/2; x.fillStyle=g; x.beginPath(); x.moveTo(l,y0); x.quadraticCurveTo(cx,y0+h*.55,r,y0); x.lineTo(r,y0+h); x.quadraticCurveTo(cx,y0+h*1.55,l,y0+h); x.closePath(); x.fill(); }); });
+}
+function bambooBundle(x,w,col){ BAMBOO_BACK.forEach(st=>bambooStalk(x,w,st,col,true)); BAMBOO_FRONT.forEach(st=>bambooStalk(x,w,st,col,false)); bambooNodes(x,w,col,false); }
+/* fita de alga do sushi: abraça o peixe e o arroz (curva por cima e por baixo), com brilho no meio */
+function sushiBand(x,w,col,shiny){
+  const l=w*.41, r=w*.59;
+  x.beginPath(); x.moveTo(l,w*.155); x.quadraticCurveTo(w*.5,w*.115,r,w*.155); x.lineTo(r+w*.01,w*.9); x.quadraticCurveTo(w*.5,w*.96,l-w*.01,w*.9); x.closePath();
+  const g=x.createLinearGradient(l,0,r,0); g.addColorStop(0,mix(col,'#000000',.55)); g.addColorStop(.38,shiny?mix(col,'#ffffff',.55):mix(col,'#ffffff',.85)); g.addColorStop(.62,col); g.addColorStop(1,mix(col,'#000000',.5));
+  x.fillStyle=g; x.fill(); x.lineWidth=Math.max(1,w*.016); x.strokeStyle=shiny?'#a8740e':mix(col,'#000000',.45); x.stroke();
+  x.save(); x.clip(); x.strokeStyle=shiny?'rgba(255,255,255,.22)':'rgba(255,255,255,.08)'; x.lineWidth=Math.max(1,w*.01);
+  for(let k=1;k<6;k+=shiny?2:1){ const yy=w*(.16+k*.13); x.beginPath(); x.moveTo(l,yy); x.quadraticCurveTo(w*.5,yy+w*.025,r,yy); x.stroke(); } x.restore();
 }
 function sushiFish(x,w,col){ const g=x.createLinearGradient(0,w*.16,0,w*.6); g.addColorStop(0,mix(col,'#ffffff',.55)); g.addColorStop(.6,col); g.addColorStop(1,mix(col,'#000000',.7));
   x.beginPath(); x.moveTo(w*.08,w*.5); x.quadraticCurveTo(w*.06,w*.16,w*.5,w*.14); x.quadraticCurveTo(w*.94,w*.16,w*.92,w*.5); x.quadraticCurveTo(w*.5,w*.62,w*.08,w*.5); x.closePath(); x.fillStyle=g; x.fill();
@@ -1159,11 +1177,9 @@ const GOLD_DECO={
   /* robô: olhos e boca acesos na cor da peça */
   robot:(x,w,c)=>{ x.fillStyle='#1d2430'; x.beginPath(); x.roundRect?x.roundRect(w*.18,w*.32,w*.64,w*.28,w*.1):x.rect(w*.18,w*.32,w*.64,w*.28); x.fill(); robotEyes(x,w,c,true); },
   /* bambu: folha e nó na cor da peça */
-  bamboo:(x,w,c)=>{ BAMBOO_N.forEach((nodes,k)=>{ const sw=w/BAMBOO_N.length, x0=k*sw+sw*.06-w*.01, bw=sw*.88+w*.02;
-    nodes.forEach(ny=>{ const h=w*.085, y0=w*ny-h/2, ng=x.createLinearGradient(0,y0,0,y0+h); ng.addColorStop(0,mix(c,'#000000',.6)); ng.addColorStop(.5,mix(c,'#ffffff',.55)); ng.addColorStop(1,mix(c,'#000000',.6)); x.fillStyle=ng; x.fillRect(x0,y0,bw,h); }); }); },
+  bamboo:(x,w,c)=>bambooNodes(x,w,c,true),
   /* sushi: arroz de ouro e o peixe na cor da peça */
-  sushi:(x,w,c)=>{ const g=x.createLinearGradient(w*.4,0,w*.6,0); g.addColorStop(0,mix(c,'#000000',.6)); g.addColorStop(.35,mix(c,'#ffffff',.6)); g.addColorStop(1,mix(c,'#000000',.7));
-    x.fillStyle=g; x.fillRect(w*.4,w*.11,w*.2,w*.84); x.strokeStyle=mix(c,'#000000',.45); x.lineWidth=Math.max(1,w*.015); x.strokeRect(w*.4,w*.11,w*.2,w*.84); },
+  sushi:(x,w,c)=>sushiBand(x,w,c,true),
   /* joaninha: casco de ouro com as bolinhas na cor da peça */
   bug:(x,w,c)=>{ x.save(); x.beginPath(); x.rect(0,0,w,w*.255); x.clip();
     const hg=x.createRadialGradient(w*.44,w*.12,0,w*.5,w*.2,w*.22); hg.addColorStop(0,'#fff6c8'); hg.addColorStop(.5,'#e9b22a'); hg.addColorStop(1,'#8a5a06');
@@ -1333,7 +1349,7 @@ function drawBlock(skin,c,fr,w,dpr,lite){
     robotEyes(x,w,'#8ff4ff',true); x.fillStyle=mix(c,'#000000',.55); x.fillRect(w*.32,w*.7,w*.36,w*.05);
   } else if(skin==='bamboo'){
     /* bambu: feixe de bambus finos na cor da peça; tema ganho ao derrotar o Pandão */
-    bambooBundle(x,w,c,c,false);
+    bambooBundle(x,w,c);
   } else if(skin==='stalk'){
     /* bambu de verdade do Mundo 5 (cresce sozinho): uma vara grossa verde com folhinha */
     const ins=w*.18, bw=w-ins*2, g=x.createLinearGradient(ins,0,ins+bw,0); g.addColorStop(0,mix(c,'#000000',.55)); g.addColorStop(.3,mix(c,'#ffffff',.6)); g.addColorStop(.6,c); g.addColorStop(1,mix(c,'#000000',.55));
@@ -1346,7 +1362,7 @@ function drawBlock(skin,c,fr,w,dpr,lite){
     x.beginPath(); x.moveTo(w*.12,w*.5); x.quadraticCurveTo(w*.04,w*.94,w*.5,w*.93); x.quadraticCurveTo(w*.96,w*.94,w*.88,w*.5); x.closePath(); x.fillStyle=c===GOLDSK?(()=>{ const gg=x.createLinearGradient(0,w*.4,0,w*.94); gg.addColorStop(0,'#fff0b0'); gg.addColorStop(1,'#c88f14'); return gg; })():rg; x.fill();
     x.fillStyle='rgba(150,140,120,.35)'; for(let k=0;k<14;k++){ const px=w*(.18+((k*37)%64)/100), py=w*(.62+((k*23)%28)/100); x.beginPath(); x.ellipse(px,py,w*.03,w*.017,k,0,7); x.fill(); }
     sushiFish(x,w,c);
-    x.fillStyle=c===GOLDSK?'#7a5200':'#1f2a22'; x.fillRect(w*.42,w*.12,w*.16,w*.82); x.fillStyle='rgba(255,255,255,.15)'; x.fillRect(w*.44,w*.12,w*.03,w*.82);
+    sushiBand(x,w,c===GOLDSK?'#7a5200':'#24322a',false);
   } else if(skin==='petal'){
     /* flor de sakura: 5 pétalas cor-de-rosa (no Mundo 6 ela voa embora depois de poucas jogadas) */
     const cx=w*.5, cy=w*.52;
