@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.5 · 21/11/2026
+- 🔔 **Avisos no celular:** na tela de Desafios, "Me avisar quando for a minha vez" liga uma notificação do navegador (Android e computador; no iPhone só com o jogo na Tela de Início).
+
 ## 1.4 · 21/11/2026
 - 🌍 **Sala por link:** quem cria a sala manda um convite pelo WhatsApp; a pessoa toca no link e entra de longe, sem ler QR.
 - ⚔️ **Desafios numa tela própria:** lista de jogadores para desafiar direto (sem precisar de link), seus desafios separados em "sua vez", "esperando" e "terminados", e escolha do tempo da rodada.

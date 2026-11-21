@@ -81,7 +81,7 @@ const dsTempo=()=>store.get('ddb_dstempo',0);
 let DS_PEOPLE=[], DS_LIST=[];
 /* tela de desafios: os meus (sua vez, esperando, terminados) e a lista de jogadores para desafiar */
 function dsList(){
-  dsNeedNick(()=>{ closeEnd(); dsCheckPend(); show('chal');
+  dsNeedNick(()=>{ closeEnd(); dsCheckPend(); show('chal'); avRender();
     $('#chalTime').innerHTML=DS_TIMES.map(t=>`<button type="button" data-v="${t}" class="${dsTempo()===t?'sel':''}">${TIME_L[t]}</button>`).join('');
     $$('#chalTime button').forEach(b=>b.addEventListener('click',()=>{ store.set('ddb_dstempo',+b.dataset.v); $$('#chalTime button').forEach(x=>x.classList.toggle('sel',x===b)); }));
     $('#chalMine').innerHTML='<p class="muted">Carregando seus desafios…</p>'; $('#chalPeople').innerHTML='<p class="muted">Carregando jogadores…</p>';
