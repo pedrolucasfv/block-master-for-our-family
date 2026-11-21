@@ -19,20 +19,20 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
 ]},{w:2,name:'Doceria',icon:'🍬',skin:'candy',boss:'queen',reward:'jelly',card:'candy',bossC:'#e8459a',phases:[
   {name:'Vitrine de doces',icon:'🍭',goal:'lines',v:8,desc:'Limpe {v} linhas.',st:{by:'pieces',two:21,three:18}},
   {name:'Fornada',icon:'🧁',goal:'score',v:450,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:65,three:50}},
-  {name:'Chiclete!',icon:'🫧',goal:'clear',setup:'gum',k:3,gum:3,desc:'Limpe os {k} chicletes. A cada {gum} jogadas, um chiclete gruda numa casa vizinha.',st:{by:'pieces',two:15,three:9}},
+  {name:'Chiclete!',icon:'🫧',goal:'clear',setup:'gum',k:3,gum:3,desc:'Limpe os {k} chicletes. A cada {gum} jogadas, um chiclete gruda numa casa vizinha.',st:{by:'pieces',two:15,three:8}},
   {name:'Granulado',icon:'✨',goal:'golds',setup:'golds',k:6,limit:31,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:18,three:12}},
   {name:'Açúcar no talo',icon:'🍫',goal:'combo',v:4,limit:28,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:12,three:10}},
   {name:'Chuva de confeitos',icon:'🌧️',goal:'survive',time:120,rain:12,mt:7,desc:'Aguente 2 minutos. Cai um bloco cinza a cada {rain} segundos, e você tem 7 segundos por jogada.',st:{by:'lines',two:17,three:23}},
   {name:'Bolo em camadas',icon:'🎂',goal:'empty',setup:'puzzle',bands:[2,2,2,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
   {name:'Pudim gelado',icon:'🍮',goal:'clear',setup:'ice',k:8,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:47,three:32}},
-  {name:'Chiclete grudento',icon:'🍬',goal:'lines',v:10,setup:'gum',k:2,gum:2,desc:'Limpe {v} linhas. Começa com {k} chicletes, e a cada {gum} jogadas um gruda numa casa vizinha.',st:{by:'pieces',two:23,three:21}},
+  {name:'Chiclete grudento',icon:'🍬',goal:'lines',v:10,setup:'gum',k:2,gum:2,desc:'Limpe {v} linhas. Começa com {k} chicletes, e a cada {gum} jogadas um gruda numa casa vizinha.',st:{by:'pieces',two:23,three:20}},
   {name:'Chefona: Rainha Jujuba',icon:'👑',goal:'boss',hp:40,time:200,gum:4,desc:'Cada linha tira vida da Rainha; o combo multiplica o dano. Ela joga chicletes que se espalham e, brava, gruda uma peça por 4 s.',st:{by:'time',two:80,three:55}}
 ]},{w:3,name:'Pomar',icon:'🍎',skin:'fruit',boss:'cat',reward:'bug',card:'leaf',bossC:'#6fb83a',phases:[
   {name:'Pomar em flor',icon:'🌸',goal:'lines',v:10,desc:'Limpe {v} linhas.',st:{by:'pieces',two:25,three:23}},
   {name:'Feira',icon:'🍉',goal:'score',v:550,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:75,three:55}},
   {name:'Colheita',icon:'🧺',goal:'harvest',v:4,limit:28,ripe:{k:2,life:7,every:3},desc:'Colha {v} frutas maduras em até {limit} peças: limpe a fruta antes de a contagem chegar a zero, senão ela apodrece e vira bloco cinza.',st:{by:'pieces',two:18,three:13}},
   {name:'Joaninhas douradas',icon:'🐞',goal:'golds',setup:'golds',k:7,limit:34,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:17,three:12}},
-  {name:'Suco duplo',icon:'🥤',goal:'combo',v:4,limit:25,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:13,three:11}},
+  {name:'Suco duplo',icon:'🥤',goal:'combo',v:4,limit:25,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:13,three:10}},
   {name:'Ventania',icon:'🍃',goal:'survive',time:150,rain:12,mt:7,desc:'Aguente 2 minutos e meio. Cai um bloco cinza a cada {rain} segundos, e você tem 7 segundos por jogada.',st:{by:'lines',two:22,three:28}},
   {name:'Cesta cheia',icon:'🧺',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
   {name:'Geada no pomar',icon:'❄️',goal:'clear',setup:'ice',k:10,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:47,three:36}},
@@ -40,7 +40,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Chefão: Lagartão Guloso',icon:'🦎',goal:'boss',hp:50,time:220,ripe:{k:1,life:6,every:5},desc:'Cada linha tira vida do Lagartão; o combo multiplica o dano, e fruta madura colhida tira 3 a mais. Ele joga maçãs bichadas e, bravo, morde uma peça por 4 s.',st:{by:'time',two:75,three:55}}
 ]},{w:4,name:'Obras',icon:'🏗️',skin:'brick',boss:'robot',reward:'robot',card:'hazard',bossC:'#7d8ea8',phases:[
   {name:'Alicerce',icon:'🧱',goal:'lines',v:12,desc:'Limpe {v} linhas.',st:{by:'pieces',two:29,three:27}},
-  {name:'Hora extra',icon:'⏱️',goal:'score',v:650,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:75,three:60}},
+  {name:'Hora extra',icon:'⏱️',goal:'score',v:650,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:75,three:55}},
   {name:'Esteira',icon:'🏭',goal:'lines',v:8,belt:{rows:[3],every:3},desc:'Limpe {v} linhas. A cada 3 jogadas, a linha da esteira (com as setas) anda uma casa para a direita.',st:{by:'pieces',two:21,three:18}},
   {name:'Entulho',icon:'🪨',goal:'clear',setup:'stones',k:14,desc:'O tabuleiro começa com {k} blocos cinza. Limpe todos.',st:{by:'pieces',two:24,three:20}},
   {name:'Guindaste',icon:'🏗️',goal:'combo',v:5,limit:31,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:14,three:12}},
@@ -52,7 +52,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
 ]},{w:5,name:'Bambuzal',icon:'🎋',skin:'crochet',boss:'panda',reward:'bamboo',card:'bamboo',bossC:'#3c4048',phases:[
   {name:'Brotos',icon:'🌱',goal:'lines',v:12,desc:'Limpe {v} linhas.',st:{by:'pieces',two:28,three:26}},
   {name:'Chá verde',icon:'🍵',goal:'score',v:700,time:100,desc:'Faça {v} pontos em até 100 segundos.',st:{by:'time',two:80,three:60}},
-  {name:'Bambu cresce',icon:'🎋',goal:'clear',setup:'bamboo',k:5,bamboo:{every:3},desc:'Limpe todo o bambu. A cada 3 jogadas, cada pé de bambu cresce uma casa para cima.',st:{by:'pieces',two:9,three:5}},
+  {name:'Bambu cresce',icon:'🎋',goal:'clear',setup:'bamboo',k:5,bamboo:{every:3},desc:'Limpe todo o bambu. A cada 3 jogadas, cada pé de bambu cresce uma casa para cima.',st:{by:'pieces',two:14,three:9}},
   {name:'Lanternas',icon:'🏮',goal:'golds',setup:'golds',k:8,limit:32,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:18,three:14}},
   {name:'Dança do panda',icon:'🐼',goal:'combo',v:5,limit:30,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:14,three:11}},
   {name:'Chuva na floresta',icon:'🌧️',goal:'survive',time:160,rain:10,mt:6,desc:'Aguente 2 minutos e 40 segundos. Cai um bloco cinza a cada {rain} segundos, e você tem 6 segundos por jogada.',st:{by:'lines',two:24,three:31}},
@@ -64,11 +64,11 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Torii',icon:'⛩️',goal:'lines',v:14,desc:'Limpe {v} linhas.',st:{by:'pieces',two:32,three:29}},
   {name:'Trem-bala',icon:'🚄',goal:'score',v:700,time:85,desc:'Faça {v} pontos em até 85 segundos.',st:{by:'time',two:70,three:58}},
   {name:'Hanami',icon:'🌸',goal:'petals',v:5,limit:32,petal:{k:3,life:4,every:2},desc:'Pegue {v} flores de sakura em até {limit} peças: limpe a linha da flor antes de a contagem zerar, senão ela voa embora.',st:{by:'pieces',two:25,three:14}},
-  {name:'Moedas da sorte',icon:'🪙',goal:'golds',setup:'golds',k:9,limit:33,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:18,three:12}},
+  {name:'Moedas da sorte',icon:'🪙',goal:'golds',setup:'golds',k:9,limit:33,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:19,three:14}},
   {name:'Taiko',icon:'🥁',goal:'combo',v:6,limit:33,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:17,three:14}},
   {name:'Tufão',icon:'🌀',goal:'survive',time:180,rain:9,mt:6,desc:'Aguente 3 minutos. Cai um bloco cinza a cada {rain} segundos, e você tem 6 segundos por jogada.',st:{by:'lines',two:27,three:36}},
   {name:'Tsuru de papel',icon:'🦢',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
-  {name:'Monte Fuji',icon:'🗻',goal:'clear',setup:'ice',k:12,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:48,three:36}},
+  {name:'Monte Fuji',icon:'🗻',goal:'clear',setup:'ice',k:12,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:50,three:40}},
   {name:'Jardim zen',icon:'🪨',goal:'clear',setup:'stones',k:12,belt:{rows:[4],every:3},petal:{k:1,life:5,every:4},desc:'Limpe os {k} blocos cinza. Uma esteira anda a cada 3 jogadas e flores de sakura aparecem pelo caminho.',st:{by:'pieces',two:25,three:19}},
   {name:'Chefão: Gatão da Sorte',icon:'🐱',goal:'boss',hp:70,time:260,petal:{k:2,life:5,every:4},desc:'Cada linha tira vida do Gatão; o combo multiplica o dano, e cada flor de sakura pega tira 3 a mais. Ele joga moedas e, bravo, prende uma peça por 4 s.',st:{by:'time',two:105,three:70}}
 ]}];
