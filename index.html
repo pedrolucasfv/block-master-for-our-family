@@ -3122,13 +3122,23 @@ function shareMsg(){
 function goHome(){ closeEnd(); D=null; SH=null; IN=null; renderNight(); show('home'); }
 
 /* pausa e saída */
+/* campanha travada sem ajuda usada ainda: a pausa vira a escolha entre usar ajuda (no máximo ★★) ou recomeçar (ainda vale ★★★) */
+function campStuckPauseTxt(){
+  const cp=SH&&SH.type==='camp'?(SH.host?SH.H&&SH.H.cp:SH.view&&SH.view.cp):null, ask=!!(cp&&cp.needHelp&&!(cp.used&&cp.used.length)), boss=SH&&(SH.cfg.solo||SH.host);
+  $('#pResume').textContent=ask?'Continuar com ajuda (máx. ★★)':'Continuar';
+  $('#pRetry').textContent=ask?'↻ Recomeçar a fase (vale ★★★)':'↻ Tentar de novo';
+  if(!ask) return;
+  $('#pauseTitle').textContent='Nenhuma peça cabe';
+  $('#pauseTxt').textContent=boss?'Você ainda tem ajudas (🔨 🔀 💥) para continuar, mas quem usa ajuda fica com no máximo ★★ nesta fase. Quer continuar com ajuda ou recomeçar para tentar ★★★?'
+    :'Ainda dá para continuar com ajuda (🔨 🔀 💥), mas aí a fase vale no máximo ★★. Quem criou a sala pode recomeçar para tentar ★★★.';
+}
 function setPaused(p,fromRemote){
   const g=D||SH; if(!g||g.over) return;
   if(SH&&!SH.host&&!fromRemote){ act({k:p?'pause':'resume'}); return; }
   g.paused=p; if(SH&&SH.host){ SH.H.paused=p; broadcast(); }
   if(D&&D.live&&!fromRemote) send({t:p?'pause':'resume'});
   $('#pRetry').hidden=!(SH&&SH.type==='camp'&&(SH.cfg.solo||SH.host));
-  if(p){ cancelDrag(); campPauseInfo(); $('#pauseTitle').textContent='Pausado'; $('#pauseTxt').textContent=fromRemote?(typeof fromRemote==='string'?nm(fromRemote)+' pausou a partida.':'A partida foi pausada.'):(D&&!D.live&&!SH?'O tempo está parado.':'A partida está pausada para todos.'); $('#pauseOv').classList.add('show'); }
+  if(p){ cancelDrag(); campPauseInfo(); $('#pauseTitle').textContent='Pausado'; $('#pauseTxt').textContent=fromRemote?(typeof fromRemote==='string'?nm(fromRemote)+' pausou a partida.':'A partida foi pausada.'):(D&&!D.live&&!SH?'O tempo está parado.':'A partida está pausada para todos.'); campStuckPauseTxt(); $('#pauseOv').classList.add('show'); }
   else { $('#pauseOv').classList.remove('show'); if($('#settings').classList.contains('active')) show('game'); }
 }
 $('#gPause').addEventListener('click',()=>{ const g=D||SH; if(g&&g.playing) setPaused(true); });
@@ -3785,7 +3795,7 @@ function applySync(m){
   const bds={}; for(const k in m.bds){ const q=m.bds[k]; bds[k]={b:deserBoard(q.b),hold:q.hold||null,marks:q.marks||null,sc:q.sc,combo:q.combo,since:q.since,shield:q.shield}; }
   s.view=deriveView({bds,tr:m.tr,scs:m.scs,turn:m.turn,ph:m.ph,ch:m.ch,paused:m.paused,stuck:m.stuck,out:m.out||{},cp:m.cp||null,hammer:(m.hm||{})[s.me]||0});
   s.remAt={rem:m.rem,sd:m.sd,at:performance.now()}; s.pending=null;
-  if(m.paused!==prevPaused&&s.playing) { s.paused=m.paused; if(m.paused){ cancelDrag(); campPauseInfo(); $('#pauseTitle').textContent='Pausado'; $('#pauseTxt').textContent='A partida está pausada para todos.'; if(!$('#settings').classList.contains('active')) $('#pauseOv').classList.add('show'); } else { $('#pauseOv').classList.remove('show'); if($('#settings').classList.contains('active')) show('game'); } }
+  if(m.paused!==prevPaused&&s.playing) { s.paused=m.paused; if(m.paused){ cancelDrag(); campPauseInfo(); $('#pauseTitle').textContent='Pausado'; $('#pauseTxt').textContent='A partida está pausada para todos.'; campStuckPauseTxt(); if(!$('#settings').classList.contains('active')) $('#pauseOv').classList.add('show'); } else { $('#pauseOv').classList.remove('show'); if($('#settings').classList.contains('active')) show('game'); } }
   if(m.ev&&m.ev.id!==s.lastEv) playEv(m.ev);
   if(m.over&&!s.over) sharedOver(m.over);
   renderShared();
@@ -4657,7 +4667,7 @@ function campHook(cfg){
   /* ajuda ainda não usada (martelo, trocar peças, bomba de linha) salva: avisa em vez de perder */
   hk.helpLeft=cp=>cp.helps.some(h=>!cp.used.includes(h)&&!(h==='swap'&&hk.noRegen));
   hk.stuck=()=>{ const cp=SH.H.cp;
-    if(hk.helpLeft(cp)){ if(!cp.needHelp){ cp.needHelp=true; broadcast(); renderShared(); } return; }
+    if(hk.helpLeft(cp)){ if(!cp.needHelp){ cp.needHelp=true; if(!cp.used.length&&SH.playing&&!SH.paused){ cancelDrag(); setPaused(true); } else broadcast(); renderShared(); } return; }
     hk.finish(false,def.setup==='puzzle'?'Nenhuma peça cabe mais: o quebra-cabeça travou':'Sem espaço no tabuleiro'); };
   hk.tick=t=>{
     if(!SH||SH.over) return; const v=SH.view, cp=SH.host?SH.H.cp:v&&v.cp; if(!cp) return;
