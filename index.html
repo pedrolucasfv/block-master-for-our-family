@@ -1327,26 +1327,33 @@ function drawBlock(skin,c,fr,w,dpr,lite){
     const flesh=()=>{ const g=x.createLinearGradient(0,0,0,w); g.addColorStop(0,mix(c,'#ffffff',.62)); g.addColorStop(.55,c); g.addColorStop(1,mix(c,'#000000',.85)); return g; };
     rrect(x,w,r); x.save(); x.clip();
     if(kind==='melon'){
-      /* casca verde por fora (com as listras), a parte branca e a polpa: a fatia faz uma curva e a casca sobe pelos cantos */
-      x.fillStyle='#4f9a2e'; x.fillRect(0,0,w,w); x.fillStyle='#2f6e1d'; for(let k=0;k<7;k++){ x.beginPath(); x.moveTo(w*(k*.17-.05),w); x.quadraticCurveTo(w*(k*.17+.06),w*.7,w*(k*.17-.02),w*.4); x.lineTo(w*(k*.17+.05),w*.4); x.quadraticCurveTo(w*(k*.17+.13),w*.7,w*(k*.17+.06),w); x.closePath(); x.fill(); }
-      x.fillStyle='#f6f1dc'; x.beginPath(); x.ellipse(w*.5,w*.1,w*.74,w*.82,0,0,7); x.fill();
-      x.fillStyle=flesh(); x.beginPath(); x.ellipse(w*.5,w*.08,w*.69,w*.76,0,0,7); x.fill();
-      x.save(); x.beginPath(); x.ellipse(w*.5,w*.08,w*.69,w*.76,0,0,7); x.clip(); sugar(w*.85); x.restore();
-      [[.2,.28,-.5],[.42,.22,-.15],[.64,.24,.2],[.84,.3,.5],[.3,.48,-.35],[.54,.46,0],[.74,.5,.35]].forEach(([a,b2,an])=>{ x.save(); x.translate(w*a,w*b2); x.rotate(an); x.fillStyle='#2a1a12'; x.beginPath(); x.moveTo(0,-w*.045); x.quadraticCurveTo(w*.035,w*.012,0,w*.035); x.quadraticCurveTo(-w*.035,w*.012,0,-w*.045); x.fill(); x.fillStyle='rgba(255,255,255,.45)'; x.beginPath(); x.ellipse(-w*.008,-w*.014,w*.007,w*.012,0,0,7); x.fill(); x.restore(); });
+      /* fatia de melancia: a casca (listrada) e a parte branca fazem um "C" grosso no canto, na diagonal.
+         Na melancia azul a casca também fica em tons de azul */
+      const blue=idx===4, rc=blue?'#2f6fb0':'#4f9a2e', rs=blue?'#1d4a80':'#2f6e1d', wc=blue?'#e6f3ff':'#f6f1dc';
+      x.fillStyle=rc; x.fillRect(0,0,w,w); x.save(); x.translate(w,w); x.rotate(-Math.PI/4); x.fillStyle=rs;
+      for(let k=-5;k<=5;k++){ x.beginPath(); x.moveTo(k*w*.2-w*.04,-w*1.5); x.quadraticCurveTo(k*w*.2+w*.05,-w*.75,k*w*.2-w*.04,0); x.lineTo(k*w*.2+w*.05,0); x.quadraticCurveTo(k*w*.2+w*.14,-w*.75,k*w*.2+w*.05,-w*1.5); x.closePath(); x.fill(); } x.restore();
+      const cx=w*.36, cy=w*.34; x.fillStyle=wc; x.beginPath(); x.ellipse(cx,cy,w*.62,w*.56,-.6,0,7); x.fill();
+      x.fillStyle=flesh(); x.beginPath(); x.ellipse(cx,cy,w*.54,w*.48,-.6,0,7); x.fill();
+      x.save(); x.beginPath(); x.ellipse(cx,cy,w*.54,w*.48,-.6,0,7); x.clip(); sugar(w*.8); x.restore();
+      [[.14,.2,-.6],[.34,.14,-.3],[.55,.18,0],[.16,.42,-.8],[.36,.38,-.5],[.58,.4,-.2],[.32,.6,-.7]].forEach(([a,b2,an])=>{ x.save(); x.translate(w*a,w*b2); x.rotate(an+.6); x.fillStyle='#2a1a12'; x.beginPath(); x.moveTo(0,-w*.045); x.quadraticCurveTo(w*.035,w*.012,0,w*.035); x.quadraticCurveTo(-w*.035,w*.012,0,-w*.045); x.fill(); x.fillStyle='rgba(255,255,255,.45)'; x.beginPath(); x.ellipse(-w*.008,-w*.014,w*.007,w*.012,0,0,7); x.fill(); x.restore(); });
     } else if(kind==='kiwi'){
       /* kiwi: casca marrom com pelinhos fazendo um "C" na diagonal, polpa com raios, anel de sementes e miolo claro */
       x.fillStyle='#7a5634'; x.fillRect(0,0,w,w); x.strokeStyle='rgba(60,40,20,.5)'; x.lineWidth=Math.max(1,w*.008); x.beginPath(); for(let k=0;k<60;k++){ const px=w*R(k,17), py=w*R(k,19); x.moveTo(px,py); x.lineTo(px+w*.02,py-w*.015); } x.stroke();
-      const cx=w*.4, cy=w*.38; x.fillStyle='#e9f2c8'; x.beginPath(); x.ellipse(cx,cy,w*.6,w*.56,-.5,0,7); x.fill();
-      const g=x.createRadialGradient(cx,cy,w*.05,cx,cy,w*.62); g.addColorStop(0,mix(c,'#ffffff',.45)); g.addColorStop(.6,c); g.addColorStop(1,mix(c,'#000000',.8)); x.fillStyle=g; x.beginPath(); x.ellipse(cx,cy,w*.56,w*.52,-.5,0,7); x.fill();
+      const cx=w*.36, cy=w*.34; x.fillStyle='#e9f2c8'; x.beginPath(); x.ellipse(cx,cy,w*.58,w*.52,-.6,0,7); x.fill();
+      const g=x.createRadialGradient(cx,cy,w*.05,cx,cy,w*.62); g.addColorStop(0,mix(c,'#ffffff',.45)); g.addColorStop(.6,c); g.addColorStop(1,mix(c,'#000000',.8)); x.fillStyle=g; x.beginPath(); x.ellipse(cx,cy,w*.53,w*.47,-.6,0,7); x.fill();
       x.strokeStyle='rgba(255,255,255,.25)'; x.lineWidth=Math.max(1,w*.012); x.beginPath(); for(let k=0;k<20;k++){ const a=k*Math.PI/10; x.moveTo(cx+Math.cos(a)*w*.13,cy+Math.sin(a)*w*.1); x.lineTo(cx+Math.cos(a)*w*.55,cy+Math.sin(a)*w*.5); } x.stroke();
       const cg=x.createRadialGradient(cx,cy,0,cx,cy,w*.15); cg.addColorStop(0,'#fbfde8'); cg.addColorStop(1,mix(c,'#ffffff',.35)); x.fillStyle=cg; x.beginPath(); x.ellipse(cx,cy,w*.15,w*.11,-.5,0,7); x.fill();
       for(let k=0;k<14;k++){ const a=k*Math.PI*2/14; x.fillStyle='#1e1a14'; x.beginPath(); x.ellipse(cx+Math.cos(a)*w*.21,cy+Math.sin(a)*w*.16,w*.014,w*.026,a+Math.PI/2,0,7); x.fill(); }
     } else if(kind==='grape'){
-      /* uva: bolinhas que cobrem o quadrado todo */
-      x.fillStyle=mix(c,'#000000',.8); x.fillRect(0,0,w,w);
-      const P=[[.33,.33],[.67,.33],[.33,.67],[.67,.67]]; for(let j2=0;j2<3;j2++) for(let i2=0;i2<3;i2++) P.push([.17+i2*.33,.17+j2*.33]);
-      P.forEach(([a,b2],k)=>{ const bx=w*a, by=w*b2, br=w*(k<4?.17:.19), gg=x.createRadialGradient(bx-br*.35,by-br*.4,br*.08,bx,by,br); gg.addColorStop(0,mix(c,'#ffffff',.45)); gg.addColorStop(.6,c); gg.addColorStop(1,mix(c,'#000000',.62));
-        x.fillStyle=gg; x.beginPath(); x.arc(bx,by,br,0,7); x.fill(); x.fillStyle='rgba(255,255,255,.55)'; x.beginPath(); x.ellipse(bx-br*.3,by-br*.38,br*.22,br*.13,-.6,0,7); x.fill(); });
+      /* uva: um cacho de verdade, com fileiras desencontradas, bolinhas de tamanhos um pouco diferentes,
+         as de baixo por cima das de cima, sombra suave entre elas e um brilho pequeno */
+      x.fillStyle=mix(c,'#000000',.55); x.fillRect(0,0,w,w);
+      const G=[[.2,.2],[.5,.18],[.8,.2],[.35,.5],[.65,.5],[.04,.5],[.96,.5],[.2,.8],[.5,.82],[.8,.8]];
+      G.forEach(([a,b2],k)=>{ const bx=w*(a+(R(k,3)-.5)*.03), by=w*(b2+(R(k,5)-.5)*.03), br=w*(.165+R(k,7)*.02);
+        x.fillStyle='rgba(0,0,0,.28)'; x.beginPath(); x.arc(bx+br*.06,by+br*.14,br,0,7); x.fill();
+        const gg=x.createRadialGradient(bx-br*.3,by-br*.35,br*.1,bx,by,br*1.05); gg.addColorStop(0,mix(c,'#ffffff',.62)); gg.addColorStop(.45,c); gg.addColorStop(1,mix(c,'#000000',.62));
+        x.fillStyle=gg; x.beginPath(); x.arc(bx,by,br,0,7); x.fill();
+        x.fillStyle='rgba(255,255,255,.55)'; x.beginPath(); x.ellipse(bx-br*.35,by-br*.42,br*.18,br*.1,-.6,0,7); x.fill(); });
     } else {
       /* laranja (casca com poros) e abacaxi (losangos com pontinhos) */
       x.fillStyle=flesh(); x.fillRect(0,0,w,w);
