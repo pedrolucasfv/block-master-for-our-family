@@ -33,10 +33,14 @@ create extension if not exists pg_net;
 create or replace function avisar_desafio() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if tg_op = 'UPDATE' and old.vez is not distinct from new.vez then return new; end if;
+  if tg_op <> 'UPDATE' or old.vez is not distinct from new.vez then return new; end if;
+  /* manda junto os aparelhos inscritos de cada lado: assim a função não precisa ler o banco */
   perform net.http_post(
     url := 'https://udduiuoausbswczewcng.supabase.co/functions/v1/swift-endpoint',  -- endereço da função "avisar" (o Supabase deu esse nome ao publicar)
-    body := jsonb_build_object('type', tg_op, 'table', 'desafios', 'record', to_jsonb(new), 'old_record', case when tg_op = 'UPDATE' then to_jsonb(old) end),
+    body := jsonb_build_object('type', tg_op, 'table', 'desafios', 'record', to_jsonb(new), 'old_record', to_jsonb(old),
+      'subs', jsonb_build_object(
+        'a', (select coalesce(jsonb_agg(inscricao), '[]'::jsonb) from push_inscricoes where chave = new.a),
+        'b', (select coalesce(jsonb_agg(inscricao), '[]'::jsonb) from push_inscricoes where chave = new.b))),
     headers := jsonb_build_object('Content-Type', 'application/json', 'x-segredo', 'COLOQUE_O_SEGREDO')
   );
   return new;

@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.5.1 · 21/11/2026
+- 🔔 Correção: os avisos não chegavam (a função de aviso não conseguia ler o banco). Agora o banco manda tudo o que ela precisa.
+
 ## 1.5 · 21/11/2026
 - 🔔 **Avisos no celular:** na tela de Desafios, "Me avisar quando for a minha vez" liga uma notificação do navegador (Android e computador; no iPhone só com o jogo na Tela de Início).
 
