@@ -27,12 +27,13 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/14-main.js` | Inicialização e modo teste (`simAdd`, `simBoot`, `simBot`) |
 | `js/15-npc.js` | Duelo contra o robô no Sozinho (`startNpc`, `NPC`, `npcHear`): é um duelo ao vivo (`D.cfg.npc`) com adversário `'npc'`; o `send` desvia para o robô quando não há sala |
 | `js/16-ranking.js` | Ranking online no Supabase (`SUPA_URL`/`SUPA_KEY`; vazio = desligado): recorde por fase da campanha (`rkCampEnd`, `rkPhaseBox`), ranking geral (`rkOpenGeneral`), fila de envio offline (`ddb_rkq`). Banco: `supabase/ranking.sql` |
+| `js/17-desafio.js` | Desafio a distância, melhor de 5 (Supabase; usa `rkFetch`/`rkQueue`): lista (`dsList`), cartão (`dsOpen`), rodada é um `startDuel` com `type:'chal'` (`dsPlay`, `dsRoundEnd`), aviso por WhatsApp (`dsShare`), link `?d=id` (`dsFromLink`). Banco: `supabase/desafios.sql` |
 | `css/base.css` | Variáveis de tema em `:root[data-app=…]`, layout, blocos, jogo |
 | `css/worlds.css` | Visual de cada mundo (`:root[data-world=…]`) e animações de limpeza por skin |
 | `css/ui.css` | Efeitos, sobreposições, histórico, conexão, abas da sala, estrelinha dourada |
 
 ## Glossário rápido
-- Tipos de partida (`type`): `solo`, `daily`, `duel`/`live` (cada um no seu tabuleiro), `versus`, `coop`, `halves`, `camp`, `tlive`/`tsplit` (times).
+- Tipos de partida (`type`): `solo`, `daily`, `chal` (rodada de desafio a distância), `duel`/`live` (cada um no seu tabuleiro), `versus`, `coop`, `halves`, `camp`, `tlive`/`tsplit` (times).
 - `D` = estado da partida de duelo/solo; `SH` = estado do tabuleiro único; `IN` = a interface de entrada ativa (`duelIN` ou `sharedIN`: `piece`, `canDrag`, `check`, `drop`, `tap`, `toHold`).
 - `NET.role`: `'A'` é quem criou a sala, `'S'` é o espectador, os outros são ids de convidado. Quem criou é o dono da verdade e repassa (`relay`).
 - Fase da campanha (`def`): `goal` (`lines`, `score`, `clear`, `golds`, `combo`, `empty`, `survive`, `harvest`, `petals`, `boss`), `setup` (`stones`, `golds`, `gum`, `ice`, `bamboo`, `puzzle`), `st` = regra das estrelas (`by`, `two`, `three`).

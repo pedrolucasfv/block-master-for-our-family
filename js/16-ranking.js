@@ -7,7 +7,7 @@ const rkOn=()=>!!(SUPA_URL&&SUPA_KEY)&&!SIM;
 function rkFetch(path,opt){
   opt=opt||{}; const h={apikey:SUPA_KEY,'Content-Type':'application/json'}; if(/^eyJ/.test(SUPA_KEY)) h.Authorization='Bearer '+SUPA_KEY; /* chave antiga (anon) também vai no Authorization; a nova (sb_publishable_) só no apikey */
   return fetch(SUPA_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method:opt.body?'POST':'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined})
-    .then(r=>{ if(!r.ok) throw new Error('ranking '+r.status); return r.status===204?null:r.json(); });
+    .then(r=>{ if(!r.ok) throw new Error('ranking '+r.status); return r.text().then(t=>t?JSON.parse(t):null); });
 }
 /* fila de envios: fica no aparelho até conseguir mandar (jogou sem internet, manda quando voltar) */
 let rkBusy=false;

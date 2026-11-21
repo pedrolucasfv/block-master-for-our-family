@@ -337,9 +337,10 @@ function duelEnd(reason){
   d.info={reason,score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo,placed:d.placed,timeline:d.timeline,elapsed:d.elapsed,goalTime:reason==='goal'?d.elapsed:null};
   if(d.live){ send({t:'end',seed:d.cfg.seed,info:d.info}); noteEnd(NET.role,d.info,d.cfg.seed); saveLastOnline(); }
   if(d.cfg.type==='daily'){ const dl=store.get('ddb_daily',{}); dl[d.cfg.key]={score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo}; store.set('ddb_daily',dl); }
-  d.newBest=checkBest(d.cfg.type,d.o,d.score)&&d.score>0;
+  if(d.cfg.type==='chal') dsRoundEnd(d);
+  d.newBest=d.cfg.type!=='chal'&&checkBest(d.cfg.type,d.o,d.score)&&d.score>0;
   if(d.cfg.type==='solo') soloRecord(d);
-  if(!d.live) addHist({date:Date.now(),kind:d.cfg.type,label:d.cfg.type==='daily'?'Desafio do dia':d.cfg.type==='solo'?'Sozinho · '+TIME_L[d.o.time]+' · '+PLAYS[d.o.play]:'Duelo · '+PLAYS[d.o.play],code:d.cfg.code||'',score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo,result:null});
+  if(!d.live) addHist({date:Date.now(),kind:d.cfg.type,label:d.cfg.type==='daily'?'Desafio do dia':d.cfg.type==='chal'?d.cfg.label:d.cfg.type==='solo'?'Sozinho · '+TIME_L[d.o.time]+' · '+PLAYS[d.o.play]:'Duelo · '+PLAYS[d.o.play],code:d.cfg.code||'',score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo,result:null});
   setTimeout(()=>{ if(D!==d) return; praise(reasonTxt(reason)); SFX.over(); BC.dead();
     setTimeout(()=>{ if(D!==d) return; if(d.live&&stillPlaying().length&&(NET.open||d.cfg.npc)) enterSpectate(); else showDuelEnd(); },1400); }, reason==='stuck'?450:0);
 }
@@ -411,8 +412,9 @@ function showDuelEnd(){
       btns.push({t:'Revanche',cls:'primary',on:()=>{ closeEnd(); setup.round++; showReady(); }});
     }
     if(d.cfg.type==='solo') btns.push({t:'Jogar de novo',cls:'primary',on:()=>startSolo(d.o)});
-    btns.push({t:'Compartilhar',on:()=>shareText(shareMsg())});
-    btns.push({t:'Menu',cls:'ghost',on:d.cfg.type==='solo'?()=>{ closeEnd(); D=null; IN=null; openSolo(); }:goHome});
+    if(d.cfg.type==='chal'){ body+=`<p class="muted">Rodada ${d.cfg.chal.r} enviada. Agora avise quem você desafiou!</p>`; btns.push(...dsEndBtns(d)); }
+    else { btns.push({t:'Compartilhar',on:()=>shareText(shareMsg())});
+      btns.push({t:'Menu',cls:'ghost',on:d.cfg.type==='solo'?()=>{ closeEnd(); D=null; IN=null; openSolo(); }:goHome}); }
   }
   openEnd(body,btns);
   $$('#whoBox .btn').forEach(b=>b.addEventListener('click',()=>{
@@ -472,6 +474,7 @@ $('#qNo').addEventListener('click',()=>$('#quitOv').classList.remove('show'));
 $('#qYes').addEventListener('click',()=>{ $('#quitOv').classList.remove('show'); quitGame(); });
 function quitGame(){
   $('#count').classList.remove('show'); cancelDrag();
+  if(D&&D.cfg.type==='chal'&&!D.over){ const c=D.cfg.chal; dsSend(c.id,c.r,D.score); toast(`Rodada ${c.r} enviada com ${fmtN(D.score)} pontos.`); }
   if(D){ const live=D.live, npc=D.cfg.npc; if(live&&!D.over){ D.over=true; D.playing=false; const info={reason:'quit',score:D.score,lines:D.eng.lines,combo:D.eng.maxCombo,placed:D.placed,timeline:D.timeline,goalTime:null}; send({t:'end',seed:D.cfg.seed,info}); noteEnd(NET.role,info,D.cfg.seed); }
     D.over=true; D.playing=false; D=null; IN=null; if(npc){ npcLeave(); openSolo(); return; } if(live&&NET.open){ toLobby(); return; } }
   if(SH&&SH.cfg.solo){ SH.over=true; SH=null; IN=null; $('#timebar').classList.remove('hp'); openCamp(); return; }
