@@ -2,7 +2,7 @@
 /* RANKING online (Supabase): recorde de cada fase da campanha, total de estrelas e recorde do Sozinho. Sem internet, guarda e envia depois. */
 /* Endereço e chave pública do projeto no Supabase (Project Settings → API Keys: "Publishable key" ou, na aba Legacy, "anon public"). A chave "anon" é pública de propósito: quem protege os dados são as regras de supabase/ranking.sql. */
 const SUPA_URL='https://udduiuoausbswczewcng.supabase.co';
-const SUPA_KEY='';
+const SUPA_KEY='sb_publishable_mSdw3fWJ7a6qJGC7XW2slg_HrE8anNh';
 const rkOn=()=>!!(SUPA_URL&&SUPA_KEY)&&!SIM;
 function rkFetch(path,opt){
   opt=opt||{}; const h={apikey:SUPA_KEY,'Content-Type':'application/json'}; if(/^eyJ/.test(SUPA_KEY)) h.Authorization='Bearer '+SUPA_KEY; /* chave antiga (anon) também vai no Authorization; a nova (sb_publishable_) só no apikey */
