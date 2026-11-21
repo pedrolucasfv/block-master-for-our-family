@@ -9,8 +9,7 @@ const NPC_LV=[null,{min:2600,max:4000,miss:.3,deep:false},{min:1500,max:2500,mis
 let NPC=null;
 function npcName(){ return NPC_N[(D&&D.cfg.npc)||(NPC&&NPC.lv)||0]||'Robô'; }
 function npcAvatar(px,cls){ return `<span class="av ${cls}" style="width:${px}px;height:${px}px;line-height:${px}px;font-size:${Math.round(px*.62)}px;background:#5b6b86">🤖</span>`; }
-/* o antigo Difícil (nível 3) virou o Expert (nível 4): leva o placar junto */
-function npcStats(){ const st=store.get('ddb_npc',{}); if(!st.v){ if(st[3]){ st[4]=st[3]; delete st[3]; } st.v=2; store.set('ddb_npc',st); } return st; }
+function npcStats(){ return store.get('ddb_npc',{}); }
 function startNpc(o){
   if(NET.open){ toast('Saia da sala de jogo conectado para jogar contra o robô'); return; }
   ac(); npcStop(); NET.role='A';
