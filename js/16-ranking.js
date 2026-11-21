@@ -1,11 +1,11 @@
 'use strict';
 /* RANKING online (Supabase): recorde de cada fase da campanha, total de estrelas e recorde do Sozinho. Sem internet, guarda e envia depois. */
-/* Endereço e chave pública do projeto no Supabase (Project Settings → API). A chave "anon" é pública de propósito: quem protege os dados são as regras de supabase/ranking.sql. */
-const SUPA_URL='';
+/* Endereço e chave pública do projeto no Supabase (Project Settings → API Keys: "Publishable key" ou, na aba Legacy, "anon public"). A chave "anon" é pública de propósito: quem protege os dados são as regras de supabase/ranking.sql. */
+const SUPA_URL='https://udduiuoausbswczewcng.supabase.co';
 const SUPA_KEY='';
 const rkOn=()=>!!(SUPA_URL&&SUPA_KEY)&&!SIM;
 function rkFetch(path,opt){
-  opt=opt||{}; const h={apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+  opt=opt||{}; const h={apikey:SUPA_KEY,'Content-Type':'application/json'}; if(/^eyJ/.test(SUPA_KEY)) h.Authorization='Bearer '+SUPA_KEY; /* chave antiga (anon) também vai no Authorization; a nova (sb_publishable_) só no apikey */
   return fetch(SUPA_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method:opt.body?'POST':'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined})
     .then(r=>{ if(!r.ok) throw new Error('ranking '+r.status); return r.status===204?null:r.json(); });
 }
