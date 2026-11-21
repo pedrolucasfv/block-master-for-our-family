@@ -5,6 +5,7 @@ Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = corre
 
 ## 1.5.1 · 21/11/2026
 - 🔔 Correção: os avisos não chegavam (a função de aviso não conseguia ler o banco). Agora o banco manda tudo o que ela precisa.
+- 🔔 Quem abre o jogo dentro do WhatsApp vê como abrir no Chrome para ligar os avisos; se der erro, a tela mostra onde parou.
 
 ## 1.5 · 21/11/2026
 - 🔔 **Avisos no celular:** na tela de Desafios, "Me avisar quando for a minha vez" liga uma notificação do navegador (Android e computador; no iPhone só com o jogo na Tela de Início).
