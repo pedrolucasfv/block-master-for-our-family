@@ -18,7 +18,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Chefão: Ursão',icon:'🐻',goal:'boss',hp:30,time:180,desc:'Cada linha tira vida do Ursão; o combo multiplica o dano. Bravo, ele congela uma peça por 4 s.',st:{by:'time',two:100,three:70}}
 ]},{w:2,name:'Doceria',icon:'🍬',skin:'candy',boss:'queen',reward:'jelly',card:'candy',bossC:'#e8459a',phases:[
   {name:'Vitrine de doces',icon:'🍭',goal:'lines',v:8,desc:'Limpe {v} linhas.',st:{by:'pieces',two:24,three:18}},
-  {name:'Fornada',icon:'🧁',goal:'score',v:600,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:65,three:45}},
+  {name:'Fornada',icon:'🧁',goal:'score',v:450,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:65,three:45}},
   {name:'Chiclete!',icon:'🫧',goal:'clear',setup:'gum',k:3,gum:3,desc:'Limpe os {k} chicletes. A cada {gum} jogadas, um chiclete gruda numa casa vizinha.',st:{by:'pieces',two:24,three:16}},
   {name:'Granulado',icon:'✨',goal:'golds',setup:'golds',k:6,limit:36,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:28,three:21}},
   {name:'Açúcar no talo',icon:'🍫',goal:'combo',v:4,limit:36,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:22,three:15}},
@@ -29,7 +29,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Chefona: Rainha Jujuba',icon:'👑',goal:'boss',hp:40,time:200,gum:4,desc:'Cada linha tira vida da Rainha; o combo multiplica o dano. Ela joga chicletes que se espalham e, brava, gruda uma peça por 4 s.',st:{by:'time',two:120,three:85}}
 ]},{w:3,name:'Pomar',icon:'🍎',skin:'fruit',boss:'cat',reward:'bug',card:'leaf',bossC:'#6fb83a',phases:[
   {name:'Pomar em flor',icon:'🌸',goal:'lines',v:10,desc:'Limpe {v} linhas.',st:{by:'pieces',two:26,three:20}},
-  {name:'Feira',icon:'🍉',goal:'score',v:800,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:65,three:45}},
+  {name:'Feira',icon:'🍉',goal:'score',v:550,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:70,three:50}},
   {name:'Colheita',icon:'🧺',goal:'harvest',v:4,limit:30,ripe:{k:2,life:7,every:3},desc:'Colha {v} frutas maduras em até {limit} peças: limpe a fruta antes de a contagem chegar a zero, senão ela apodrece e vira bloco cinza.',st:{by:'pieces',two:22,three:16}},
   {name:'Joaninhas douradas',icon:'🐞',goal:'golds',setup:'golds',k:7,limit:38,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:30,three:23}},
   {name:'Suco duplo',icon:'🥤',goal:'combo',v:4,limit:32,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:22,three:15}},
@@ -40,7 +40,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Chefão: Lagartão Guloso',icon:'🦎',goal:'boss',hp:50,time:220,ripe:{k:1,life:6,every:5},desc:'Cada linha tira vida do Lagartão; o combo multiplica o dano, e fruta madura colhida tira 3 a mais. Ele joga maçãs bichadas e, bravo, morde uma peça por 4 s.',st:{by:'time',two:140,three:100}}
 ]},{w:4,name:'Obras',icon:'🏗️',skin:'brick',boss:'robot',reward:'robot',card:'hazard',bossC:'#7d8ea8',phases:[
   {name:'Alicerce',icon:'🧱',goal:'lines',v:12,desc:'Limpe {v} linhas.',st:{by:'pieces',two:30,three:22}},
-  {name:'Hora extra',icon:'⏱️',goal:'score',v:1000,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:65,three:45}},
+  {name:'Hora extra',icon:'⏱️',goal:'score',v:650,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:72,three:55}},
   {name:'Esteira',icon:'🏭',goal:'lines',v:8,belt:{rows:[3],every:3},desc:'Limpe {v} linhas. A cada 3 jogadas, a linha da esteira (com as setas) anda uma casa para a direita.',st:{by:'pieces',two:24,three:18}},
   {name:'Entulho',icon:'🪨',goal:'clear',setup:'stones',k:14,desc:'O tabuleiro começa com {k} blocos cinza. Limpe todos.',st:{by:'pieces',two:40,three:30}},
   {name:'Guindaste',icon:'🏗️',goal:'combo',v:5,limit:40,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:28,three:20}},
@@ -51,7 +51,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Chefão: Robozão',icon:'🤖',goal:'boss',hp:60,time:240,belt:{rows:[4],every:4},desc:'Cada linha tira vida do Robozão; o combo multiplica o dano. Uma esteira anda a cada 4 jogadas. Ele joga porcas de aço e, bravo, trava uma peça por 4 s.',st:{by:'time',two:150,three:110}}
 ]},{w:5,name:'Bambuzal',icon:'🎋',skin:'crochet',boss:'panda',reward:'bamboo',card:'bamboo',bossC:'#3c4048',phases:[
   {name:'Brotos',icon:'🌱',goal:'lines',v:12,desc:'Limpe {v} linhas.',st:{by:'pieces',two:30,three:22}},
-  {name:'Chá verde',icon:'🍵',goal:'score',v:1100,time:90,desc:'Faça {v} pontos em até 90 segundos.',st:{by:'time',two:65,three:45}},
+  {name:'Chá verde',icon:'🍵',goal:'score',v:700,time:100,desc:'Faça {v} pontos em até 100 segundos.',st:{by:'time',two:78,three:60}},
   {name:'Bambu cresce',icon:'🎋',goal:'clear',setup:'bamboo',k:3,bamboo:{every:3},desc:'Limpe todo o bambu. A cada 3 jogadas, cada pé de bambu cresce uma casa para cima.',st:{by:'pieces',two:26,three:18}},
   {name:'Lanternas',icon:'🏮',goal:'golds',setup:'golds',k:8,limit:40,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:32,three:25}},
   {name:'Dança do panda',icon:'🐼',goal:'combo',v:5,limit:38,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:27,three:19}},
@@ -62,7 +62,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Chefão: Pandão',icon:'🐼',goal:'boss',hp:70,time:250,bamboo:{every:4},desc:'Cada linha tira vida do Pandão; o combo multiplica o dano. Ele planta bambu que cresce a cada 4 jogadas e, bravo, abraça uma peça por 4 s.',st:{by:'time',two:160,three:120}}
 ]},{w:6,name:'Japão',icon:'⛩️',skin:'lantern',boss:'neko',reward:'sushi',card:'sakura',bossC:'#d6334a',phases:[
   {name:'Torii',icon:'⛩️',goal:'lines',v:14,desc:'Limpe {v} linhas.',st:{by:'pieces',two:34,three:25}},
-  {name:'Trem-bala',icon:'🚄',goal:'score',v:1200,time:80,desc:'Faça {v} pontos em até 80 segundos.',st:{by:'time',two:60,three:42}},
+  {name:'Trem-bala',icon:'🚄',goal:'score',v:700,time:85,desc:'Faça {v} pontos em até 85 segundos.',st:{by:'time',two:70,three:55}},
   {name:'Hanami',icon:'🌸',goal:'petals',v:5,limit:32,petal:{k:3,life:4,every:2},desc:'Pegue {v} flores de sakura em até {limit} peças: limpe a linha da flor antes de a contagem zerar, senão ela voa embora.',st:{by:'pieces',two:24,three:17}},
   {name:'Moedas da sorte',icon:'🪙',goal:'golds',setup:'golds',k:9,limit:42,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:34,three:26}},
   {name:'Taiko',icon:'🥁',goal:'combo',v:6,limit:42,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:32,three:23}},
@@ -106,6 +106,8 @@ function gumSpread(eng){
   if(!c.length) return -1; const i=c[Math.floor(Math.random()*c.length)]; eng.b[(i/N)|0][i%N]={c:-6,s:null,t:0}; return i;
 }
 function campHelps(st){ const t=campTotal(st); return CHELPS.filter(h=>t>=h.need||devAll()).map(h=>h.k); }
+/* fases de pontos (score): a pontuação cresce mais rápido que o número de jogadas (combo), então metas pequenas a mais pedem muito mais tempo.
+   Calibradas com um robô que planeja as 3 peças da bandeja: 1 estrela ~3,4 s por jogada, 3 estrelas ~2,2 s por jogada numa partida boa. */
 /* mais jogadores, metas maiores (há mais variedade de peças e mais cabeças pensando) */
 function campScale(def,P){
   const m=[1,1.25,1.4,1.55][Math.max(0,Math.min(3,P-1))], pm=1+(m-1)*.8, r=x=>Math.round(x);
