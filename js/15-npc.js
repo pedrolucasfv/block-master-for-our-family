@@ -3,17 +3,18 @@
 /* ===================== DUELO CONTRA O ROBÔ =====================
    A partida é um duelo ao vivo comum (D.live) com um adversário de id 'npc'. O que o jogo mandaria pela
    conexão (ataques, poderes, fim) vem para npcHear; o robô responde chamando onSt/onEnd/receiveAttack como se fosse outro celular. */
-const NPC_L=['Ninguém','🤖 Fácil','🤖 Médio','🤖 Difícil'], NPC_N=['','Robô Fácil','Robô Médio','Robô Difícil'];
+const NPC_L=['Ninguém','🤖 Fácil','🤖 Médio','🤖 Difícil','🤖 Expert'], NPC_N=['','Robô Fácil','Robô Médio','Robô Difícil','Robô Expert'];
 /* tempo entre jogadas (ms), chance de jogar qualquer coisa e se pensa na peça seguinte */
-const NPC_LV=[null,{min:2600,max:4000,miss:.3,deep:false},{min:1500,max:2500,miss:.08,deep:false},{min:800,max:1400,miss:0,deep:true}];
+const NPC_LV=[null,{min:2600,max:4000,miss:.3,deep:false},{min:1500,max:2500,miss:.08,deep:false},{min:1300,max:2100,miss:.08,deep:true},{min:800,max:1400,miss:0,deep:true}];
 let NPC=null;
 function npcName(){ return NPC_N[(D&&D.cfg.npc)||(NPC&&NPC.lv)||0]||'Robô'; }
 function npcAvatar(px,cls){ return `<span class="av ${cls}" style="width:${px}px;height:${px}px;line-height:${px}px;font-size:${Math.round(px*.62)}px;background:#5b6b86">🤖</span>`; }
-function npcStats(){ return store.get('ddb_npc',{}); }
+/* o antigo Difícil (nível 3) virou o Expert (nível 4): leva o placar junto */
+function npcStats(){ const st=store.get('ddb_npc',{}); if(!st.v){ if(st[3]){ st[4]=st[3]; delete st[3]; } st.v=2; store.set('ddb_npc',st); } return st; }
 function startNpc(o){
   if(NET.open){ toast('Saia da sala de jogo conectado para jogar contra o robô'); return; }
   ac(); npcStop(); NET.role='A';
-  const lv=Math.min(3,Math.max(1,o.npc|0)), opts={...o,npc:lv}, seed='N|'+Date.now()+'|'+Math.random().toString(36).slice(2);
+  const lv=Math.min(4,Math.max(1,o.npc|0)), opts={...o,npc:lv}, seed='N|'+Date.now()+'|'+Math.random().toString(36).slice(2);
   startDuel({type:'live',opts,seed,players:['A','npc'],npc:lv,label:'Contra o '+NPC_N[lv]+' · '+(TIMES[opts.time]?TIME_L[opts.time]:'Sem limite')+(opts.play?' · '+PLAYS[opts.play]:'')});
   const eng=new Engine(opts); if(opts.obstacles) eng.addStones(makeRng(seed+'|obs'),6);
   NPC={d:D,lv,cfg:NPC_LV[lv],eng,rng:makeRng(seed),tray:null,score:0,placed:0,t:0,next:0,last:performance.now(),timeline:[[0,0]],over:false,shield:0,frozen:0,slow:0,hurry:false,timer:0};
@@ -71,7 +72,7 @@ function npcPick(n){
   const c=n.cfg;
   if(Math.random()<c.miss) return mv[Math.floor(Math.random()*mv.length)];
   if(!c.deep) return c.miss>=.3?mv[Math.floor(Math.random()*Math.min(3,mv.length))]:mv[0];
-  /* difícil: para as melhores jogadas, olha também a melhor jogada seguinte com as peças que sobram */
+  /* difícil e expert: para as melhores jogadas, olha também a melhor jogada seguinte com as peças que sobram */
   let best=mv[0], bv=-Infinity;
   for(const m of mv.slice(0,8)){
     let v=m.v;
@@ -155,7 +156,7 @@ function npcMenu(){ closeEnd(); D=null; IN=null; npcLeave(); openSolo(); }
 function renderNpcBox(){
   const box=$('#soloNpcBox'), lv=soloOpts.npc|0; box.hidden=!lv; $('#soloBestLine').hidden=!!lv; if(!lv) return;
   const s=npcStats()[lv]||{w:0,l:0,t:0};
-  box.innerHTML=`<p class="muted">${['','Joga devagar e às vezes erra. Bom para aprender.','Joga direitinho, num ritmo tranquilo.','Rápido e pensa na próxima peça. Boa sorte!'][lv]}</p>
+  box.innerHTML=`<p class="muted">${['','Joga devagar e às vezes erra. Bom para aprender.','Joga direitinho, num ritmo tranquilo.','Pensa na próxima peça, mas ainda erra de vez em quando.','Rápido, pensa na próxima peça e quase não erra. Boa sorte!'][lv]}</p>
     <p class="muted">Contra o ${NPC_N[lv]}: ${s.w} vitória${s.w===1?'':'s'} · ${s.l} derrota${s.l===1?'':'s'}${s.t?` · ${s.t} empate${s.t>1?'s':''}`:''}</p>
     <div class="toggles">${['attacks','pblocks','powers'].map(k=>`<button type="button" class="tog ${soloOpts[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div>`;
   box.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.t; soloOpts[k]=!soloOpts[k]; b.classList.toggle('on',soloOpts[k]); store.set('ddb_soloOpts',soloOpts); }));
