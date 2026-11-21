@@ -3937,6 +3937,8 @@ function recordShared(o){
   else if(SH.type==='camp') return;
   else recordMatch({type:SH.type,label,date:Date.now(),team:o.sc,names:SH.ids.map(id=>nm(id,false))});
 }
+/* toque na tela libera o relógio das fases de chuva */
+document.addEventListener('pointerdown',()=>{ if(SH&&SH.host&&SH.type==='camp'&&SH.H&&SH.H.cp&&SH.H.cp.wait&&SH.playing&&!SH.over){ SH.H.cp.wait=false; broadcast(); renderShared(); } },true);
 function sharedTick(t){
   const s=SH; if(!s||s.over) return;
   const dt=Math.min(1000,t-s.lastTick); s.lastTick=t;
@@ -3944,7 +3946,8 @@ function sharedTick(t){
   if(s.host){
     const H=s.H;
     if(s.playing&&!H.paused){
-      s.elapsed+=dt;
+      /* campanha (fases de chuva): o relógio só começa depois do primeiro toque ou da primeira peça */
+      if(!(H.cp&&H.cp.wait)) s.elapsed+=dt;
       if(tot){ const left=tot-s.elapsed; setTimer(left,tot,sharedFinal()); if(left<=0){ hostEnd('time',null); return; } }
       if(s.o.sudden&&s.type==='versus'){ const l=H.suddenAt-s.elapsed;
         if(l<=0){ if(H.ph==='choose'){ const av=H.tray.map((p,i)=>p?i:-1).filter(i=>i>=0); hostChoose(prevOf(H.turn),av[Math.floor(Math.random()*av.length)]); broadcast(); renderShared(); }
@@ -4569,7 +4572,7 @@ function campHook(cfg){
     if(def.setup==='ice'){ const idx=e.addStones(rnd,def.k,0); idx.forEach(i=>{ e.b[(i/N)|0][i%N]={c:Math.floor(rnd()*NCOL),s:'ice',t:0,ic:1}; }); }
     if(def.setup==='puzzle'){ const pz=makePuzzle(w===1?'W1P7':'W'+w+'P'+ph,def.bands); e.b=pz.board; const q={}; SH.ids.forEach(id=>q[id]=[]); pz.pieces.forEach((p,i)=>q[SH.ids[i%SH.ids.length]].push(p));
       SH.ids.forEach(id=>{ H.trays[id]=[null,null,null]; for(let s=0;s<3&&q[id].length;s++) H.trays[id][s]=q[id].shift(); }); H.campQ=q; }
-    H.cp={w,gumN:0,gum:0,ripe:0,ripeN:0,petal:0,petalN:0,beltN:0,bambN:0,bamb:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
+    H.cp={wait:!!(def.mt||def.rain),w,gumN:0,gum:0,ripe:0,ripeN:0,petal:0,petalN:0,beltN:0,bambN:0,bamb:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
     hk.progress(H);
   };
   hk.progress=H=>{
@@ -4603,7 +4606,7 @@ function campHook(cfg){
   hk.canDrag=src=>{ const cp=SH.view&&SH.view.cp; return !(frzOn(cp)&&cp.frz.id===SH.me&&src!=='h'&&cp.frz.slot===src); };
   hk.dimSlot=i=>{ const cp=SH.view&&SH.view.cp; return !!(frzOn(cp)&&cp.frz.id===SH.me&&cp.frz.slot===i); };
   hk.afterPlace=(who,res,pts,B)=>{
-    const H=SH.H, cp=H.cp; if(cp.mt) cp.moveAt=SH.elapsed+cp.mt; cp.placed++; cp.ripe+=res.ripe||0; cp.petal+=res.petal||0; cp.lines+=res.n; cp.score+=pts; cp.combo=Math.max(cp.combo,res.combo||0); cp.colorLines+=res.colorLines||0;
+    const H=SH.H, cp=H.cp; cp.wait=false; if(cp.mt) cp.moveAt=SH.elapsed+cp.mt; cp.placed++; cp.ripe+=res.ripe||0; cp.petal+=res.petal||0; cp.lines+=res.n; cp.score+=pts; cp.combo=Math.max(cp.combo,res.combo||0); cp.colorLines+=res.colorLines||0;
     if(def.goal==='boss'){
       if(res.n>0){ const dmg=res.n*Math.max(1,res.combo||1)*(res.chain||1)+((res.ripe||0)+(res.petal||0))*3; cp.hp-=dmg; H.ev.dmg=dmg; }
       if(cp.hp>0){ cp.bossN++; const rage=cp.hp<=cp.hpMax/2; if(rage&&!cp.rage){ cp.rage=1; H.ev.rage=1; }
@@ -4654,6 +4657,7 @@ function campHook(cfg){
   hk.status=v=>{ const cp=v.cp; if(!cp) return null; const grp=SH.ids.length>1;
     const k=SH.ids.indexOf(SH.me), part=grp&&!hk.noRegen?(SH.ids.length<=2?(k?'Seu lado: direita · ':'Seu lado: esquerda · '):`Seu quadrante: ${['↖','↗','↙','↘'][k]} · `):'';
     let t=part+cp.txt, wn=false;
+    if(cp.wait) return {t:'⏸ Relógio parado · toque na tela ou jogue uma peça para começar',w:false};
     if(frzOn(cp)&&cp.frz.id===SH.me){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?performance.now()-SH.remAt.at:0); t+=` · ${BS.frzI} ${BS.frzT} (${Math.ceil((cp.frz.until-el)/1000)} s)`; wn=true; }
     if(def.gum&&cp.gum) t+=` · 🫧 gruda em ${def.gum-(cp.gumN||0)}`;
     if(def.belt) t+=` · 🏭 anda em ${def.belt.every-(cp.beltN||0)}`;
