@@ -35,7 +35,7 @@ language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'UPDATE' and old.vez is not distinct from new.vez then return new; end if;
   perform net.http_post(
-    url := 'https://udduiuoausbswczewcng.supabase.co/functions/v1/avisar',
+    url := 'https://udduiuoausbswczewcng.supabase.co/functions/v1/swift-endpoint',  -- endereço da função "avisar" (o Supabase deu esse nome ao publicar)
     body := jsonb_build_object('type', tg_op, 'table', 'desafios', 'record', to_jsonb(new), 'old_record', case when tg_op = 'UPDATE' then to_jsonb(old) end),
     headers := jsonb_build_object('Content-Type', 'application/json', 'x-segredo', 'COLOQUE_O_SEGREDO')
   );
