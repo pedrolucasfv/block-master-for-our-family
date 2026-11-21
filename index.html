@@ -2761,7 +2761,7 @@ function startDuel(cfg){
   if(cfg.handicapMe) eng.addStones(makeRng(cfg.seed+'|hc'),3);
   D={cfg,o,eng,rng:makeRng(cfg.seed),tray:[null,null,null],hold:null,score:0,placed:0,timeline:[[0,0]],undoUsed:false,snap:null,
      playing:false,over:false,paused:false,elapsed:0,lastTick:0,suddenAt:Infinity,pv:null,finalShown:false,lastBlind:0,
-     live:cfg.type==='live',powers:0,powerLines:0,frozenUntil:0,fog:null,nextGold:30000,others:[],opps:{}};
+     live:cfg.type==='live',wait:cfg.type!=='live'&&(TIMES[o.time]>0||!!o.sudden),powers:0,powerLines:0,frozenUntil:0,fog:null,nextGold:30000,others:[],opps:{}};
   if(D.live){ D.others=(cfg.players||[]).filter(id=>id!==NET.role); D.others.forEach(id=>D.opps[id]={score:0,mini:'',b:'',info:null}); D.teams=cfg.teams||null; D.myTeam=D.teams?D.teams[NET.role]:null; }
   resetScore(); animTimers.forEach(clearTimeout); $('#fx').innerHTML=''; BC.reset();
   $('#gLabel').textContent=cfg.label; $('#gMute').textContent=muted?'🔇':'🔊';
@@ -2832,7 +2832,7 @@ function duelDrop(src,r,c){
   if(D.o.undo&&!D.undoUsed) D.snap=duelSnap();
   if(src==='h') D.hold=null; else D.tray[src]=null;
   const res=D.eng.place(p,r,c,performance.now());
-  D.placed++;
+  D.placed++; if(D.wait){ D.wait=false; setStatus(''); }
   const tb=tickBombs(D.eng); if(tb.boom){ setTimeout(()=>BC.drop(tb.added),0); toast('💣 A bomba explodiu! Blocos cinza no seu tabuleiro'); SFX.boom(); shake(); }
   duelApply(res,r+p.h/2,c+p.w/2,'Bloco dourado é seu! +150');
   const refilled=D.tray.every(x=>!x);
@@ -2878,6 +2878,8 @@ function duelTick(t){
   if(!D||D.over) return;
   const dt=Math.min(1000,t-D.lastTick); D.lastTick=t;
   if(D.playing&&!D.paused){
+    /* jogando sozinho: o relógio só começa depois do primeiro toque ou da primeira peça */
+    if(D.wait){ if(!D.waitShown){ D.waitShown=1; setStatus('⏸ Relógio parado · toque na tela ou jogue uma peça para começar'); } requestAnimationFrame(duelTick); return; }
     D.elapsed+=dt;
     const tot=TIMES[D.o.time]*1000;
     if(tot){ const left=tot-D.elapsed; setTimer(left,tot,finalOn());
@@ -3938,7 +3940,7 @@ function recordShared(o){
   else recordMatch({type:SH.type,label,date:Date.now(),team:o.sc,names:SH.ids.map(id=>nm(id,false))});
 }
 /* toque na tela libera o relógio das fases de chuva */
-document.addEventListener('pointerdown',()=>{ if(SH&&SH.host&&SH.type==='camp'&&SH.H&&SH.H.cp&&SH.H.cp.wait&&SH.playing&&!SH.over){ SH.H.cp.wait=false; broadcast(); renderShared(); } },true);
+document.addEventListener('pointerdown',()=>{ if(D&&D.wait&&D.playing&&!D.over&&!D.paused){ D.wait=false; setStatus(''); } if(SH&&SH.host&&SH.type==='camp'&&SH.H&&SH.H.cp&&SH.H.cp.wait&&SH.playing&&!SH.over){ SH.H.cp.wait=false; broadcast(); renderShared(); } },true);
 function sharedTick(t){
   const s=SH; if(!s||s.over) return;
   const dt=Math.min(1000,t-s.lastTick); s.lastTick=t;
@@ -4572,7 +4574,7 @@ function campHook(cfg){
     if(def.setup==='ice'){ const idx=e.addStones(rnd,def.k,0); idx.forEach(i=>{ e.b[(i/N)|0][i%N]={c:Math.floor(rnd()*NCOL),s:'ice',t:0,ic:1}; }); }
     if(def.setup==='puzzle'){ const pz=makePuzzle(w===1?'W1P7':'W'+w+'P'+ph,def.bands); e.b=pz.board; const q={}; SH.ids.forEach(id=>q[id]=[]); pz.pieces.forEach((p,i)=>q[SH.ids[i%SH.ids.length]].push(p));
       SH.ids.forEach(id=>{ H.trays[id]=[null,null,null]; for(let s=0;s<3&&q[id].length;s++) H.trays[id][s]=q[id].shift(); }); H.campQ=q; }
-    H.cp={wait:!!(def.mt||def.rain),w,gumN:0,gum:0,ripe:0,ripeN:0,petal:0,petalN:0,beltN:0,bambN:0,bamb:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
+    H.cp={wait:!!(def.mt||def.rain||(def.time&&cfg.solo)),w,gumN:0,gum:0,ripe:0,ripeN:0,petal:0,petalN:0,beltN:0,bambN:0,bamb:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
     hk.progress(H);
   };
   hk.progress=H=>{
