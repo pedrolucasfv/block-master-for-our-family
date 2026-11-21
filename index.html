@@ -1930,7 +1930,9 @@ function stepParts(){
 }
 
 /* ===================== opções e códigos ===================== */
-const TIMES=[120,180,300,0], TIME_L=['2 min','3 min','5 min','Sem limite'];
+/* 10 e 15 min ficam no fim da lista (o código do desafio só guarda 0 a 3) e só aparecem nos modos conectados */
+const TIMES=[120,180,300,0,600,900], TIME_L=['2 min','3 min','5 min','Sem limite','10 min','15 min'];
+const TIME_ORDER_NET=[0,1,2,4,5,3], TIME_ORDER_LOCAL=[0,1,2,3];
 const PLAYS=['Clássico','Gravidade','Cego','Sem combo'];
 const GOALS=[0,500,1000,2000], GOAL_L=['Sem meta','500','1.000','2.000'];
 const SERIES_L=['Avulsa','Melhor de 3','Melhor de 5'], SERIES_N=[1,3,5];
@@ -1970,11 +1972,12 @@ function applies(type,k){
   return base.includes(k)||k==='hold';
 }
 function buildOpts(el,o,type,cfg={}){
-  const seg=(key,label,labels)=>applies(type,key)?`<div class="optrow"><label>${label}</label><div class="seg" data-k="${key}">${labels.map((l,i)=>`<button type="button" data-v="${i}" class="${o[key]===i?'sel':''}">${l}</button>`).join('')}</div></div>`:'';
+  const seg=(key,label,labels,order)=>applies(type,key)?`<div class="optrow"><label>${label}</label><div class="seg" data-k="${key}">${(order||labels.map((_,i)=>i)).map(i=>`<button type="button" data-v="${i}" class="${o[key]===i?'sel':''}">${labels[i]}</button>`).join('')}</div></div>`:'';
+  const local=type==='solo'||type==='duel'; if(local&&o.time>3) o.time=1;
   const togs=(keys,label)=>{ const ks=keys.filter(k=>applies(type,k)); if(!ks.length) return '';
     return `<div class="optrow"><label>${label}</label><div class="toggles">${ks.map(k=>`<button type="button" class="tog ${o[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div></div>`; };
   const pane=(k,h)=>h?`<div class="opane" data-pane="${k}">${h}</div>`:'';
-  el.innerHTML=pane('regras',seg('time','Tempo',TIME_L)+seg('play','Modo de jogo',PLAYS)+seg('goal','Meta de pontos',GOAL_L)+seg('series','Série',SERIES_L))
+  el.innerHTML=pane('regras',seg('time','Tempo',TIME_L,local?TIME_ORDER_LOCAL:TIME_ORDER_NET)+seg('play','Modo de jogo',PLAYS)+seg('goal','Meta de pontos',GOAL_L)+seg('series','Série',SERIES_L))
     +pane('mods',togs(['obstacles','heavy','sudden','color','final','undo','hold'],'Modificadores')+togs(['bomb','ice','wild'],'Blocos especiais'))+pane('net',togs(NETF,'Conectados'));
   if(cfg.ro) return; /* só leitura: quem entrou na sala vê, mas não muda */
   const ch=()=>{ if(cfg.onChange) cfg.onChange(); };
@@ -2799,6 +2802,7 @@ function renderDuel(anim){
   const u=$('#aUndo'); if(u) u.disabled=D.undoUsed||!D.snap||!D.playing;
   updPowChips();
   if(D.holdHint) setStatus('Guarde a peça!',true);
+  else if(D.hammerHint&&D.hammer>0) setStatus('Nenhuma peça cabe: use o martelo 🔨',true);
   else if(D.live&&!D.o.sudden&&!D.spect){ const bl=bombLeft(D.eng.b); setStatus(bl!=null?`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`:'',bl!=null&&bl<=1); }
 }
 const duelIN={
@@ -2868,8 +2872,10 @@ function duelAfter(newMove){
 }
 /* com o espaço de guardar vazio e só uma peça na bandeja, guardar traz 3 peças novas: ainda há jogada */
 function holdRescue(tray,hold,on){ return !!on&&!hold&&tray.filter(Boolean).length===1; }
-function duelCheckStuck(){ if(!D.playing) return; const ps=[...D.tray,D.hold].filter(Boolean); D.holdHint=false;
-  if(ps.some(p=>D.eng.anyFit(p))){ holdPulse(false); return; }
+function duelCheckStuck(){ if(!D.playing) return; const ps=[...D.tray,D.hold].filter(Boolean); D.holdHint=false; const hh=D.hammerHint; D.hammerHint=false;
+  if(ps.some(p=>D.eng.anyFit(p))){ holdPulse(false); if(hh) setStatus(''); return; }
+  /* martelo sobrando: ainda dá para abrir espaço, não perde */
+  if(D.hammer>0){ D.hammerHint=true; if(!hh) toast('Nenhuma peça cabe: use o martelo 🔨 para abrir espaço'); setStatus('Nenhuma peça cabe: use o martelo 🔨',true); return; }
   if(holdRescue(D.tray,D.hold,D.o.hold)){ D.holdHint=true; toast('Nenhuma peça cabe: guarde a peça para receber peças novas'); holdPulse(true); setStatus('Guarde a peça!',true); return; }
   duelEnd('stuck'); }
 function holdPulse(on){ const h=$('#holdSlot'); if(h) h.classList.toggle('pulse',!!on); }
@@ -3174,7 +3180,7 @@ function soloSeg(el,key,labels){
   el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ soloOpts[key]=+b.dataset.v; store.set('ddb_soloOpts',soloOpts); renderSolo(); }));
 }
 function renderSolo(){
-  soloSeg($('#soloTime'),'time',TIME_L); soloSeg($('#soloPlay'),'play',PLAYS);
+  soloSeg($('#soloTime'),'time',TIME_L.slice(0,4)); soloSeg($('#soloPlay'),'play',PLAYS);
   const b=getBest('solo',soloOpts);
   $('#soloBestLine').textContent=(b?`Seu recorde neste modo: ${fmtN(b)}.`:'Nenhuma partida neste modo ainda.')+(soloOpts.time===3?' Sem relógio: joga até não caber mais peça.':' Faça o máximo de pontos antes do tempo acabar.');
   if(!$('#soloMods').dataset.built){ buildOpts($('#soloMods'),soloOpts,'solo'); $('#soloMods').dataset.built=1;
@@ -3295,8 +3301,16 @@ async function copyText(text,btn){
 let stream=null, scanning=false, detector=null;
 async function scan(onText,errEl){
   if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){ errEl.textContent=mediaWhy('cam',null)+' Por enquanto, use Copiar e colar.'; return; }
-  try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}); }
-  catch(e){ errEl.textContent=mediaWhy('cam',e)+' Por enquanto, use Copiar e colar.'; return; }
+  /* resolução maior ajuda nos QR densos; Samsung com várias câmeras às vezes abre a grande-angular (sem foco de perto),
+     então, se houver mais de uma câmera traseira, troca para a principal ("camera2 0") */
+  const V={facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}};
+  try{ stream=await navigator.mediaDevices.getUserMedia({video:V,audio:false}); }
+  catch(e){ try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}); }
+    catch(e2){ errEl.textContent=mediaWhy('cam',e2)+' Por enquanto, use Copiar e colar.'; return; } }
+  try{ const cur=stream.getVideoTracks()[0], devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput'&&/back|traseira|rear|environment/i.test(d.label));
+    const main=devs.find(d=>/\b0\b/.test(d.label))||devs[0], curId=cur.getSettings().deviceId;
+    if(devs.length>1&&main&&main.deviceId&&main.deviceId!==curId){ const s2=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:main.deviceId},width:{ideal:1920},height:{ideal:1080}},audio:false}); stream.getTracks().forEach(t=>t.stop()); stream=s2; } }catch(e){}
+  try{ const tr=stream.getVideoTracks()[0], cap=tr.getCapabilities?tr.getCapabilities():{}; if(cap.focusMode&&cap.focusMode.includes('continuous')) await tr.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
   const video=$('#video'), canvas=$('#canvas'), ctx=canvas.getContext('2d',{willReadFrequently:true});
   video.srcObject=stream; $('#scanner').classList.add('show'); try{ await video.play(); }catch(e){}
   if('BarcodeDetector' in window&&!detector){ try{ detector=new BarcodeDetector({formats:['qr_code']}); }catch(e){ detector=null; } }
@@ -3309,7 +3323,7 @@ async function scan(onText,errEl){
       if(!found&&typeof window.jsQR==='function'){
         const sc=Math.min(1,800/Math.max(video.videoWidth,video.videoHeight)); canvas.width=Math.round(video.videoWidth*sc); canvas.height=Math.round(video.videoHeight*sc);
         ctx.drawImage(video,0,0,canvas.width,canvas.height); const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-        const r=jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'}); if(r&&r.data) found=r.data;
+        const r=jsQR(img.data,img.width,img.height,{inversionAttempts:'attemptBoth'}); if(r&&r.data) found=r.data;
       }
       if(found){ stopScan(); onText(found); return; }
     }
@@ -3901,7 +3915,7 @@ function hostHold(who,src){
 }
 function hostCheckStuck(){
   if(SH.type==='versus'||SH.H.over) return; const H=SH.H;
-  const can=w=>{ const B=H.bd[bdKey(w)], reg=regionOf(SH.type,w); return H.trays[w].some(p=>p&&B.eng.anyFit(p,reg))||(!!B.hold&&B.eng.anyFit(B.hold,reg))||holdRescue(H.trays[w],B.hold,SH.o.hold&&SH.type!=='versus'); };
+  const can=w=>{ const B=H.bd[bdKey(w)], reg=regionOf(SH.type,w); return ((H.hammer||{})[w]||0)>0||H.trays[w].some(p=>p&&B.eng.anyFit(p,reg))||(!!B.hold&&B.eng.anyFit(B.hold,reg))||holdRescue(H.trays[w],B.hold,SH.o.hold&&SH.type!=='versus'); };
   SH.ids.forEach(id=>H.stuck[id]=!can(id));
   if(SH.type==='tsplit'){
     /* time sem jogadas fica de fora; o outro continua até passar a pontuação dele */
@@ -3979,7 +3993,7 @@ const sharedIN={
 $('#board').addEventListener('pointerdown',e=>{
   const at=()=>{ grC=null; const gr=GR(), c=Math.floor((e.clientX-gr.left)/CS), r=Math.floor((e.clientY-gr.top)/CS); return (r<0||c<0||r>=N||c>=N)?null:[r,c]; };
   if(D&&D.live&&D.hammer>0&&D.playing&&!D.paused){ const p=at(); if(!p) return; const [r,c]=p, v=D.eng.b[r][c]; if(!v) return;
-    e.preventDefault(); e.stopPropagation(); D.eng.b[r][c]=null; D.hammer--; spawnClear(r*N+c,v.c,v.s,0); SFX.place(); buzz(15); renderDuel(); sendState(); return; }
+    e.preventDefault(); e.stopPropagation(); D.eng.b[r][c]=null; D.hammer--; spawnClear(r*N+c,v.c,v.s,0); SFX.place(); buzz(15); renderDuel(); sendState(); duelCheckStuck(); return; }
   if(SH&&SH.tapMode==='row'&&SH.playing&&!SH.over){ const p=at(); if(!p) return; e.preventDefault(); e.stopPropagation(); SH.tapMode=null; act({k:'help',h:'row',i:p[0]}); SFX.boom(); renderShared(); return; }
   if(SH&&SH.view&&SH.view.hammer>0&&SH.playing&&!SH.over){ const p=at(); if(!p) return; const [r,c]=p; if(!SH.view.b[r][c]) return;
     e.preventDefault(); e.stopPropagation(); act({k:'hammer',i:r*N+c}); SFX.place(); buzz(15); }
@@ -4640,7 +4654,11 @@ function campHook(cfg){
     cp.frz={slot:cand[Math.floor(Math.random()*cand.length)],id,until:SH.elapsed+4000}; if(H.ev&&H.ev.boss) H.ev.boss.frz=1;
   };
   hk.afterHelp=()=>{ const H=SH.H; if(H.over) return; if(hk.progress(H)) hk.finish(true); };
-  hk.stuck=()=>hk.finish(false,def.setup==='puzzle'?'Nenhuma peça cabe mais: o quebra-cabeça travou':'Sem espaço no tabuleiro');
+  /* ajuda ainda não usada (martelo, trocar peças, bomba de linha) salva: avisa em vez de perder */
+  hk.helpLeft=cp=>cp.helps.some(h=>!cp.used.includes(h)&&!(h==='swap'&&hk.noRegen));
+  hk.stuck=()=>{ const cp=SH.H.cp;
+    if(hk.helpLeft(cp)){ if(!cp.needHelp){ cp.needHelp=true; broadcast(); renderShared(); } return; }
+    hk.finish(false,def.setup==='puzzle'?'Nenhuma peça cabe mais: o quebra-cabeça travou':'Sem espaço no tabuleiro'); };
   hk.tick=t=>{
     if(!SH||SH.over) return; const v=SH.view, cp=SH.host?SH.H.cp:v&&v.cp; if(!cp) return;
     if(cp.frz&&SH.playing){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?t-SH.remAt.at:0);
@@ -4664,7 +4682,7 @@ function campHook(cfg){
     if(def.gum&&cp.gum) t+=` · 🫧 gruda em ${def.gum-(cp.gumN||0)}`;
     if(def.belt) t+=` · 🏭 anda em ${def.belt.every-(cp.beltN||0)}`;
     if(def.bamboo&&cp.bamb) t+=` · 🎋 cresce em ${def.bamboo.every-(cp.bambN||0)}`;
-    if(cp.mt&&SH.playing){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?performance.now()-SH.remAt.at:0), left=Math.max(0,cp.moveAt-el); t=`⏱ ${(left/1000).toFixed(1).replace('.',',')} s · `+t; if(left<3000) wn=true; } if(v.hammer>0) t='🔨 Toque num bloco para quebrar'; if(SH.tapMode==='row') t='💥 Toque numa casa: a linha inteira some';
+    if(cp.mt&&SH.playing){ const el=SH.host?SH.elapsed:cp.el+(SH.remAt?performance.now()-SH.remAt.at:0), left=Math.max(0,cp.moveAt-el); t=`⏱ ${(left/1000).toFixed(1).replace('.',',')} s · `+t; if(left<3000) wn=true; } if(cp.needHelp&&SH.playing){ t='Nenhuma peça cabe: use uma ajuda (🔨 🔀 💥) para continuar'; wn=true; } if(v.hammer>0) t='🔨 Toque num bloco para quebrar'; if(SH.tapMode==='row') t='💥 Toque numa casa: a linha inteira some';
     return {t,w:wn}; };
   hk.render=(v,anim)=>{
     const cp=v.cp; if(!cp) return;
@@ -4713,7 +4731,7 @@ function campHook(cfg){
       for(let x=0;x<N;x++){ const v=B.eng.b[y][x]; if(v){ cl.push([y*N+x,v.c,v.s]); B.eng.b[y][x]=null; } }
       H.ev={id:(H.ev?H.ev.id:0)+1,who,k:null,pts:0,res:{n:0,chain:0,colorLines:0,bombs:0,perfect:false,combo:B.eng.combo},cleared:cl,placed:[],cr:y+.5,cc:N/2}; playEv(H.ev); }
     else return;
-    cp.used.push(h); if(hk.progress(H)) hk.finish(true); else hostCheckStuck();
+    cp.used.push(h); cp.needHelp=false; if(hk.progress(H)) hk.finish(true); else hostCheckStuck();
   };
   hk.onEnd=over=>{
     const cp=SH.H.cp; over.win=cp.win; over.stars=cp.stars; over.msg=cp.msg; over.camp={w,ph,slot:cfg.camp.slot}; over.cp={placed:cp.placed,lines:cp.lines,score:cp.score,el:cp.el,used:cp.used.length};
