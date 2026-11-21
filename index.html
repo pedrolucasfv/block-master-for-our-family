@@ -36,6 +36,24 @@
   </div>
 </section>
 
+<!-- DESAFIOS A DISTÂNCIA -->
+<section id="chal" class="screen">
+  <div class="pad">
+    <div class="topnav"><button class="back" data-go="home">← Voltar</button></div>
+    <h1>⚔️ Desafios</h1>
+    <p class="muted">Melhor de 5: cada um joga a rodada quando puder, com as mesmas peças. Quem fizer mais pontos leva a rodada.</p>
+    <div id="chalMine"></div>
+    <div class="card">
+      <h2>Desafiar alguém</h2>
+      <div class="optrow"><label>Tempo de cada rodada</label><div class="seg" id="chalTime"></div></div>
+      <input class="code nick" id="chalFind" placeholder="🔎 Procurar pelo nome" autocomplete="off" spellcheck="false" style="width:100%;margin:6px 0 4px">
+      <div id="chalPeople"></div>
+      <div style="height:8px"></div>
+      <button class="btn" id="chalInvite">📲 Convidar outra pessoa pelo WhatsApp<small style="display:block;font-size:12px;font-weight:400;opacity:.75">para quem ainda não está na lista</small></button>
+    </div>
+  </div>
+</section>
+
 <!-- SOZINHO -->
 <section id="solo" class="screen">
   <div class="pad">
@@ -66,7 +84,7 @@
     </div>
     <div class="card">
       <h2>Conectado</h2>
-      <p class="muted">Celulares no mesmo Wi-Fi, ligados direto: placar ao vivo, co-op, versus em turnos e ataques. Um cria a sala, o outro entra.</p>
+      <p class="muted">Celulares ligados direto: placar ao vivo, co-op, versus em turnos e ataques. Um cria a sala, o outro entra (juntos pelo QR, ou de longe por link).</p>
       <div id="withConn">
         <button class="btn primary" id="pHost">Criar sala</button>
         <div style="height:8px"></div>

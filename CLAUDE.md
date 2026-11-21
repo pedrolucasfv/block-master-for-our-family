@@ -27,7 +27,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/14-main.js` | Inicialização e modo teste (`simAdd`, `simBoot`, `simBot`) |
 | `js/15-npc.js` | Duelo contra o robô no Sozinho (`startNpc`, `NPC`, `npcHear`): é um duelo ao vivo (`D.cfg.npc`) com adversário `'npc'`; o `send` desvia para o robô quando não há sala |
 | `js/16-ranking.js` | Ranking online no Supabase (`SUPA_URL`/`SUPA_KEY`; vazio = desligado): recorde por fase da campanha (`rkCampEnd`, `rkPhaseBox`), ranking geral (`rkOpenGeneral`), fila de envio offline (`ddb_rkq`). Banco: `supabase/ranking.sql` |
-| `js/17-desafio.js` | Desafio a distância, melhor de 5 (Supabase; usa `rkFetch`/`rkQueue`): lista (`dsList`), cartão (`dsOpen`), rodada é um `startDuel` com `type:'chal'` (`dsPlay`, `dsRoundEnd`), aviso por WhatsApp (`dsShare`), link `?d=id` (`dsFromLink`). Banco: `supabase/desafios.sql` |
+| `js/17-desafio.js` | Desafio a distância, melhor de 5 (Supabase; usa `rkFetch`/`rkQueue`): tela `#chal` (`dsList`, jogadores para desafiar em `dsRenderPeople`), cartão (`dsOpen`), rodada é um `startDuel` com `type:'chal'` (`dsPlay`, `dsRoundEnd`), aviso por WhatsApp (`dsShare`), link `?d=id` (`dsFromLink`). Banco: `supabase/desafios.sql` |
 | `js/18-sala-link.js` | Sala por link: guarda oferta/resposta do WebRTC no Supabase (`slSend` de quem cria, `slFromLink` de quem abre `?s=id`). Banco: `supabase/salas.sql` |
 | `css/base.css` | Variáveis de tema em `:root[data-app=…]`, layout, blocos, jogo |
 | `css/worlds.css` | Visual de cada mundo (`:root[data-world=…]`) e animações de limpeza por skin |

@@ -18,14 +18,20 @@ alter table desafios enable row level security;
 drop policy if exists "todos leem" on desafios;
 create policy "todos leem" on desafios for select using (true);
 
-create or replace function criar_desafio(p_nome text, p_tempo int) returns text
+-- p_rival: nome de quem já está no ranking (desafio direto); vazio = convite por link, entra quem abrir primeiro
+drop function if exists criar_desafio(text,int);
+create or replace function criar_desafio(p_nome text, p_tempo int, p_rival text default null) returns text
 language plpgsql security definer set search_path = public as $$
-declare v_id text;
+declare v_id text; v_b text; v_bn text;
 begin
   if p_tempo not between 0 and 3 then raise exception 'tempo inválido'; end if;
   perform salvar_jogador(p_nome, 0, 0);
+  if coalesce(btrim(p_rival),'') <> '' then
+    select chave, nome into v_b, v_bn from jogadores where chave = rk_chave(p_rival);
+    if v_b is null or v_b = rk_chave(p_nome) then raise exception 'jogador não encontrado'; end if;
+  end if;
   v_id := substr(md5(random()::text || clock_timestamp()::text), 1, 8);
-  insert into desafios(id, a, a_nome, tempo) values (v_id, rk_chave(p_nome), btrim(p_nome), p_tempo);
+  insert into desafios(id, a, a_nome, b, b_nome, tempo) values (v_id, rk_chave(p_nome), btrim(p_nome), v_b, v_bn, p_tempo);
   return v_id;
 end $$;
 
@@ -64,10 +70,10 @@ begin
   update desafios set rodadas = d.rodadas, vez = d.vez, vencedor = d.vencedor, atualizado = now() where id = p_id;
 end $$;
 
-revoke all on function criar_desafio(text,int) from public;
+revoke all on function criar_desafio(text,int,text) from public;
 revoke all on function entrar_desafio(text,text) from public;
 revoke all on function jogar_rodada(text,text,int,int) from public;
-grant execute on function criar_desafio(text,int) to anon, authenticated;
+grant execute on function criar_desafio(text,int,text) to anon, authenticated;
 grant execute on function entrar_desafio(text,text) to anon, authenticated;
 grant execute on function jogar_rodada(text,text,int,int) to anon, authenticated;
 grant select on desafios to anon, authenticated;

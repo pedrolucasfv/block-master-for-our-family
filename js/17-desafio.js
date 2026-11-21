@@ -15,7 +15,7 @@ function dsMine(){ const k=encodeURIComponent(dsKey()); return Promise.all([rkFe
 /* sem nome não dá para desafiar: pede um nome (o mesmo do Perfil) */
 function dsNeedNick(cb){
   if(myNick()){ cb(); return; }
-  openEnd('<h2>Qual é o seu nome?</h2><p class="muted">É assim que os outros vão ver você nos desafios e no ranking.</p><input id="dsNick" maxlength="16" autocomplete="nickname" style="width:100%;margin-top:10px">',
+  openEnd('<h2>Qual é o seu nome?</h2><p class="muted">É assim que os outros vão ver você nos desafios e no ranking.</p><input class="code nick" id="dsNick" maxlength="16" autocomplete="nickname" style="width:100%;margin-top:10px">',
     [{t:'Continuar',cls:'primary',on:()=>{ const v=$('#dsNick').value.trim().slice(0,16); if(!v){ toast('Escreva um nome'); return; } store.set('ddb_nick',v); closeEnd(); cb(); }},{t:'Voltar',cls:'ghost',on:closeEnd}]);
   setTimeout(()=>{ const i=$('#dsNick'); if(i) i.focus(); },100);
 }
@@ -24,6 +24,7 @@ function dsShare(d,kind){
   let t;
   if(kind==='convite') t=`⚔️ ${me} te desafiou no Duelo de Blocos! Melhor de 5, ${TIME_L[d.tempo]} por rodada. Toque para jogar:`;
   else if(d.vez==='fim') t=d.vencedor==='empate'?`⚔️ Nosso desafio no Duelo de Blocos terminou empatado: ${my} × ${ot}!`:`⚔️ Desafio no Duelo de Blocos: ${d.vencedor===side?'eu venci':'você venceu'} por ${Math.max(wa,wb)} × ${Math.min(wa,wb)}! Revanche?`;
+  else if(d.rodadas.length===1&&side==='a') t=`⚔️ ${me} te desafiou no Duelo de Blocos! Melhor de 5, ${TIME_L[d.tempo]} por rodada. Já joguei a rodada 1, sua vez:`;
   else t=`⚔️ Joguei minha parte no nosso desafio do Duelo de Blocos. Sua vez (rodada ${r})! Placar: ${me} ${my} × ${ot} ${dsOther(d,side)}.`;
   shareText(t+(l?'\n'+l:''));
 }
@@ -46,9 +47,10 @@ function dsOpen(id,delay){
     if(!side) body+=`<p class="muted">Você não está neste desafio.</p>`;
     else if(d.vez!=='fim'){
       if(dsMyTurn(d)) btns.push({t:`Jogar rodada ${last+1}`,cls:'primary',on:()=>dsPlay(d)});
-      else body+=`<p class="muted">Vez de ${esc(dsOther(d,side))}. Avise pelo WhatsApp!</p>`;
-      btns.push({t:!d.b?'Mandar convite no WhatsApp':'Avisar no WhatsApp',cls:dsMyTurn(d)?'':'primary',on:()=>dsShare(d,!d.b?'convite':'vez')});
-    } else btns.push({t:'Compartilhar resultado',on:()=>dsShare(d,'fim')},{t:'Revanche',cls:'primary',on:()=>dsNew(d.tempo)});
+      else body+=`<p class="muted">${!d.b?'Esperando alguém aceitar o convite.':`Vez de ${esc(dsOther(d,side))}. Avise pelo WhatsApp!`}</p>`;
+      if(!d.b) btns.push({t:'Mandar convite no WhatsApp',on:()=>dsShare(d,'convite')});
+      else if(!dsMyTurn(d)) btns.push({t:'Avisar no WhatsApp',cls:'primary',on:()=>dsShare(d,'vez')});
+    } else btns.push({t:'Compartilhar resultado',on:()=>dsShare(d,'fim')},{t:'Revanche',cls:'primary',on:()=>dsNew(d.tempo,dsOther(d,side))});
     btns.push({t:'Meus desafios',cls:'ghost',on:dsList});
     openEnd(body,btns);
   }).catch(()=>openEnd('<h2>⚔️ Desafio</h2><p class="reason">Sem internet agora. Tente de novo daqui a pouco.</p>',[{t:'Fechar',cls:'ghost',on:closeEnd}])),delay||0);
@@ -63,35 +65,53 @@ function dsSend(id,r,s){ store.set('ddb_dspend',null); rkQueue('jogar_rodada',{p
 function dsRoundEnd(d){ const c=d.cfg.chal; dsSend(c.id,c.r,d.score); }
 function dsEndBtns(d){ const c=d.cfg.chal;
   return [{t:'Avisar no WhatsApp',cls:'primary',on:()=>dsGet(c.id).then(x=>dsShare(x||c.d,'vez')).catch(()=>dsShare(c.d,'vez'))},
-    {t:'Ver desafio',on:()=>{ D=null; IN=null; show('home'); dsOpen(c.id,store.get('ddb_rkq',[]).length?1500:0); }},
+    {t:'Ver desafio',on:()=>{ D=null; IN=null; dsList(); dsOpen(c.id,store.get('ddb_rkq',[]).length?1500:0); }},
     {t:'Menu',cls:'ghost',on:goHome}]; }
 /* saiu no meio de uma rodada (ou fechou o jogo): manda o que tinha */
 function dsCheckPend(){ const p=store.get('ddb_dspend',null); if(!p||(D&&D.cfg&&D.cfg.type==='chal'&&!D.over)) return; dsSend(p.id,p.r,p.s||0); toast(`Você saiu no meio da rodada ${p.r} do desafio: ela foi enviada com ${fmtN(p.s||0)} pontos.`); }
-function dsNew(tempo){
+/* cria o desafio: com rival (alguém da lista) ou sem (convite por link, entra quem abrir primeiro) */
+function dsNew(tempo,rival){
   dsNeedNick(()=>{
-    const go=t=>{ openEnd('<h2>⚔️ Novo desafio</h2><p class="muted">Criando…</p>',[]);
-      rkFetch('rpc/criar_desafio',{body:{p_nome:myNick(),p_tempo:t}}).then(id=>dsOpen(id)).catch(()=>openEnd('<h2>⚔️ Novo desafio</h2><p class="reason">Sem internet agora. Tente de novo daqui a pouco.</p>',[{t:'Fechar',cls:'ghost',on:closeEnd}])); };
-    if(tempo!=null){ go(tempo); return; }
-    openEnd('<h2>⚔️ Novo desafio</h2><p class="muted">Melhor de 5: cada um joga a rodada quando puder, com as mesmas peças. Quanto tempo cada rodada?</p>',
-      DS_TIMES.map(t=>({t:TIME_L[t],cls:t===0?'primary':'',on:()=>go(t)})).concat([{t:'Voltar',cls:'ghost',on:dsList}]));
+    openEnd('<h2>⚔️ Novo desafio</h2><p class="muted">Criando…</p>',[]);
+    rkFetch('rpc/criar_desafio',{body:{p_nome:myNick(),p_tempo:tempo==null?dsTempo():tempo,p_rival:rival||null}}).then(id=>dsOpen(id))
+      .catch(()=>openEnd('<h2>⚔️ Novo desafio</h2><p class="reason">Não deu para criar agora. Confira a internet e tente de novo.</p>',[{t:'Fechar',cls:'ghost',on:closeEnd}]));
   });
 }
-/* lista: primeiro os desafios em que é a sua vez */
+const dsTempo=()=>store.get('ddb_dstempo',0);
+let DS_PEOPLE=[], DS_LIST=[];
+/* tela de desafios: os meus (sua vez, esperando, terminados) e a lista de jogadores para desafiar */
 function dsList(){
-  dsNeedNick(()=>{ dsCheckPend();
-    openEnd('<h2>⚔️ Desafios</h2><p class="muted">Carregando…</p>',[{t:'Novo desafio',cls:'primary',on:()=>dsNew()},{t:'Fechar',cls:'ghost',on:closeEnd}]);
-    setTimeout(()=>dsMine().then(list=>{ const box=$('#endBody'); if(!box) return;
-      const row=d=>{ const side=dsSide(d), [wa,wb]=dsWins(d), my=side==='b'?wb:wa, ot=side==='b'?wa:wb;
-        const st=d.vez==='fim'?(d.vencedor===side?'🏆 venceu':d.vencedor==='empate'?'empate':'perdeu'):dsMyTurn(d)?'▶ sua vez':!d.b?'esperando alguém aceitar':'vez do outro';
-        return `<button type="button" class="kv dsrow" data-id="${esc(d.id)}" style="width:100%;background:none;border:0;border-bottom:1px solid var(--line);font:inherit;color:inherit;text-align:left"><span>vs ${esc(dsOther(d,side))} · ${my} × ${ot}</span><b>${st}</b></button>`; };
-      const turn=list.filter(dsMyTurn), wait=list.filter(d=>d.vez!=='fim'&&!dsMyTurn(d)), done=list.filter(d=>d.vez==='fim').slice(0,10);
-      const sec=(t,a)=>a.length?`<p class="muted" style="margin-top:12px">${t}</p><div class="rank">${a.map(row).join('')}</div>`:'';
-      box.innerHTML='<h2>⚔️ Desafios</h2>'+(list.length?sec('Sua vez',turn)+sec('Esperando',wait)+sec('Terminados',done):'<p class="muted">Nenhum desafio ainda. Crie um e mande o link pelo WhatsApp!</p>');
-      $$('#endBody .dsrow').forEach(b=>b.addEventListener('click',()=>dsOpen(b.dataset.id)));
-      dsBadge(turn.length);
-    }).catch(()=>{ const box=$('#endBody'); if(box) box.innerHTML='<h2>⚔️ Desafios</h2><p class="reason">Sem internet agora. Tente de novo daqui a pouco.</p>'; }),store.get('ddb_rkq',[]).length?1500:0);
+  dsNeedNick(()=>{ closeEnd(); dsCheckPend(); show('chal');
+    $('#chalTime').innerHTML=DS_TIMES.map(t=>`<button type="button" data-v="${t}" class="${dsTempo()===t?'sel':''}">${TIME_L[t]}</button>`).join('');
+    $$('#chalTime button').forEach(b=>b.addEventListener('click',()=>{ store.set('ddb_dstempo',+b.dataset.v); $$('#chalTime button').forEach(x=>x.classList.toggle('sel',x===b)); }));
+    $('#chalMine').innerHTML='<p class="muted">Carregando seus desafios…</p>'; $('#chalPeople').innerHTML='<p class="muted">Carregando jogadores…</p>';
+    setTimeout(()=>{
+      dsMine().then(list=>{ DS_LIST=list; dsRenderMine(); dsRenderPeople(); dsBadge(list.filter(dsMyTurn).length); })
+        .catch(()=>{ $('#chalMine').innerHTML='<div class="card"><p class="reason">Sem internet agora. Volte e tente de novo daqui a pouco.</p></div>'; });
+      rkFetch('jogadores?select=nome,chave,estrelas&order=atualizado.desc&limit=100').then(r=>{ DS_PEOPLE=r.filter(x=>x.chave!==dsKey()); dsRenderPeople(); })
+        .catch(()=>{ $('#chalPeople').innerHTML='<p class="muted">Sem internet agora.</p>'; });
+    },store.get('ddb_rkq',[]).length?1500:0);
   });
 }
+function dsRenderMine(){
+  const row=d=>{ const side=dsSide(d), [wa,wb]=dsWins(d), my=side==='b'?wb:wa, ot=side==='b'?wa:wb;
+    const st=d.vez==='fim'?(d.vencedor===side?'🏆 venceu':d.vencedor==='empate'?'empate':'perdeu'):dsMyTurn(d)?'▶ sua vez':!d.b?'esperando alguém aceitar':`vez de ${dsOther(d,side)}`;
+    return `<button type="button" class="kv dsrow" data-id="${esc(d.id)}"><span>vs ${esc(dsOther(d,side))} · <b>${my} × ${ot}</b></span><b>${esc(st)}</b></button>`; };
+  const L=DS_LIST, turn=L.filter(dsMyTurn), wait=L.filter(d=>d.vez!=='fim'&&!dsMyTurn(d)), done=L.filter(d=>d.vez==='fim').slice(0,10);
+  const sec=(t,a)=>a.length?`<div class="card"><h2>${t}</h2><div class="rank">${a.map(row).join('')}</div></div>`:'';
+  $('#chalMine').innerHTML=sec('▶ Sua vez',turn)+sec('⏳ Esperando',wait)+sec('Terminados',done);
+  $$('#chalMine .dsrow').forEach(b=>b.addEventListener('click',()=>dsOpen(b.dataset.id)));
+}
+function dsRenderPeople(){
+  const box=$('#chalPeople'), q=($('#chalFind').value||'').trim().toLowerCase();
+  const busy=new Set(DS_LIST.filter(d=>d.vez!=='fim').map(d=>dsSide(d)==='a'?d.b:d.a));
+  const list=DS_PEOPLE.filter(p=>!q||p.chave.includes(q));
+  box.innerHTML=list.length?'<div class="rank">'+list.slice(0,40).map(p=>`<div class="kv"><span>${esc(p.nome)}${p.estrelas?` <small class="muted">${p.estrelas}⭐</small>`:''}${busy.has(p.chave)?' <small class="muted">· em andamento</small>':''}</span><button type="button" class="btn small dsgo" data-n="${esc(p.nome)}" style="width:auto">Desafiar</button></div>`).join('')+'</div>'
+    :`<p class="muted">${q?'Ninguém com esse nome.':'Ainda não tem ninguém na lista. Quem coloca o nome no Perfil e joga aparece aqui.'}</p>`;
+  $$('#chalPeople .dsgo').forEach(b=>b.addEventListener('click',()=>dsNew(null,b.dataset.n)));
+}
+$('#chalFind').addEventListener('input',dsRenderPeople);
+$('#chalInvite').addEventListener('click',()=>dsNew(null,null));
 function dsBadge(n){ const b=$('#goChal'); if(b) b.textContent=n?`⚔️ Desafios · ${n} na sua vez`:'⚔️ Desafios a distância'; }
 /* abriu o jogo por um link de desafio (?d=...) */
 function dsFromLink(){

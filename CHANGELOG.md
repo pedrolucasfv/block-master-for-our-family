@@ -5,6 +5,7 @@ Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = corre
 
 ## 1.4 · 21/11/2026
 - 🌍 **Sala por link:** quem cria a sala manda um convite pelo WhatsApp; a pessoa toca no link e entra de longe, sem ler QR.
+- ⚔️ **Desafios numa tela própria:** lista de jogadores para desafiar direto (sem precisar de link), seus desafios separados em "sua vez", "esperando" e "terminados", e escolha do tempo da rodada.
 - 🏷️ Versão do jogo no rodapé do menu.
 
 ## 1.3 · 21/11/2026
