@@ -250,3 +250,5 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 .ro .tog:not(.on){opacity:.55}
 
 @media (prefers-reduced-motion: reduce){ #board.shake,#board.bump,#sheen i,.cell.rip::before{animation:none} }
+/* versão do jogo no rodapé do menu */
+.ver{margin-top:18px;font-size:12px;opacity:.75;text-align:center}

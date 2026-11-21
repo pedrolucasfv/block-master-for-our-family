@@ -28,6 +28,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/15-npc.js` | Duelo contra o robô no Sozinho (`startNpc`, `NPC`, `npcHear`): é um duelo ao vivo (`D.cfg.npc`) com adversário `'npc'`; o `send` desvia para o robô quando não há sala |
 | `js/16-ranking.js` | Ranking online no Supabase (`SUPA_URL`/`SUPA_KEY`; vazio = desligado): recorde por fase da campanha (`rkCampEnd`, `rkPhaseBox`), ranking geral (`rkOpenGeneral`), fila de envio offline (`ddb_rkq`). Banco: `supabase/ranking.sql` |
 | `js/17-desafio.js` | Desafio a distância, melhor de 5 (Supabase; usa `rkFetch`/`rkQueue`): lista (`dsList`), cartão (`dsOpen`), rodada é um `startDuel` com `type:'chal'` (`dsPlay`, `dsRoundEnd`), aviso por WhatsApp (`dsShare`), link `?d=id` (`dsFromLink`). Banco: `supabase/desafios.sql` |
+| `js/18-sala-link.js` | Sala por link: guarda oferta/resposta do WebRTC no Supabase (`slSend` de quem cria, `slFromLink` de quem abre `?s=id`). Banco: `supabase/salas.sql` |
 | `css/base.css` | Variáveis de tema em `:root[data-app=…]`, layout, blocos, jogo |
 | `css/worlds.css` | Visual de cada mundo (`:root[data-world=…]`) e animações de limpeza por skin |
 | `css/ui.css` | Efeitos, sobreposições, histórico, conexão, abas da sala, estrelinha dourada |
@@ -38,6 +39,9 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 - `NET.role`: `'A'` é quem criou a sala, `'S'` é o espectador, os outros são ids de convidado. Quem criou é o dono da verdade e repassa (`relay`).
 - Fase da campanha (`def`): `goal` (`lines`, `score`, `clear`, `golds`, `combo`, `empty`, `survive`, `harvest`, `petals`, `boss`), `setup` (`stones`, `golds`, `gum`, `ice`, `bamboo`, `puzzle`), `st` = regra das estrelas (`by`, `two`, `three`).
 - Valores especiais de cor no tabuleiro (`v.c` negativo) = pedras, ouro, chiclete etc.; veja `cellColor`.
+
+## Versões
+- `VERSAO` e `VERSAO_DATA` ficam no topo de `js/02-core.js` e aparecem no rodapé do menu. Toda mudança que vai para a `main` sobe a versão (1.x para novidade, 1.x.y para correção) e ganha uma linha em `CHANGELOG.md`.
 
 ## Convenções
 - Código denso, de propósito: funções curtas numa linha só quando cabem. Não minifique nem encurte nomes; não reformate trechos que não está mudando.

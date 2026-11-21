@@ -32,6 +32,7 @@
       <button class="btn" id="goChal" hidden>⚔️ Desafios a distância</button>
       <div class="row"><button class="btn" id="goHistory">Histórico</button><button class="btn" id="goSettings">Configurações</button></div>
     </div>
+    <p class="muted ver" id="verTxt"></p>
   </div>
 </section>
 
@@ -166,6 +167,12 @@
     <h1 id="connTitle">Jogar conectado</h1>
     <div id="pHostBox" hidden>
       <button class="btn small" id="pHostSim" hidden style="margin-bottom:10px">🤖 Usar aparelho de teste</button>
+      <div class="card" id="pLinkBox" hidden>
+        <p class="step">🌍 A pessoa está longe? Convide por link</p>
+        <button class="btn primary" id="pLinkSend">Mandar convite no WhatsApp</button>
+        <div class="connstat" id="pLinkStat"></div>
+        <p class="muted">Cada link serve para uma pessoa. Estão juntos? Use o QR abaixo.</p>
+      </div>
       <div class="card">
         <p class="step" id="pHostStep">1. Mostre este código para o outro celular</p>
         <div class="connstat" id="pHostWait">Preparando…</div>
@@ -305,5 +312,6 @@
 <script src="js/15-npc.js"></script>
 <script src="js/16-ranking.js"></script>
 <script src="js/17-desafio.js"></script>
+<script src="js/18-sala-link.js"></script>
 </body>
 </html>

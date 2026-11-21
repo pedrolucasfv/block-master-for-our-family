@@ -114,6 +114,7 @@ async function hostNewOffer(spec){
   if(!spec&&NET.players.length>=MAXP){ toast('A sala já tem 6 jogadores'); return; }
   $('#connTitle').textContent='Jogar conectado';
   resetConnectUI(); $('#pHostBox').hidden=false; show('connect');
+  clearInterval(slPoll); $('#pLinkBox').hidden=!!spec||!rkOn(); $('#pLinkStat').textContent='';
   if(NET.pend){ try{ NET.pend.pc.close(); }catch(e){} }
   const pc=newPC(()=>{ if(NET.pend===pend) $('#pHostStatus').textContent='A conexão falhou. Volte e gere um novo código.'; }), pend={pc,dc:null}; NET.pend=pend;
   pend.spec=!!spec;
