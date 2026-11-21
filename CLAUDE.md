@@ -26,6 +26,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/13-spectator.js` | Modo espectador (TV): `specMsg`, `specRender` |
 | `js/14-main.js` | Inicialização e modo teste (`simAdd`, `simBoot`, `simBot`) |
 | `js/15-npc.js` | Duelo contra o robô no Sozinho (`startNpc`, `NPC`, `npcHear`): é um duelo ao vivo (`D.cfg.npc`) com adversário `'npc'`; o `send` desvia para o robô quando não há sala |
+| `js/16-ranking.js` | Ranking online no Supabase (`SUPA_URL`/`SUPA_KEY`; vazio = desligado): recorde por fase da campanha (`rkCampEnd`, `rkPhaseBox`), ranking geral (`rkOpenGeneral`), fila de envio offline (`ddb_rkq`). Banco: `supabase/ranking.sql` |
 | `css/base.css` | Variáveis de tema em `:root[data-app=…]`, layout, blocos, jogo |
 | `css/worlds.css` | Visual de cada mundo (`:root[data-world=…]`) e animações de limpeza por skin |
 | `css/ui.css` | Efeitos, sobreposições, histórico, conexão, abas da sala, estrelinha dourada |

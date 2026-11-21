@@ -346,6 +346,7 @@ function campEnd(info,cfg){
     if(info.goldNew) body+=`<p class="newbest">✨ 3 estrelas em todas as fases do Mundo ${w}! ${SKIN_L[W.reward]} dourado liberado: nas Configurações, toque de novo no tema ${SKIN_L[W.reward]} para trocar.</p>`; }
   else body+=`<div class="winner lose">${esc(info.msg||'Não foi dessa vez')}</div><p class="muted">Tente de novo: as tentativas são ilimitadas.</p>`;
   body+=statsHTML([[cp.placed||0,'peças'],[cp.lines||0,'linhas'],[fmtT(cp.el||0),'tempo']]);
+  if(solo) body+='<div id="rkPhase"></div>';
   const btns=[];
   if(host){
     if(info.win&&next) btns.push({t:next[0]!==w?'Próximo mundo':'Próxima fase',cls:'primary',on:()=>campGo(next[1],cfg,next[0])});
@@ -353,6 +354,7 @@ function campEnd(info,cfg){
   } else body+=`<p class="muted">Quem criou a sala escolhe a próxima fase.</p>`;
   btns.push({t:solo?'Mapa':'Voltar à sala',cls:'ghost',on:()=>{ if(solo){ closeEnd(); SH=null; IN=null; openCamp(w); } else backToRoom(); }});
   openEnd(body,btns);
+  if(solo){ rkCampEnd(info,cfg); rkPhaseBox(w,ph); }
 }
 function campGo(ph,cfg,w){ w=w||cfg.camp.w||1; closeEnd(); if(cfg.solo){ SH=null; startCampSolo(w,ph); } else { NET.lobby.w=w; NET.lobby.ph=ph; hostStart(true); } }
 function startCampSolo(w,ph){
@@ -457,7 +459,8 @@ function campIntro(w,ph){
   const sc=campScale(def,1), st=campLoad('solo'), tx=campStarTxt(def,sc), s=st.stars[ck(w,ph)]||0;
   openEnd(`<h2>${def.icon} Fase ${ph} · ${esc(def.name)}</h2><p class="reason" style="margin:8px 0 12px">${esc(campDesc(def,sc))}</p>
     <div class="kv"><span>★</span><b>completar</b></div><div class="kv"><span>★★</span><b>${tx[0]}</b></div><div class="kv"><span>★★★</span><b>${tx[1]}</b></div>
-    <p class="muted" style="margin-top:8px">${s?`Seu melhor: ${'★'.repeat(s)}`:'Ainda não concluída'} · usar ajuda limita a ★★</p>`,
+    <p class="muted" style="margin-top:8px">${s?`Seu melhor: ${'★'.repeat(s)}`:'Ainda não concluída'} · usar ajuda limita a ★★</p><div id="rkPhase"></div>`,
     [{t:'Começar',cls:'primary',on:()=>{ closeEnd(); startCampSolo(w,ph); }},{t:'Voltar',cls:'ghost',on:closeEnd}]);
+  rkPhaseBox(w,ph);
 }
 $('#goCamp').addEventListener('click',()=>openCamp());
