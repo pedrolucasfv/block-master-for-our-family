@@ -25,6 +25,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/12-campaign.js` | Campanha: `CWORLDS` (mundos → `phases`), `CWD(w)`, regras de cada fase (`campHook`), `campScale`, `makePuzzle`, estrelas (`ck`), mapa |
 | `js/13-spectator.js` | Modo espectador (TV): `specMsg`, `specRender` |
 | `js/14-main.js` | Inicialização e modo teste (`simAdd`, `simBoot`, `simBot`) |
+| `js/15-npc.js` | Duelo contra o robô no Sozinho (`startNpc`, `NPC`, `npcHear`): é um duelo ao vivo (`D.cfg.npc`) com adversário `'npc'`; o `send` desvia para o robô quando não há sala |
 | `css/base.css` | Variáveis de tema em `:root[data-app=…]`, layout, blocos, jogo |
 | `css/worlds.css` | Visual de cada mundo (`:root[data-world=…]`) e animações de limpeza por skin |
 | `css/ui.css` | Efeitos, sobreposições, histórico, conexão, abas da sala, estrelinha dourada |

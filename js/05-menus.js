@@ -232,6 +232,7 @@ function profOf(id){ if(typeof NET!=='undefined'&&id&&id!==NET.role) return (NET
 const AVC=['#e5483f','#3e6fe0','#4cbb47','#f08c25','#8a52d8','#2cb4d6'];
 /* bolinha com a foto (ou a inicial do apelido, se não tiver foto) */
 function avatarHTML(id,px=22,cls=''){
+  if(id==='npc') return npcAvatar(px,cls);
   const p=profOf(id), name=(typeof nm==='function'&&id)?nm(id,false):(myNick()||'?');
   if(p.photo) return `<img class="av ${cls}" src="${p.photo}" alt="" style="width:${px}px;height:${px}px">`;
   const k=Math.max(0,'ABCDEF'.indexOf(id||'A'));

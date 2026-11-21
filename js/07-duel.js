@@ -341,7 +341,7 @@ function duelEnd(reason){
   if(d.cfg.type==='solo') soloRecord(d);
   if(!d.live) addHist({date:Date.now(),kind:d.cfg.type,label:d.cfg.type==='daily'?'Desafio do dia':d.cfg.type==='solo'?'Sozinho · '+TIME_L[d.o.time]+' · '+PLAYS[d.o.play]:'Duelo · '+PLAYS[d.o.play],code:d.cfg.code||'',score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo,result:null});
   setTimeout(()=>{ if(D!==d) return; praise(reasonTxt(reason)); SFX.over(); BC.dead();
-    setTimeout(()=>{ if(D!==d) return; if(d.live&&stillPlaying().length&&NET.open) enterSpectate(); else showDuelEnd(); },1400); }, reason==='stuck'?450:0);
+    setTimeout(()=>{ if(D!==d) return; if(d.live&&stillPlaying().length&&(NET.open||d.cfg.npc)) enterSpectate(); else showDuelEnd(); },1400); }, reason==='stuck'?450:0);
 }
 /* classificação: quem saiu fica por último; quem bateu a meta antes vem primeiro; depois, mais pontos */
 function liveRank(infos){
@@ -385,18 +385,19 @@ function showDuelEnd(){
     } else if(!stillPlaying().length){
       const infos={[NET.role]:i}; d.others.forEach(id=>infos[id]=d.opps[id].info);
       const rank=d.rank||(d.rank=liveRank(infos)), res=d.res||(d.res=resOf(rank,NET.role));
-      if(!d.resolved){ d.resolved=true; liveRecord(res,i,rank); }
+      if(!d.resolved){ d.resolved=true; if(d.cfg.npc) npcRecord(res,i); else liveRecord(res,i,rank); }
       body+=winnerLine(res,rank[0].id)+rankHTML(rank.map(r=>({id:r.id,score:r.info.score,place:r.place,sub:r.info.reason==='quit'?'saiu':''})));
       body+=statsHTML(stats)+graphSVG(rank.map((r,k)=>({tl:r.info.timeline||[[0,0]],color:r.id===NET.role?'var(--text)':LINEC[k%LINEC.length],label:nm(r.id)})));
       body+=seriesLine();
       if(NET.open) btns.push(rematchBtn());
+      else if(d.cfg.npc) btns.push({t:'Revanche',cls:'primary',on:()=>startNpc(d.o)});
     } else {
       body+=`<h2>Sua pontuação</h2><div class="endscore">${fmtN(i.score)}</div><p class="muted">Aguardando os outros terminarem…</p><div id="waitList">${waitListHTML()}</div>`;
       body+=statsHTML(stats)+graphSVG([{tl:i.timeline,color:'var(--text)',label:'Você'}]);
       if(d.spect) btns.push({t:'Assistir',cls:'primary',on:closeEnd});
     }
     btns.push({t:'Compartilhar',on:()=>shareText(shareMsg())});
-    btns.push({t:'Voltar à sala',cls:'ghost',on:backToRoom});
+    btns.push(d.cfg.npc?{t:'Menu',cls:'ghost',on:npcMenu}:{t:'Voltar à sala',cls:'ghost',on:backToRoom});
   } else {
     body+=`<h2>${d.cfg.type==='daily'?'Desafio do dia':'Sua pontuação'}</h2><div class="endscore">${fmtN(i.score)}</div>${d.newBest?'<div class="newbest">Novo recorde!</div>':''}`;
     if(d.cfg.type==='solo'){
@@ -458,7 +459,7 @@ function setPaused(p,fromRemote){
   g.paused=p; if(SH&&SH.host){ SH.H.paused=p; broadcast(); }
   if(D&&D.live&&!fromRemote) send({t:p?'pause':'resume'});
   $('#pRetry').hidden=!(SH&&SH.type==='camp'&&(SH.cfg.solo||SH.host));
-  if(p){ cancelDrag(); campPauseInfo(); $('#pauseTitle').textContent='Pausado'; $('#pauseTxt').textContent=fromRemote?(typeof fromRemote==='string'?nm(fromRemote)+' pausou a partida.':'A partida foi pausada.'):(D&&!D.live&&!SH?'O tempo está parado.':'A partida está pausada para todos.'); campStuckPauseTxt(); $('#pauseOv').classList.add('show'); }
+  if(p){ cancelDrag(); campPauseInfo(); $('#pauseTitle').textContent='Pausado'; $('#pauseTxt').textContent=fromRemote?(typeof fromRemote==='string'?nm(fromRemote)+' pausou a partida.':'A partida foi pausada.'):(D&&(!D.live||D.cfg.npc)&&!SH?'O tempo está parado.':'A partida está pausada para todos.'); campStuckPauseTxt(); $('#pauseOv').classList.add('show'); }
   else { $('#pauseOv').classList.remove('show'); if($('#settings').classList.contains('active')) show('game'); }
 }
 $('#gPause').addEventListener('click',()=>{ const g=D||SH; if(g&&g.playing) setPaused(true); });
@@ -471,8 +472,8 @@ $('#qNo').addEventListener('click',()=>$('#quitOv').classList.remove('show'));
 $('#qYes').addEventListener('click',()=>{ $('#quitOv').classList.remove('show'); quitGame(); });
 function quitGame(){
   $('#count').classList.remove('show'); cancelDrag();
-  if(D){ const live=D.live; if(live&&!D.over){ D.over=true; D.playing=false; const info={reason:'quit',score:D.score,lines:D.eng.lines,combo:D.eng.maxCombo,placed:D.placed,timeline:D.timeline,goalTime:null}; send({t:'end',seed:D.cfg.seed,info}); noteEnd(NET.role,info,D.cfg.seed); }
-    D.over=true; D.playing=false; D=null; IN=null; if(live&&NET.open){ toLobby(); return; } }
+  if(D){ const live=D.live, npc=D.cfg.npc; if(live&&!D.over){ D.over=true; D.playing=false; const info={reason:'quit',score:D.score,lines:D.eng.lines,combo:D.eng.maxCombo,placed:D.placed,timeline:D.timeline,goalTime:null}; send({t:'end',seed:D.cfg.seed,info}); noteEnd(NET.role,info,D.cfg.seed); }
+    D.over=true; D.playing=false; D=null; IN=null; if(npc){ npcLeave(); openSolo(); return; } if(live&&NET.open){ toLobby(); return; } }
   if(SH&&SH.cfg.solo){ SH.over=true; SH=null; IN=null; $('#timebar').classList.remove('hp'); openCamp(); return; }
   if(SH){ if(NET.open&&!SH.over){ if(SH.host) hostEnd('oppQuit',null,SH.me); else send({t:'quit'}); } SH.over=true; SH=null; IN=null; if(NET.open){ toLobby(); return; } }
   goHome();

@@ -9,6 +9,7 @@ function rawSend(dc,txt){ if(dc&&dc.readyState==='open'){ try{ dc.send(txt); }ca
 /* quem criou manda para todos (ou só para "to"); convidado manda para quem criou, que repassa */
 function send(obj){
   obj.from=obj.from||NET.role;
+  if(D&&D.cfg.npc&&!NET.open){ npcHear(obj); return; } /* duelo contra o robô: nada sai pela rede */
   if(NET.role==='A'){ if(obj.to){ sendTo(obj.to,obj); if((obj.t==='atk'||obj.t==='pw'||obj.t==='blk')&&obj.to!=='S'&&NET.peers.S) sendTo('S',obj); return; } const txt=JSON.stringify(obj); for(const id in NET.peers) rawSend(NET.peers[id].dc,txt); }
   else if(NET.link) rawSend(NET.link.dc,JSON.stringify(obj));
 }
@@ -78,7 +79,7 @@ $('#scanCancel').addEventListener('click',stopScan);
    Quem cria a sala é o centro: cada convidado tem uma conexão direta só com ele (um par de QR por convidado).
    O criador repassa as mensagens entre os convidados. Ids: A (criador), B, C, D, E, F. */
 function myNick(){ return String(store.get('ddb_nick','')||'').trim().slice(0,16); }
-function nm(id,you=true){ if(!id) return 'Alguém'; if(you&&id===NET.role) return 'Você'; const n=NET.names[id]; return n||('Jogador '+(IDS.indexOf(id)+1)); }
+function nm(id,you=true){ if(!id) return 'Alguém'; if(id==='npc') return npcName(); if(!you&&D&&D.cfg.npc&&id===NET.role) return myNick()||'Você'; if(you&&id===NET.role) return 'Você'; const n=NET.names[id]; return n||('Jogador '+(IDS.indexOf(id)+1)); }
 function myDaily(){ const dl=store.get('ddb_daily',{}), tk=todayKey(); return {key:tk,t:dl[tk]?dl[tk].score:null,s:dl[tk+'|S']?dl[tk+'|S'].score:null}; }
 function rtcOk(){ if(typeof RTCPeerConnection!=='function'){ toast('Este navegador não permite conexão direta.'); return false; } return true; }
 /* onGone: a conexão caiu de vez (falhou, fechou, ou ficou "desconectada" por mais de 15 s) */
@@ -300,7 +301,7 @@ function compareLast(theirs){
   toast(`Última partida: Você ${fmtN(mine.info.score)} × ${fmtN(theirs.info.score)}`);
   mine.compared=true; store.set('ddb_lastOnline',mine);
 }
-function saveLastOnline(){ if(D&&D.live&&D.info){ store.set('ddb_lastOnline',{id:D.cfg.seed,info:D.info,compared:!!D.resolved}); } }
+function saveLastOnline(){ if(D&&D.live&&D.info&&!D.cfg.npc){ store.set('ddb_lastOnline',{id:D.cfg.seed,info:D.info,compared:!!D.resolved}); } }
 
 /* ----- resultados da sala (o criador anota e manda para todos) ----- */
 function noteEnd(id,info,seed){

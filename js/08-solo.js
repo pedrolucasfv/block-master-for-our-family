@@ -26,13 +26,13 @@ function soloRecord(d){
   const un=ACH.filter(a=>!st.ach.includes(a[0])&&a[4](st)); un.forEach(a=>st.ach.push(a[0]));
   store.set('ddb_solo',st); d.broke=broke; d.unlocked=un;
 }
-let soloOpts=Object.assign(defOpts(),{time:3},store.get('ddb_soloOpts',{}));
+let soloOpts=Object.assign(defOpts(),{time:3,npc:0,attacks:true,pblocks:true,powers:true},store.get('ddb_soloOpts',{}));
 function soloSeg(el,key,labels){
   el.innerHTML=labels.map((l,i)=>`<button type="button" data-v="${i}" class="${soloOpts[key]===i?'sel':''}">${l}</button>`).join('');
   el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ soloOpts[key]=+b.dataset.v; store.set('ddb_soloOpts',soloOpts); renderSolo(); }));
 }
 function renderSolo(){
-  soloSeg($('#soloTime'),'time',TIME_L.slice(0,4)); soloSeg($('#soloPlay'),'play',PLAYS);
+  soloSeg($('#soloTime'),'time',TIME_L.slice(0,4)); soloSeg($('#soloPlay'),'play',PLAYS); soloSeg($('#soloNpc'),'npc',NPC_L); renderNpcBox();
   const b=getBest('solo',soloOpts);
   $('#soloBestLine').textContent=(b?`Seu recorde neste modo: ${fmtN(b)}.`:'Nenhuma partida neste modo ainda.')+(soloOpts.time===3?' Sem relógio: joga até não caber mais peça.':' Faça o máximo de pontos antes do tempo acabar.');
   if(!$('#soloMods').dataset.built){ buildOpts($('#soloMods'),soloOpts,'solo'); $('#soloMods').dataset.built=1;
@@ -46,7 +46,7 @@ function renderSolo(){
 }
 function openSolo(){ renderSolo(); show('solo'); }
 function startSolo(o){
-  ac(); const opts={...o};
+  ac(); const opts={...o,npc:0,attacks:false,pblocks:false,powers:false};
   startDuel({type:'solo',opts,seed:'S|'+Date.now()+'|'+Math.random().toString(36).slice(2),label:'Sozinho · '+(TIMES[opts.time]?TIME_L[opts.time]:'Sem limite')+(opts.play?' · '+PLAYS[opts.play]:'')});
 }
 function renderHome(){
@@ -55,7 +55,7 @@ function renderHome(){
     :`<div class="muted" style="padding:2px 4px">Jogue sozinho para começar a juntar recordes e conquistas.</div>`;
 }
 $('#goSolo').addEventListener('click',openSolo);
-$('#soloStart').addEventListener('click',()=>{ store.set('ddb_soloOpts',soloOpts); startSolo(soloOpts); });
+$('#soloStart').addEventListener('click',()=>{ store.set('ddb_soloOpts',soloOpts); if(soloOpts.npc) startNpc(soloOpts); else startSolo(soloOpts); });
 $('#goWith').addEventListener('click',()=>{ renderNight(); show('with'); });
 
 /* ===================== fluxo offline ===================== */
