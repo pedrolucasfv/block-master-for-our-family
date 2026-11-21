@@ -26,3 +26,20 @@ revoke all on function salvar_inscricao(text,jsonb) from public;
 revoke all on function remover_inscricao(text) from public;
 grant execute on function salvar_inscricao(text,jsonb) to anon, authenticated;
 grant execute on function remover_inscricao(text) to anon, authenticated;
+
+-- Gatilho: quando muda a vez num desafio, chama a função "avisar" (supabase/functions/avisar).
+-- Troque COLOQUE_O_SEGREDO pelo mesmo valor do segredo AVISO_SEGREDO das Edge Functions (não deixe o segredo salvo no GitHub).
+create extension if not exists pg_net;
+create or replace function avisar_desafio() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'UPDATE' and old.vez is not distinct from new.vez then return new; end if;
+  perform net.http_post(
+    url := 'https://udduiuoausbswczewcng.supabase.co/functions/v1/avisar',
+    body := jsonb_build_object('type', tg_op, 'table', 'desafios', 'record', to_jsonb(new), 'old_record', case when tg_op = 'UPDATE' then to_jsonb(old) end),
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-segredo', 'COLOQUE_O_SEGREDO')
+  );
+  return new;
+end $$;
+drop trigger if exists avisar on desafios;
+create trigger avisar after insert or update on desafios for each row execute function avisar_desafio();

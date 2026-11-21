@@ -1,5 +1,5 @@
 // Função "avisar" do Supabase: manda o aviso no celular quando muda a vez num desafio.
-// É chamada por um Database Webhook da tabela desafios (Insert e Update), com o cabeçalho x-segredo.
+// É chamada pelo gatilho "avisar" da tabela desafios (supabase/avisos.sql), com o cabeçalho x-segredo.
 // Segredos (Edge Functions → Secrets): VAPID_PUBLIC, VAPID_PRIVATE, AVISO_SEGREDO. SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já vêm prontos.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
