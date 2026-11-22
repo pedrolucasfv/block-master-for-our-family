@@ -4,6 +4,7 @@ A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
 ## 1.11.2 · 22/11/2026
+- ✏️ Ao escrever o apelido no Perfil, o nome só vai para o ranking quando você termina de digitar (antes, cada pedaço, como "Ke" e "Ken", virava um jogador).
 - 🏆 Ranking, desafios e avisos não ficam mais "Carregando…" para sempre quando a internet ou o servidor demoram: depois de 12 segundos, aparece que está indisponível (é só abrir de novo).
 
 ## 1.11.1 · 22/11/2026
