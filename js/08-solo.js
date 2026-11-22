@@ -34,7 +34,8 @@ function soloSeg(el,key,labels,order){
 function renderSolo(){
   soloSeg($('#soloTime'),'time',TIME_L,TIME_ORDER_LOCAL); soloSeg($('#soloPlay'),'play',PLAYS); soloSeg($('#soloNpc'),'npc',NPC_L); renderNpcBox();
   const b=getBest('solo',soloOpts);
-  $('#soloBestLine').textContent=(b?`Seu recorde neste modo: ${fmtN(b)}.`:'Nenhuma partida neste modo ainda.')+(soloOpts.time===6?` Sem relógio no começo; depois de ${RAMP[0][0]/60} min o tempo para pôr cada peça vai apertando (${RAMP.map(r=>r[1]+' s').join(', ')}).`:soloOpts.time===3?' Sem relógio: joga até não caber mais peça.':' Faça o máximo de pontos antes do tempo acabar.');
+  $('#soloBestLine').textContent=(b?`Seu recorde neste modo: ${fmtN(b)}.`:'Nenhuma partida neste modo ainda.')+(soloOpts.time===6?' '+rampTxt(rampOf(soloOpts)):soloOpts.time===3?' Sem relógio: joga até não caber mais peça.':' Faça o máximo de pontos antes do tempo acabar.');
+  $('#soloRamp').hidden=soloOpts.time!==6; if(soloOpts.time===6) rampEditor($('#soloRamp'),soloOpts,false,()=>{ store.set('ddb_soloOpts',soloOpts); renderSolo(); });
   if(!$('#soloMods').dataset.built){ buildOpts($('#soloMods'),soloOpts,'solo'); $('#soloMods').dataset.built=1;
     $('#soloMods').addEventListener('click',()=>setTimeout(()=>store.set('ddb_soloOpts',soloOpts),0)); }
   const st=soloStats();

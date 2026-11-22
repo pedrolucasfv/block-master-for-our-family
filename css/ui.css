@@ -314,3 +314,22 @@ input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:non
 .chatbadge{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e5483f;color:#fff;font:700 11px/17px system-ui,sans-serif;font-style:normal;text-align:center}
 .chatbadge[hidden]{display:none}
 .chatdiv{font-size:11px;margin:2px 0;opacity:.8}
+/* chat fixo na aba Sala */
+.chatb0{position:relative}
+.lchat{margin-top:12px}.lchat h2{margin-bottom:4px}
+#chatHome .chatlist{height:min(36vh,260px);flex:none}
+.chatbody{display:flex;flex-direction:column;flex:1;min-height:0}
+/* desenho de cada estilo de jogo na sala (modePic, js/05-menus.js) */
+.tpics button{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1 1 0;min-width:0;padding:7px 5px}
+.tpics button span{font-size:13px;line-height:1.2}
+.mpic{display:block;width:100%;max-width:110px;height:auto;color:inherit}
+.tbig{display:block;margin:4px auto 8px;max-width:280px;padding:8px;border-radius:12px;background:var(--input)}.tbig .mpic{max-width:none}
+/* etapas do "Sem limite com progressão" (rampEditor, js/05-menus.js) */
+.rampbox{background:var(--input);border-radius:12px;padding:8px 10px}.rampbox>label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.rrow{display:grid;grid-template-columns:118px 12px 118px 1fr;justify-content:start;align-items:center;gap:6px;padding:3px 0;font-size:13px}
+.rhead{font-size:11px;padding:0}.rhead span:first-child,.rhead span:last-child{text-align:center}
+.rstep{display:inline-flex;align-items:center;gap:2px;background:var(--chip);border-radius:10px;padding:2px}
+.rstep b{min-width:56px;text-align:center;font-variant-numeric:tabular-nums;font-size:14px}
+.rstep button{width:28px;height:28px;border-radius:8px;font-size:17px;font-weight:700;line-height:1}
+.rdel{justify-self:end;width:28px;height:28px;border-radius:8px;color:var(--muted)}
+.rbtns{margin-top:6px;gap:6px}.rbtns .chip{font-size:13px;padding:6px 10px}

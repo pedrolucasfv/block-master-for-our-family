@@ -33,6 +33,25 @@ const TIME_ORDER_NET=[0,1,2,4,5,3,6], TIME_ORDER_LOCAL=[0,1,2,3,6];
 const RAMP_TYPES=['solo','duel','live','tlive'];
 const rampOn=o=>!!o.ramp||o.time===6;
 const timeName=t=>TIMES[t]?TIME_L[t]:t===6?TIME_L[6]:'Sem limite';
+/* etapas da progressão escolhidas pelo jogador (o.rp = [[a partir de (s), segundos por peça], …]); sem escolha = RAMP (o mesmo do Desafio do dia) */
+const rampOf=o=>Array.isArray(o.rp)&&o.rp.length?o.rp:RAMP;
+const rampMin=t=>t%60?(t<60?`${t} s`:`${Math.floor(t/60)} min ${t%60} s`):`${t/60} min`;
+function rampTxt(r){ const ini=r[0][0]?`Sem relógio no começo; depois de ${rampMin(r[0][0])} o tempo para pôr cada peça vai apertando`:'Desde o começo o tempo para pôr cada peça vai apertando';
+  return ini+': '+r.map(([t,x])=>t>r[0][0]?`${x} s por peça (a partir de ${rampMin(t)})`:`${x} s por peça`).join(', ')+'.'; }
+/* quadro para escolher as etapas: "depois de X min → Y s por peça"; ro = só leitura (quem entrou na sala) */
+function rampEditor(box,o,ro,onChange){
+  const r=rampOf(o).map(x=>x.slice());
+  const st=(i,k,d)=>`<span class="rstep">${ro?'':`<button type="button" data-i="${i}" data-k="${k}" data-d="-${d}" aria-label="Menos">−</button>`}<b>${k?r[i][1]+' s':rampMin(r[i][0])}</b>${ro?'':`<button type="button" data-i="${i}" data-k="${k}" data-d="${d}" aria-label="Mais">+</button>`}</span>`;
+  box.innerHTML=`<label>Etapas da progressão</label><div class="rrow rhead muted"><span>A partir de</span><span></span><span>Tempo por peça</span></div>`+r.map((x,i)=>`<div class="rrow">${st(i,0,30)}<span class="muted">→</span>${st(i,1,1)}${ro||r.length<2?'':`<button type="button" class="rdel" data-del="${i}" aria-label="Tirar etapa">✕</button>`}</div>`).join('')
+    +(ro?'':`<div class="row rbtns">${r.length<6?'<button type="button" class="chip" data-add="1">+ Etapa</button>':''}<button type="button" class="chip" data-reset="1">Voltar ao padrão</button></div>`);
+  if(ro) return;
+  const salva=nr=>{ nr.sort((a,b)=>a[0]-b[0]); const igual=JSON.stringify(nr)===JSON.stringify(RAMP); if(igual) delete o.rp; else o.rp=nr; rampEditor(box,o,ro,onChange); if(onChange) onChange(); };
+  box.querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',()=>{ const i=+b.dataset.i, k=+b.dataset.k, v=r[i][k]+ +b.dataset.d;
+    r[i][k]=k?Math.max(1,Math.min(30,v)):Math.max(0,Math.min(1800,v)); salva(r); }));
+  box.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ r.splice(+b.dataset.del,1); salva(r); }));
+  const add=box.querySelector('[data-add]'); if(add) add.addEventListener('click',()=>{ const l=r[r.length-1]; r.push([l[0]+180,Math.max(1,l[1]-1)]); salva(r); });
+  box.querySelector('[data-reset]').addEventListener('click',()=>salva(RAMP.map(x=>x.slice())));
+}
 const PLAYS=['Clássico','Gravidade','Cego','Sem combo'];
 const GOALS=[0,500,1000,2000], GOAL_L=['Sem meta','500','1.000','2.000'];
 const SERIES_L=['Avulsa','Melhor de 3','Melhor de 5'], SERIES_N=[1,3,5];
@@ -59,6 +78,45 @@ function teamRec(type,label,teams,sc,winner,per,quitter){
   return {type,label,date:Date.now(),tw:1,rows:ids.map(id=>({n:nm(id,false),s:per&&per[id]!=null?per[id]:0,p:winner?(teams[id]===winner?1:2):1,c:0,q:id===quitter?1:0})),
     tm:{az:ids.filter(id=>teams[id]==='az').map(id=>nm(id,false)),la:ids.filter(id=>teams[id]==='la').map(id=>nm(id,false)),sAz:sc.az||0,sLa:sc.la||0}}; }
 const TYPE_HINT={camp:'Campanha em grupo (até 4), num tabuleiro só dividido: cada um com a sua parte (metade, ou quadrante com 3 ou 4 jogadores), todos jogando ao mesmo tempo. No quebra-cabeça o tabuleiro é livre para todos. Com mais gente, as metas ficam maiores. O progresso do grupo fica no celular de quem criou a sala.',tlive:'Dois times, cada jogador no seu tabuleiro, com as mesmas peças. Os pontos do time são somados e os ataques vão para o líder do outro time.',tsplit:'Um tabuleiro por time, dividido em faixas (uma para cada jogador, até 3 por time). Os dois tabuleiros correm lado a lado e linhas limpas atacam o outro time.',live:'Cada um no seu tabuleiro (2 a 6 jogadores), com as mesmas peças, placar ao vivo e miniatura dos outros. Ataques vão para o líder.',coop:'Um tabuleiro só (2 a 4 jogadores), um de cada vez, somando pontos.',halves:'Um tabuleiro só e cada um com a sua parte: com 2, metades; com 3 ou 4, um quadrante para cada num tabuleiro 10×10 (com 3, o quarto é livre). Toda peça precisa tocar a sua parte.',versus:'Um tabuleiro só, em turnos (2 a 4 jogadores): cada um escolhe a peça de quem joga depois dele.'};
+/* desenho de cada estilo de jogo (na escolha da sala): quantos tabuleiros, de quem é cada parte. n = jogadores na sala, tc = {az,la} gente em cada time */
+const MP_C=['#e5483f','#3e6fe0','#4cbb47','#f0a325','#a35bd6','#1fb5a8'], MP_FILL=[[0,3],[1,3],[3,3],[0,2],[1,2],[3,2],[2,1],[2,3]];
+/* tabuleiro 4×4 em miniatura; cor(cx,cy) diz de quem é cada casa (pinta as casas cheias e o fundo da parte de cada um) */
+function mpBoard(x,y,w,cor,k=0,borda){
+  const c=w/4, r=(a,b,cc,op)=>`<rect x="${(x+a*c+.8).toFixed(1)}" y="${(y+b*c+.8).toFixed(1)}" width="${(c-1.6).toFixed(1)}" height="${(c-1.6).toFixed(1)}" rx="${(c*.18).toFixed(1)}" fill="${cc}" fill-opacity="${op}"/>`;
+  let h=`<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${(w*.1).toFixed(1)}" fill="currentColor" fill-opacity=".08" stroke="${borda||'currentColor'}" stroke-opacity="${borda?1:.35}" stroke-width="${borda?1.6:1}"/>`;
+  const cheia=new Set(MP_FILL.slice(0,5+(k%3)).map(([a,b])=>((a+k)%4)+','+b));
+  for(let b=0;b<4;b++) for(let a=0;a<4;a++){ const cc=cor(a,b); h+=cheia.has(a+','+b)?r(a,b,cc||'currentColor',cc?.95:.45):cc?r(a,b,cc,.16):''; }
+  return h;
+}
+const mpDot=(x,y,c,t)=>`<circle cx="${x}" cy="${y}" r="5" fill="${c}"/>`+(t?`<text x="${x}" y="${y+2.6}" font-size="7" font-weight="700" text-anchor="middle" fill="#fff">${t}</text>`:'');
+function modePic(type,n,tc){
+  const W=120, H=64, svg=h=>`<svg class="mpic" viewBox="0 0 ${W} ${H}" aria-hidden="true">${h}</svg>`;
+  n=Math.max(2,n|0);
+  if(type==='live'){ n=Math.min(6,n); const w=Math.min(34,(W-6-(n-1)*5)/n), x0=(W-(n*w+(n-1)*5))/2;
+    return svg(Array.from({length:n},(_,i)=>mpBoard(x0+i*(w+5),(H-w)/2-4,w,()=>MP_C[i],i,MP_C[i])+mpDot(x0+i*(w+5)+w/2,(H+w)/2+3,MP_C[i])).join('')); }
+  if(type==='tlive'||type==='tsplit'){ const t={az:Math.max(1,tc&&tc.az||1),la:Math.max(1,tc&&tc.la||1)};
+    const side=(k,x0)=>{ const m=Math.min(type==='tsplit'?3:3,t[k]), col=TEAM[k].c;
+      if(type==='tsplit'){ const w=40, cs=['','',''].map((_,i)=>MP_C[(k==='az'?0:3)+i]);
+        return mpBoard(x0+(50-w)/2,14,w,(a)=>m===1?col:cs[Math.min(m-1,Math.floor(a*m/4))],k==='az'?0:2,col)+`<rect x="${x0}" y="2" width="50" height="8" rx="4" fill="${col}"/>`; }
+      const w=m===1?34:m===2?22:15, gap=3, tot=m*w+(m-1)*gap, xs=x0+(50-tot)/2;
+      return Array.from({length:m},(_,i)=>mpBoard(xs+i*(w+gap),14+(34-w)/2,w,()=>col,i+(k==='la'?3:0),col)).join('')+`<rect x="${x0}" y="2" width="50" height="8" rx="4" fill="${col}"/>`; };
+    return svg(side('az',4)+side('la',66)+`<text x="60" y="38" font-size="12" font-weight="700" text-anchor="middle" fill="currentColor" fill-opacity=".6">×</text>`
+      +`<text x="29" y="60" font-size="8" font-weight="700" text-anchor="middle" fill="${TEAM.az.c}">Σ</text><text x="91" y="60" font-size="8" font-weight="700" text-anchor="middle" fill="${TEAM.la.c}">Σ</text>`); }
+  const w=46, x=(W-w)/2, y=(H-w)/2;
+  if(type==='halves'||type==='camp'){ n=Math.min(4,n);
+    const cor=n<=2?(a)=>MP_C[a<2?0:1]:(a,b)=>{ const q=(b<2?0:2)+(a<2?0:1); return q<n?MP_C[q]:null; };
+    return svg(mpBoard(x,y,w,cor,1)+`<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+w}" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="2 2"/>`+(n>2?`<line x1="${x}" y1="${y+w/2}" x2="${x+w}" y2="${y+w/2}" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="2 2"/>`:'')
+      +(type==='camp'?`<text x="${x+w+14}" y="22" font-size="14" text-anchor="middle">⭐</text><text x="${x-14}" y="22" font-size="14" text-anchor="middle">🏰</text>`:'')); }
+  n=Math.min(4,n);
+  const pos=Array.from({length:n},(_,i)=>{ const a=-Math.PI/2+i*2*Math.PI/n; return [W/2+Math.cos(a)*46,H/2+Math.sin(a)*25]; });
+  if(type==='versus'){ /* um tabuleiro e a vez passando de um para o outro (setas em roda) */
+    let h=mpBoard(W/2-17,H/2-17,34,()=>null,2);
+    pos.forEach(([px,py],i)=>{ const [qx,qy]=pos[(i+1)%n]; const mx=(px+qx)/2+(W/2-(px+qx)/2)*-.25, my=(py+qy)/2+(H/2-(py+qy)/2)*-.6;
+      h+=`<path d="M${px.toFixed(1)} ${py.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${qx.toFixed(1)} ${qy.toFixed(1)}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2" marker-end="url(#mpA)"/>`; });
+    return svg(`<defs><marker id="mpA" viewBox="0 0 6 6" refX="8" refY="3" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L6 3L0 6z" fill="currentColor" fill-opacity=".6"/></marker></defs>`+h+pos.map(([px,py],i)=>mpDot(px,py,MP_C[i],i+1)).join('')); }
+  /* co-op: um tabuleiro só, peças de todo mundo nele */
+  return svg(mpBoard(W/2-20,H/2-20,40,(a,b)=>MP_C[(a+b*2)%n],0)+pos.map(([px,py],i)=>`<line x1="${px}" y1="${py}" x2="${W/2}" y2="${H/2}" stroke="${MP_C[i]}" stroke-opacity=".5" stroke-width="1.2" stroke-dasharray="2 2"/>`+mpDot(px,py,MP_C[i])).join(''));
+}
 function defOpts(){ const o={time:1,play:0,goal:0,series:0}; [...FLAGS,...NETF].forEach(k=>o[k]=false); return o; }
 function applies(type,k){
   const base=['time','play','goal','obstacles','heavy','color','final','bomb','ice','wild'];
@@ -77,10 +135,12 @@ function buildOpts(el,o,type,cfg={}){
   const togs=(keys,label)=>{ const ks=keys.filter(k=>applies(type,k)); if(!ks.length) return '';
     return `<div class="optrow"><label>${label}</label><div class="toggles">${ks.map(k=>`<button type="button" class="tog ${o[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div></div>`; };
   const pane=(k,h)=>h?`<div class="opane" data-pane="${k}">${h}</div>`:'';
-  el.innerHTML=pane('regras',seg('time','Tempo',TIME_L,(local?TIME_ORDER_LOCAL:TIME_ORDER_NET).filter(t=>t!==6||RAMP_TYPES.includes(type)))+seg('play','Modo de jogo',PLAYS)+seg('goal','Meta de pontos',GOAL_L)+seg('series','Série',SERIES_L))
-    +pane('mods',togs(['obstacles','heavy','sudden','color','final','undo','hold'],'Modificadores')+togs(['bomb','ice','wild'],'Blocos especiais'))+pane('net',togs(NETF,'Conectados'));
+  const rampOk=applies(type,'time')&&RAMP_TYPES.includes(type)&&type!=='duel'; /* no duelo por código as etapas não cabem no código: fica o padrão */
+  el.innerHTML=pane('regras',seg('time','Tempo',TIME_L,(local?TIME_ORDER_LOCAL:TIME_ORDER_NET).filter(t=>t!==6||RAMP_TYPES.includes(type)))+(rampOk?'<div class="optrow rampbox"></div>':'')+seg('play','Modo de jogo',PLAYS)+seg('goal','Meta de pontos',GOAL_L)+seg('series','Série',SERIES_L))
+    +pane('mods',togs(['obstacles','heavy','sudden','color','final','undo','hold'],'Modificadores')+togs(['bomb','ice','wild'],'Blocos especiais')+togs(NETF,'Conectados'));
+  const rb=el.querySelector('.rampbox'), rampShow=()=>{ if(!rb) return; rb.hidden=o.time!==6; if(o.time===6) rampEditor(rb,o,!!cfg.ro,cfg.onChange); }; rampShow();
   if(cfg.ro) return; /* só leitura: quem entrou na sala vê, mas não muda */
-  const ch=()=>{ if(cfg.onChange) cfg.onChange(); };
+  const ch=()=>{ rampShow(); if(cfg.onChange) cfg.onChange(); };
   el.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{ const k=b.parentElement.dataset.k; o[k]=+b.dataset.v; b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('sel',x===b)); ch(); }));
   el.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.t; o[k]=!o[k]; b.classList.toggle('on',o[k]); ch(); }));
 }

@@ -279,7 +279,7 @@ function common(m){
 }
 function onSt(m){
   const f=m.from; if(!D||!D.live||!D.opps[f]||(m.seed&&m.seed!==D.cfg.seed)) return;
-  const o=D.opps[f]; o.score=m.s; o.mini=m.m; if(m.b) o.b=m.b;
+  const o=D.opps[f]; o.score=m.s; o.mini=m.m; if(m.b) o.b=m.b; o.c=m.c|0; o.k=m.k|0;
   oppSet(f,m.s,m.m); updTeamLine(); if(D.spect&&D.watch===f) renderSpect();
   if(D.teams&&!D.over){ const g=GOALS[D.o.goal]; if(g&&teamSum(D.myTeam)>=g) duelEnd('goal'); }
   const w=$('#waitList'); if(w) w.innerHTML=waitListHTML();
@@ -337,7 +337,7 @@ $('#roomShare').addEventListener('click',()=>{ if(NET.room.matches.length) share
 
 /* ----- sala ----- */
 function toLobby(){
-  closeEnd(); $('#pauseOv').classList.remove('show'); cancelDrag(); D=null; SH=null; IN=null; MK=null;
+  closeEnd(); $('#pauseOv').classList.remove('show'); chatFechar(); cancelDrag(); D=null; SH=null; IN=null; MK=null;
   if(!NET.open){ show('home'); return; }
   NET.rematch={me:false}; if(NET.role==='A') NET.rematchReq=new Set();
   $('#lobbyStart').hidden=NET.role!=='A'; $('#lobbyGuest').hidden=NET.role==='A';
@@ -372,12 +372,13 @@ function renderLobby(){
   $('#lobbyDaily').innerHTML=ids.map(id=>{ const d=id===NET.role?myDaily():(NET.daily[id]&&NET.daily[id].key===tk?NET.daily[id]:{}); return `<div class="kv"><span>${esc(nm(id))}</span><b>${fmtD(d.t)}</b></div>`; }).join('')+'<p class="muted">Pontos no Desafio do dia de hoje. Traço quer dizer que ainda não jogou.</p>';
   $('#lobbyCard').classList.toggle('ro',!host);
   /* estilos de jogo agrupados: individual, em times e em cooperação */
-  $('#typeSeg').innerHTML=TYPE_GROUPS.map(([g,ks])=>`<div class="tgroup"><small>${g}</small><div class="seg">${ks.map(k=>`<button type="button" data-k="${k}" class="${L.type===k?'sel':''}">${TYPES[k]}</button>`).join('')}</div></div>`).join('');
+  const tc={az:0,la:0}; Object.values(teamsFinal()).forEach(k=>tc[k]++);
+  $('#typeSeg').innerHTML=TYPE_GROUPS.map(([g,ks])=>`<div class="tgroup"><small>${g}</small><div class="seg tpics">${ks.map(k=>`<button type="button" data-k="${k}" class="${L.type===k?'sel':''}">${modePic(k,n,tc)}<span>${TYPES[k]}</span></button>`).join('')}</div></div>`).join('');
   if(host) $$('#typeSeg button').forEach(b=>b.addEventListener('click',()=>{ L.type=b.dataset.k; sendLobby(); renderLobby(); }));
   const [lo,hi]=LIMITS[L.type]; let warn=n<Math.max(2,lo)?'Chame mais alguém: precisa de pelo menos 2 jogadores.':n>hi?`${TYPES[L.type]} aceita até ${hi} jogadores.`:'';
   if(!warn&&isTeamType(L.type)){ const T=teamsFinal(), c={az:0,la:0}; Object.values(T).forEach(k=>c[k]++); if(!c.az||!c.la) warn='Cada time precisa de pelo menos 1 jogador.'; else if(L.type==='tsplit'&&(c.az>3||c.la>3)) warn='No tabuleiro dividido, cada time pode ter até 3 jogadores.'; }
   renderTeamBox();
-  $('#typeHint').innerHTML=esc(TYPE_HINT[L.type])+(warn?`<br><b class="err">${esc(warn)}</b>`:'');
+  $('#typeHint').innerHTML=`<span class="tbig">${modePic(L.type,n,tc)}</span>`+esc(TYPE_HINT[L.type])+(warn?`<br><b class="err">${esc(warn)}</b>`:'');
   $('#lobbyStart').disabled=!!warn; $('#lobbyWarn').hidden=!warn; $('#lobbyWarn').textContent=warn||'';
   if(L.type==='camp'){
     const st=host?campLoad('group'):{stars:L.cs||{},att:{}}; L.w=L.w||1; if(!CWORLDS[L.w-1]||!campWOpen(st,L.w)) L.w=1; if(!campOpen(st,L.w,L.ph||1)) L.ph=1;
@@ -390,9 +391,9 @@ function renderLobby(){
   const ms=NET.room.matches; $('#roomCard').hidden=!ms.length;
   if(ms.length){ const {list}=roomStats(); $('#roomList').innerHTML=`<p class="muted">${ms.length} partida${ms.length>1?'s':''} nesta sala</p>`+list.slice(0,6).map((p,i)=>`<div class="kv"><span>${i+1}º ${esc(p.n)}</span><b>${p.w} V · ${fmtN(p.pts)}</b></div>`).join(''); }
 }
-/* abas da sala (Sala, Partida, Placar) e sub-abas da partida (Estilo, Regras/Fase, Modificadores, Conectados) */
+/* abas da sala (Sala, Partida, Placar) e sub-abas da partida (Estilo, Regras/Fase, Modificadores — as opções "Conectados" ficam dentro de Modificadores) */
 const TYPE_GROUPS=[['Individual',['live','versus']],['Em times',['tlive','tsplit']],['Cooperação',['coop','halves','camp']]];
-const OPT_TABS=[['estilo','Estilo de jogo'],['fase','Fase'],['regras','Regras'],['mods','Modificadores'],['net','Conectados']];
+const OPT_TABS=[['estilo','Estilo de jogo'],['fase','Fase'],['regras','Regras'],['mods','Modificadores']];
 let LTAB='partida', OTAB='estilo';
 function lobbyTabs(){
   $$('#lobbyTabs button').forEach(b=>b.classList.toggle('sel',b.dataset.tab===LTAB));
@@ -402,6 +403,7 @@ function lobbyTabs(){
   $('#optTabs').innerHTML=OPT_TABS.filter(([k])=>have.has(k)).map(([k,n])=>`<button type="button" data-p="${k}" class="${k===OTAB?'sel':''}">${n}</button>`).join('');
   $$('#lobbyCard .opane').forEach(p=>p.hidden=p.dataset.pane!==OTAB);
   $$('#optTabs button').forEach(b=>b.addEventListener('click',()=>{ OTAB=b.dataset.p; lobbyTabs(); }));
+  chatNaAba();
 }
 $$('#lobbyTabs button').forEach(b=>b.addEventListener('click',()=>{ LTAB=b.dataset.tab; lobbyTabs(); }));
 $('#lobbyStart').addEventListener('click',()=>{ ac(); hostStart(false); });

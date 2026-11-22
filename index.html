@@ -62,6 +62,7 @@
     <h1>Jogar sozinho</h1>
     <div class="card">
       <div class="optrow"><label>Tempo</label><div class="seg" id="soloTime"></div></div>
+      <div class="optrow rampbox" id="soloRamp" hidden></div>
       <div class="optrow"><label>Modo de jogo</label><div class="seg" id="soloPlay"></div></div>
       <div class="optrow"><label>Adversário</label><div class="seg" id="soloNpc"></div></div>
       <div id="soloNpcBox" hidden></div>
@@ -233,9 +234,9 @@
 <!-- LOBBY -->
 <section id="lobby" class="screen">
   <div class="pad">
-    <div class="topnav"><button class="back" id="lobbyLeave">Desconectar</button><span class="muted" id="lobbyConn" style="flex:1">Conectado</span><button type="button" class="back chatb" id="lobbyChat" aria-label="Chat da sala">💬<i class="chatbadge" hidden></i></button><button class="back" id="lobbySet" aria-label="Configurações">⚙</button></div>
+    <div class="topnav"><button class="back" id="lobbyLeave">Desconectar</button><span class="muted" id="lobbyConn" style="flex:1">Conectado</span><button class="back" id="lobbySet" aria-label="Configurações">⚙</button></div>
     <h1>Sala conectada</h1>
-    <div class="tabs" id="lobbyTabs"><button type="button" data-tab="sala">👥 Sala</button><button type="button" data-tab="partida">🎮 Partida</button><button type="button" data-tab="placar">🏆 Placar</button></div>
+    <div class="tabs" id="lobbyTabs"><button type="button" data-tab="sala" class="chatb0">👥 Sala<i class="chatbadge" hidden></i></button><button type="button" data-tab="partida">🎮 Partida</button><button type="button" data-tab="placar">🏆 Placar</button></div>
     <div class="ltab" data-tab="sala">
     <div class="card">
       <div class="optrow"><label for="nickIn">Seu apelido</label><input class="code nick" id="nickIn" maxlength="16" placeholder="Como você quer aparecer" autocomplete="off" spellcheck="false" enterkeyhint="done"></div>
@@ -243,6 +244,7 @@
       <div class="row"><button class="btn small" id="lobbyAdd">+ Adicionar jogador</button><button class="btn small" id="lobbySpec">📺 Conectar espectador</button></div>
       <div class="row" id="lobbySimRow" hidden><button class="btn small" id="lobbySim">🤖 Aparelho de teste</button><button class="btn small ghost" id="lobbySimDel">Remover testes</button></div>
     </div>
+    <div class="card lchat"><h2>💬 Chat da sala</h2><p class="muted" style="font-size:12px;margin:0 0 6px">Só quem está na sala vê. Some quando a sala fecha.</p><div id="chatHome"></div></div>
     </div>
     <div class="ltab" data-tab="placar">
     <div class="card" id="roomCard" hidden><h2>Resultados da sala</h2><div id="roomList"></div><button class="btn small" id="roomShare" style="margin-top:8px">Compartilhar no WhatsApp</button></div>
@@ -312,8 +314,8 @@
 <div id="fxl"></div>
 <div id="chatOv" class="overlay"><div class="panel chatpanel"><div class="chathead"><h2>💬 Chat da sala</h2><button type="button" class="back" id="chatClose" aria-label="Fechar">✕</button></div>
   <p class="muted" style="font-size:12px;margin:0 0 6px">Só quem está na sala vê. Some quando a sala fecha.</p>
-  <div id="chatList" class="chatlist" aria-live="polite"></div><div class="chatrap" id="chatRap"></div>
-  <form id="chatForm" class="chatform" autocomplete="off"><input class="code nick" id="chatIn" maxlength="200" placeholder="Escreva uma mensagem" enterkeyhint="send"><button class="btn primary small" type="submit">Enviar</button></form></div></div>
+  <div id="chatBody" class="chatbody"><div id="chatList" class="chatlist" aria-live="polite"></div><div class="chatrap" id="chatRap"></div>
+  <form id="chatForm" class="chatform" autocomplete="off"><input class="code nick" id="chatIn" maxlength="200" placeholder="Escreva uma mensagem" enterkeyhint="send"><button class="btn primary small" type="submit">Enviar</button></form></div></div></div>
 <div id="toast" role="status"></div>
 <canvas id="pcv"></canvas>
 

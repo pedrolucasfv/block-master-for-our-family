@@ -35,7 +35,7 @@ function npcLoop(){
   }
   n.timer=setTimeout(npcLoop,80);
 }
-function npcState(){ const n=NPC, e=n.eng; onSt({t:'st',from:'npc',seed:n.d.cfg.seed,s:n.score,m:e.b.flat().map(v=>v?(v.c<0&&v.c!==-2?2:1):0).join(''),b:boardStr(e.b)}); }
+function npcState(){ const n=NPC, e=n.eng; onSt({t:'st',from:'npc',seed:n.d.cfg.seed,s:n.score,m:e.b.flat().map(v=>v?(v.c<0&&v.c!==-2?2:1):0).join(''),b:boardStr(e.b),c:e.combo,k:e.since}); }
 function npcEnd(reason){
   const n=NPC; if(!n||n.over) return; n.over=true; clearTimeout(n.timer);
   const e=n.eng; npcState();

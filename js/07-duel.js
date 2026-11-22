@@ -203,12 +203,13 @@ function holdPulse(on){ const h=$('#holdSlot'); if(h) h.classList.toggle('pulse'
 function armSudden(){ if(!D) return; if(D.o.sudden) D.suddenAt=D.elapsed+5000; else if(rampOn(D.o)){ const l=rampLim(D.elapsed); D.suddenAt=l?D.elapsed+l*1000:Infinity; } }
 /* Desafio do dia: tempo livre no começo, depois um limite por peça que vai apertando. [a partir de (s), segundos por peça] */
 const RAMP=[[180,8],[360,5],[540,3]];
-function rampLim(el){ let l=0; for(const [t,s] of RAMP) if(el>=t*1000) l=s; return l; }
+function rampLim(el){ let l=0; for(const [t,s] of rampOf(D.o)) if(el>=t*1000) l=s; return l; }
 function rampTick(){
   const el=D.elapsed, l=rampLim(el);
   if(l!==(D.rampL||0)){ D.rampL=l; D.suddenAt=Math.min(D.suddenAt,el+l*1000); praise(`⏱ Agora ${l} s por peça!`); SFX.alert(); }
-  if(!l){ const nx=RAMP[0][0]*1000-el; setStatus(`Tempo livre por mais ${fmtT(nx)} · depois ${RAMP[0][1]} s por peça`,false); return true; }
-  const left=D.suddenAt-el, nxt=RAMP.find(([t])=>t*1000>el);
+  const R=rampOf(D.o);
+  if(!l){ const nx=R[0][0]*1000-el; setStatus(`Tempo livre por mais ${fmtT(nx)} · depois ${R[0][1]} s por peça`,false); return true; }
+  const left=D.suddenAt-el, nxt=R.find(([t])=>t*1000>el);
   setStatus(`⏱ ${(Math.max(0,left)/1000).toFixed(1).replace('.',',')} s para pôr a peça`+(nxt?` · em ${fmtT(nxt[0]*1000-el)}: ${nxt[1]} s`:''),left<2000);
   if(left<=0){ duelEnd('sudden'); return false; } return true;
 }
@@ -236,7 +237,7 @@ function duelTick(t){
 }
 function boardStr(b){ return b.flat().map(v=>{ if(!v) return '.-'; const c=v.c===-2?'g':v.c<0?'s':String(v.c); const s=v.s==='bomb'?'b':v.s==='ice'?'i':v.s==='wild'?'w':v.cr?'c':'-'; return c+s; }).join(''); }
 function strBoard(str){ const b=Array.from({length:N},()=>Array(N).fill(null)); if(!str) return b; for(let i=0;i<64;i++){ const c=str[i*2], s=str[i*2+1]; if(!c||c==='.') continue; b[(i/N)|0][i%N]={c:c==='s'?-1:c==='g'?-2:+c,s:s==='b'?'bomb':s==='i'?'ice':s==='w'?'wild':null,cr:s==='c'?1:0,t:Infinity}; } return b; }
-function sendState(){ if(!D||!D.live||D.over) return; send({t:'st',seed:D.cfg.seed,s:D.score,m:D.eng.b.flat().map(v=>v?(v.c<0&&v.c!==-2?2:1):0).join(''),b:boardStr(D.eng.b)}); }
+function sendState(){ if(!D||!D.live||D.over) return; send({t:'st',seed:D.cfg.seed,s:D.score,m:D.eng.b.flat().map(v=>v?(v.c<0&&v.c!==-2?2:1):0).join(''),b:boardStr(D.eng.b),c:D.eng.combo,k:D.eng.since}); }
 function stillPlaying(){ return D&&D.others?D.others.filter(id=>!D.opps[id].info):[]; }
 const EMOS=['😂','😱','🔥','👏','😈'];
 function emoBtns(){ return EMOS.map(e=>`<button class="emo" data-e="${e}">${e}</button>`).join('')+chatBtn(); }
@@ -256,15 +257,20 @@ function pickWatch(force){
   if(!pl.length){ d.watch=null; return false; }
   if(force&&pl.includes(force)) d.watch=force;
   else if(!d.watch||d.opps[d.watch].info) d.watch=pl.sort((a,b)=>d.opps[b].score-d.opps[a].score)[0];
-  d.prevB=null; resetScore(d.opps[d.watch].score); renderSpect(); return true;
+  d.prevB=null; d.prevC=d.opps[d.watch].c||0; resetScore(d.opps[d.watch].score); renderSpect(); return true;
 }
 function renderSpect(){
   const d=D; if(!d||!d.spect||!d.watch) return; const op=d.opps[d.watch];
   const b=strBoard(op.b); renderBoard(b,{...d.o,play:0},null);
   if(d.prevB&&op.b){ const old=d.prevB, nw=[]; for(let i=0;i<64;i++){ if(old[i*2]==='.'&&op.b[i*2]!=='.') nw.push(i); } glowCells(nw,b); }
   d.prevB=op.b; showScore(op.score);
+  /* combo de quem você está assistindo (vem junto com o tabuleiro); subiu para x2 ou mais: aparece no tabuleiro */
+  const c=op.c||0; updateCombo(c,op.k||0); if(c>=2&&c>(d.prevC||0)) praise('COMBO x'+c,undefined,false,Math.min(7,c+1)); d.prevC=c;
   $('#scoreLbl').textContent=nm(d.watch);
-  $('#subTxt').textContent='Você terminou com '+fmtN(d.info.score);
+  /* onde você parou, em destaque, com a sua posição agora (muda se alguém passar) */
+  const pos=1+d.others.filter(id=>{ const o=d.opps[id]; return (o.info?o.info.score:o.score)>d.info.score; }).length;
+  const h=`<span class="myend">🏁 Você parou em <b>${fmtN(d.info.score)}</b> <small>${pos}º lugar agora</small></span>`;
+  if($('#subTxt')._h!==h){ $('#subTxt')._h=h; $('#subTxt').innerHTML=h; }
   setStatus('Assistindo '+nm(d.watch)+(stillPlaying().length>1?' · toque num placar para trocar':''));
   d.others.forEach(id=>oppSet(id,d.opps[id].score,null,{watch:id===d.watch}));
 }
@@ -296,7 +302,10 @@ function applyGold(y,x){
 }
 /* ataques e poderes vão para o líder (quem está jogando com mais pontos, fora você) */
 function teamSum(k){ if(!D||!D.teams) return 0; return (D.myTeam===k?D.score:0)+D.others.filter(id=>D.teams[id]===k).reduce((s,id)=>{ const o=D.opps[id]; return s+(o.info?o.info.score:o.score); },0); }
-function updTeamLine(){ if(!D||!D.teams||D.spect) return; $('#subTxt').textContent=`${TEAM.az.e} ${fmtN(teamSum('az'))} × ${fmtN(teamSum('la'))} ${TEAM.la.e}`; }
+function updTeamLine(){ if(!D||!D.teams) return;
+  ['az','la'].forEach(k=>{ const e=$(`#opps [data-tsum="${k}"]`), t=fmtN(teamSum(k)); if(e&&e.textContent!==t) e.textContent=t; });
+  const m=$('#opps [data-mysc]'); if(m) m.textContent=fmtN(D.spect&&D.info?D.info.score:D.score);
+  if(!D.spect) $('#subTxt').textContent=''; /* o total de cada time fica em cima da coluna dele */ }
 function leaderId(){ let pl=stillPlaying(); if(D&&D.teams) pl=pl.filter(id=>D.teams[id]!==D.myTeam); if(!pl.length) return null; return pl.sort((a,b)=>D.opps[b].score-D.opps[a].score)[0]; }
 /* blocos de poder no duelo: ataques vão para o líder (do outro time, nos times); escudo e martelo são seus */
 function firePowers(list){

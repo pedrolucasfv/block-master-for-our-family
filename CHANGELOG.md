@@ -3,6 +3,14 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.12 · 22/11/2026
+- 💬 **Chat fixo na sala:** na sala conectada, o chat agora fica na aba "Sala", embaixo da lista de jogadores (sem precisar abrir janela). Mensagem nova com você em outra aba aparece com um número no "👥 Sala". Durante a partida, o 💬 da barra de emojis continua abrindo o chat.
+- 🔵🟠 **Duelo em times:** os tabuleiros de cada time ficam juntos, um time de cada lado, com o total do time em cima. Você aparece na coluna do seu time.
+- 👀 **Assistindo depois de perder:** agora aparece o combo de quem você está assistindo (com "COMBO x…" no tabuleiro), e os seus pontos ficam em destaque ("🏁 Você parou em…", com a sua posição agora).
+- ⚙️ **Sala conectada:** as opções "Conectados" (ataques, blocos de poder, bloco dourado, handicap) foram para a aba "Modificadores".
+- 🖼️ **Escolha do estilo de jogo com desenho:** cada modo mostra como fica a tela (um tabuleiro para cada, tabuleiro dividido em metades ou quadrantes conforme o número de pessoas, times um de cada lado…), usando quem está na sala.
+- ⏱️ **Sem limite com progressão do seu jeito:** escolha quando o tempo por peça começa a apertar e quantos segundos fica em cada etapa (mais ou menos etapas, ou voltar ao padrão). Funciona no Sozinho e na sala conectada.
+
 ## 1.11.2 · 22/11/2026
 - ✏️ Ao escrever o apelido no Perfil, o nome só vai para o ranking quando você termina de digitar (antes, cada pedaço, como "Ke" e "Ken", virava um jogador).
 - 🏆 Ranking, desafios e avisos não ficam mais "Carregando…" para sempre quando a internet ou o servidor demoram: depois de 12 segundos, aparece que está indisponível (é só abrir de novo).

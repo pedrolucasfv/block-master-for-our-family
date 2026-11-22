@@ -378,7 +378,12 @@ function playSteps(steps,renderStep,done){
 /* placar dos adversários (um cartão por jogador, com miniatura do tabuleiro no duelo ao vivo) */
 function oppsSetup(ids,withMini,onTap,teams){
   const el=$('#opps'); el.hidden=!ids.length; el.classList.toggle('many',ids.length>1);
-  el.innerHTML=ids.map(id=>`<button type="button" class="opp" data-id="${id}"${teams&&teams[id]?` style="box-shadow:inset 0 0 0 2px ${TEAM[teams[id]].c}"`:''}>${withMini?'<div class="mini">'+'<i></i>'.repeat(64)+'</div>':''}${avatarHTML(id,26)}<div><b>0</b><span>${esc(nm(id))}</span></div></button>`).join('');
+  const card=id=>`<button type="button" class="opp" data-id="${id}"${teams&&teams[id]?` style="box-shadow:inset 0 0 0 2px ${TEAM[teams[id]].c}"`:''}>${withMini?'<div class="mini">'+'<i></i>'.repeat(64)+'</div>':''}${avatarHTML(id,26)}<div><b>0</b><span>${esc(nm(id))}</span></div></button>`;
+  /* duelo em times: cada time na sua coluna (o seu time do lado esquerdo, com você nele), com o total do time em cima */
+  const me=teams&&teams[NET.role]; el.classList.toggle('teams',!!me);
+  if(me){ const col=k=>`<div class="tcol" style="--tc:${TEAM[k].c}"><div class="thead"><span>${TEAM[k].e} ${esc(TEAM[k].n)}</span><b data-tsum="${k}">0</b></div><div class="tlist">${k===me?`<div class="opp me"><div><b data-mysc>0</b><span>Você</span></div></div>`:''}${ids.filter(id=>teams[id]===k).map(card).join('')}</div></div>`;
+    el.innerHTML=col(me)+'<div class="tx">×</div>'+col(otherTeam(me)); }
+  else el.innerHTML=ids.map(card).join('');
   el.querySelectorAll('.opp').forEach(b=>b.addEventListener('click',()=>{ if(onTap) onTap(b.dataset.id); }));
 }
 function oppSet(id,score,mini,o={}){

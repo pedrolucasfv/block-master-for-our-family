@@ -1,11 +1,14 @@
 'use strict';
 /* CHAT DA SALA conectada: mensagens só na memória dos aparelhos da sala (nada vai para servidor nem fica guardado); somem quando a sala fecha */
+/* Na sala, o chat fica fixo na aba "Sala", embaixo dos jogadores (#chatHome). Na partida, o 💬 da barra de emojis abre o mesmo chat numa janela (#chatOv):
+   o miolo (#chatBody) muda de lugar entre os dois. */
 /* Vai pela própria conexão da sala: {t:'chat',x:texto}. Quem criou a sala carimba quem mandou e repassa para todos (hostMsg).
    Quem criou guarda a conversa enquanto a sala existir e manda para quem entra depois ({t:'chatHist'}, em hostMsg 'hello'). */
 const CHAT=[], CHAT_MAX=200, CHAT_RAP=['👍','Bora!','Mais uma?','Boa jogada!','Já volto','Kkkkk'];
 let chatNovas=0;
-const chatAberto=()=>$('#chatOv').classList.contains('show');
-function chatLimpar(){ CHAT.length=0; chatNovas=0; chatBadge(); $('#chatOv').classList.remove('show'); }
+const chatNaSala=()=>$('#lobby').classList.contains('active')&&LTAB==='sala';
+const chatAberto=()=>$('#chatOv').classList.contains('show')||chatNaSala();
+function chatLimpar(){ CHAT.length=0; chatNovas=0; chatBadge(); chatFechar(); chatRender(); }
 function chatBadge(){ $$('.chatbadge').forEach(b=>{ b.textContent=chatNovas>9?'9+':chatNovas||''; b.hidden=!chatNovas; }); }
 /* botão para a barra de emojis da partida (emoBtns) */
 function chatBtn(){ return NET.open&&!NET.isSpec?`<button type="button" class="emo chatb" aria-label="Chat da sala">💬<i class="chatbadge"${chatNovas?'':' hidden'}>${chatNovas||''}</i></button>`:''; }
@@ -34,8 +37,11 @@ function chatRender(){
     :'<p class="muted tcenter">Ninguém falou nada ainda. Mande um oi!</p>';
   list.scrollTop=list.scrollHeight;
 }
-function chatAbrir(){ if(!NET.open) return; chatNovas=0; chatBadge(); $('#toast').classList.remove('show'); $('#chatOv').classList.add('show'); chatRender(); }
-function chatFechar(){ $('#chatOv').classList.remove('show'); }
+function chatAbrir(){ if(!NET.open) return; chatNovas=0; chatBadge(); $('#toast').classList.remove('show'); $('.chatpanel').appendChild($('#chatBody')); $('#chatOv').classList.add('show'); chatRender(); }
+function chatFechar(){ $('#chatOv').classList.remove('show'); $('#chatHome').appendChild($('#chatBody')); }
+/* aba "Sala" à vista: a conversa está aberta ali (zera o número de novas) */
+function chatNaAba(){ if(!chatNaSala()) return; chatFechar(); chatNovas=0; chatBadge(); chatRender(); }
+chatFechar();
 $('#chatRap').innerHTML=CHAT_RAP.map(t=>`<button type="button" class="chip" data-x="${esc(t)}">${esc(t)}</button>`).join('');
 $('#chatRap').addEventListener('click',e=>{ const b=e.target.closest('[data-x]'); if(b) chatEnviar(b.dataset.x); });
 $('#chatForm').addEventListener('submit',e=>{ e.preventDefault(); const i=$('#chatIn'); if(chatEnviar(i.value)) i.value=''; i.focus(); });
