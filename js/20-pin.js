@@ -42,7 +42,7 @@ async function pinEnviar(modo,ok){
     store.set('ddb_rkpin',par.filter(x=>!meus.includes(x))); if(meus.length){ store.set('ddb_rkq',store.get('ddb_rkq',[]).concat(meus)); rkFlush(); }
     store.set('ddb_rksync',''); store.set('ddb_rkfoto',''); await pinFoto();
     const antes=campTotal(campLoad('solo')), sync=await pgSync(), depois=campTotal(campLoad('solo'));
-    toast(modo==='criar'?'🔒 PIN criado! Seu progresso está guardado na nuvem.':!sync?'🔒 Entrou! O progresso vai para a nuvem quando a internet voltar.':depois>antes?`☁️ Progresso recuperado: ${depois} ⭐`:'🔒 Entrou! Progresso em dia.');
+    if(!pgConf) toast(modo==='criar'?'🔒 PIN criado! Seu progresso está guardado na nuvem.':!sync?'🔒 Entrou! O progresso vai para a nuvem quando a internet voltar.':depois>antes?`☁️ Progresso recuperado: ${depois} ⭐`:'🔒 Entrou! Progresso em dia.');
     rkSyncMe(); pinRender(); if(ok) ok();
   }catch(e){ msg.textContent=/pin:/.test(e.message)?'O PIN mudou em outro aparelho. Entre de novo.':'Sem internet agora. Tente de novo daqui a pouco.'; if(/pin:/.test(e.message)) pinSalvar(chave,''); }
   finally{ pinBusy=false; }
@@ -69,7 +69,7 @@ function pinRender(){
   const poe=(html,ev)=>{ box.innerHTML='<h3 class="pinh">🔒 PIN e progresso na nuvem</h3>'+html; (ev||[]).forEach(([id,f])=>{ const b=$('#'+id); if(b) b.addEventListener('click',f); }); };
   if(!nome){ poe('<p class="muted">Coloque seu apelido acima para criar um PIN e guardar seu progresso na nuvem.</p>'); return; }
   if(pinTok()){ poe(`<p class="muted">✅ <b>${esc(nome)}</b> está protegido com PIN. ☁️ Progresso guardado na nuvem${q?' '+pgQuando(q):''}.</p><div class="row" style="margin-top:8px">${bt('pgNow','☁️ Salvar agora')}${bt('pinTroca','Trocar PIN')}${bt('pinSai','Sair do nome','ghost')}</div>`,
-    [['pgNow',()=>{ toast('☁️ Salvando…'); pgSync().then(ok=>{ toast(ok?'☁️ Progresso salvo na nuvem!':'Sem internet agora. Tente de novo daqui a pouco.'); pinRender(); }); }],['pinTroca',()=>pinAbrir('trocar')],['pinSai',pinSair]]); return; }
+    [['pgNow',()=>{ toast('☁️ Salvando…'); pgSync().then(ok=>{ if(pgConf) return; toast(ok?'☁️ Progresso salvo na nuvem!':'Sem internet agora. Tente de novo daqui a pouco.'); pinRender(); }); }],['pinTroca',()=>pinAbrir('trocar')],['pinSai',pinSair]]); return; }
   poe('<p class="muted">Conferindo…</p>');
   clearTimeout(pinRT); pinRT=setTimeout(()=>pinEstado().then(r=>{ if(nome!==myNick()) return;
     if(r&&r.estado==='com_pin') poe(`<p class="muted">Esse nome já tem PIN. Se é você, entre com o PIN para trazer seu progresso para este aparelho. Se não é, escolha outro apelido.</p><div class="row" style="margin-top:8px">${bt('pinIn','🔒 Entrar com PIN','primary')}</div>`,[['pinIn',()=>pinAbrir('entrar')]]);
@@ -101,34 +101,83 @@ function pgMerge(loc,nuv){
 }
 /* JSON com as chaves em ordem: o banco reordena as chaves, então compara assim */
 function pgTxt(v){ return Array.isArray(v)?'['+v.map(pgTxt).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+pgTxt(v[k])).join(',')+'}':JSON.stringify(v); }
+/* controle no aparelho: ddb_pglocal = quando o progresso daqui mudou por último (jogando); ddb_pgsujo = tem mudança daqui que a nuvem ainda não tem;
+   ddb_pgoff = essa mudança foi feita sem internet; ddb_pgrev = {k: nome em minúsculas, rev: versão da nuvem com que este aparelho está em dia} */
 let pgAplicando=false;
-/* grava no aparelho o que veio da nuvem e libera os temas ganhos */
-function pgAplicar(m){
+/* grava no aparelho o progresso m e libera os temas ganhos. exato: fica igual a m (o que m não tem é apagado daqui, inclusive temas) */
+function pgAplicar(m,exato){
   let mudou=false; pgAplicando=true;
-  try{ PG_KEYS.forEach(k=>{ const v=m[k.slice(4)]; if(v!=null&&pgTxt(v)!==pgTxt(store.get(k,null))){ store.set(k,v); mudou=true; } });
+  try{ PG_KEYS.forEach(k=>{ const v=m[k.slice(4)]; if(v!=null){ if(pgTxt(v)!==pgTxt(store.get(k,null))){ store.set(k,v); mudou=true; } } else if(exato&&store.get(k,null)!=null){ store.del(k); mudou=true; } });
+    if(mudou&&exato){ WON.clear(); GOLDS.clear(); SKIN_REW.forEach(k=>{ const i=SKINS.indexOf(k); if(i>=0) SKINS.splice(i,1); }); }
     if(mudou){ (m.won||[]).forEach(k=>unlockSkin(k)); if(m.bear) unlockSkin('bear'); (m.gold||[]).forEach(k=>unlockGold(k)); } }finally{ pgAplicando=false; }
   if(!mudou) return false;
   if($('#home').classList.contains('active')) renderHome(); else if($('#settings').classList.contains('active')) renderSettings();
   return true;
 }
-let pgBusy=false, pgT=0, pgMais=false;
-/* algo do progresso mudou (store.set de uma chave de PG_KEYS): manda daqui a pouco */
-function pgAgendar(){ if(pgAplicando||!rkOn()||!pinTok()) return; clearTimeout(pgT); pgT=setTimeout(pgSync,4000); }
-/* lê a nuvem, junta com o aparelho, grava nos dois. Se outro celular gravou no meio, junta de novo e tenta outra vez. Responde true se deu certo. */
+let pgBusy=false, pgT=0, pgMais=false, pgConf=null;
+/* algo do progresso mudou de verdade (store.set de uma chave de PG_KEYS): anota quando e manda daqui a pouco */
+function pgAgendar(){ if(pgAplicando) return; store.set('ddb_pglocal',Date.now()); store.set('ddb_pgsujo',true); if(!navigator.onLine) store.set('ddb_pgoff',true);
+  if(!rkOn()||!pinTok()) return; clearTimeout(pgT); pgT=setTimeout(pgSync,4000); }
+const pgVazio=o=>!o||!Object.keys(o).length;
+/* aparelho e nuvem iguais na versão rev. t0: quando o progresso daqui tinha mudado ao começar; se mudou de novo no meio, continua marcado para mandar */
+function pgEmDia(k,rev,t0){ store.set('ddb_pgrev',{k,rev:rev||0}); store.set('ddb_pgquando',Date.now()); if(store.get('ddb_pglocal',0)===t0){ store.set('ddb_pgsujo',false); store.set('ddb_pgoff',false); } }
+async function pgGravar(nome,k,m,rev,t0){ const s=await rkFetch('rpc/salvar_progresso',{body:{p_nome:nome,p_dados:m,p_rev:rev||0}}); if(!s||!s.ok) return false; pgEmDia(k,s.rev,t0); return true; }
+/* lê a nuvem e decide: nada a fazer, trazer o da nuvem, mandar o daqui ou perguntar qual fica. Se outro celular gravou no meio, lê de novo. Responde true se ficou em dia. */
 async function pgSync(){
-  if(!rkOn()||!pinTok()) return false; if(pgBusy){ pgMais=true; return false; }
-  pgBusy=true; const nome=myNick();
+  if(!rkOn()||!pinTok()) return false; if(pgConf){ pgPerguntar(); return false; } if(pgBusy){ pgMais=true; return false; }
+  pgBusy=true; const nome=myNick(), k=pinChave();
   try{
-    let r=await rkFetch('rpc/ler_progresso',{body:{p_nome:nome}});
     for(let i=0;i<5;i++){
-      const m=pgMerge(pgLocal(),r.dados); pgAplicar(m);
-      if(r.dados&&pgTxt(m)===pgTxt(r.dados)) break;
-      const s=await rkFetch('rpc/salvar_progresso',{body:{p_nome:nome,p_dados:m,p_rev:r.rev||0}});
-      if(s&&s.ok) break; r={dados:s&&s.dados,rev:s&&s.rev};
+      const r=await rkFetch('rpc/ler_progresso',{body:{p_nome:nome}}), t0=store.get('ddb_pglocal',0), loc=pgLocal(), nuv=r.dados, ref=store.get('ddb_pgrev',null);
+      const ligado=!!ref&&ref.k===k, sujo=store.get('ddb_pgsujo',false), off=store.get('ddb_pgoff',false), mudouLa=!ligado||ref.rev!==(r.rev||0);
+      let usar;
+      if(pgVazio(nuv)) usar=pgVazio(loc)?'nada':'local';
+      else if(pgVazio(loc)||pgTxt(loc)===pgTxt(nuv)) usar='nuvem';
+      else if(!ref&&store.get('ddb_pgquando',0)) usar='juntar'; /* aparelho que já usava a nuvem antes da 1.15: junta pelo melhor, como antes, uma vez */
+      else if(pgTxt(pgMerge(loc,nuv))===pgTxt(nuv)) usar='nuvem'; /* tudo o que tem aqui já está na nuvem */
+      else if(ligado&&!sujo) usar='nuvem'; /* nada novo aqui: vale o da nuvem (mais novo, de outro aparelho) */
+      else if(ligado&&!off&&!mudouLa) usar='local'; /* jogou aqui com internet e ninguém mexeu na nuvem: só manda */
+      else usar='perguntar'; /* jogou sem internet, os dois lados mudaram, ou é a primeira vez deste aparelho com essa nuvem */
+      if(usar==='perguntar'){ pgConf={nuvem:nuv,quando:r.atualizado?Date.parse(r.atualizado):0}; pgPerguntar(); return false; }
+      if(usar==='nada'||usar==='nuvem'){ if(usar==='nuvem') pgAplicar(nuv,true); pgEmDia(k,r.rev,t0); return true; }
+      const m=usar==='juntar'?pgMerge(loc,nuv):loc; if(usar==='juntar') pgAplicar(m);
+      if(await pgGravar(nome,k,m,r.rev,t0)) return true;
     }
-    store.set('ddb_pgquando',Date.now()); return true;
-  }catch(e){ if(/pin:/.test(e.message)) pinPerdeu(); return false; }
+    return false;
+  }catch(e){ if(/pin:/.test(e.message)) pinPerdeu(); else if(store.get('ddb_pgsujo',false)) store.set('ddb_pgoff',true); return false; }
   finally{ pgBusy=false; if(pgMais){ pgMais=false; pgAgendar(); } }
+}
+/* ===================== qual progresso fica: este aparelho ou a nuvem ===================== */
+function pgData(t){ const d=new Date(t); return `Atualizado em ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`; }
+function pgResumo(o){ const st=Object.values((o&&o.camp_solo&&o.camp_solo.stars)||{}).reduce((a,b)=>a+b,0), so=(o&&o.solo)||{};
+  return `⭐ ${st} estrelas · 🏆 recorde ${fmtN(so.bestScore||0)} · 🎮 ${fmtN(so.games||0)} partidas`; }
+/* espera estar no menu (não interrompe partida) e mostra os dois lados, com a data da última atualização de cada um */
+let pgEsperaT=0;
+function pgPerguntar(){
+  clearTimeout(pgEsperaT); if(!pgConf) return;
+  if(!$('#home').classList.contains('active')||$('#end').classList.contains('show')){ pgEsperaT=setTimeout(pgPerguntar,2000); return; }
+  const loc=pgLocal(), tl=store.get('ddb_pglocal',0)||store.get('ddb_pgquando',0), tn=pgConf.quando, off=store.get('ddb_pgoff',false);
+  const lado=(ic,tit,t,o,novo)=>`<div class="pgop${novo?' novo':''}"><b>${ic} ${tit}</b>${novo?'<em>mais recente</em>':''}<span>${t?pgData(t):'Sem data'}</span><span>${pgResumo(o)}</span></div>`;
+  openEnd('<h2>☁️ Qual progresso usar?</h2><p class="muted">'+(off?'<b>Você jogou sem internet.</b> ':'')+'O progresso deste aparelho ficou diferente do que está guardado na nuvem. Escolha qual fica: o outro é substituído.</p>'
+    +lado('📱','Este aparelho',tl,loc,tl>tn)+lado('☁️','Nuvem',tn,pgConf.nuvem,tn>tl),
+    [{t:'📱 Usar o deste aparelho',cls:tl>tn?'primary':'',on:()=>pgEscolher('local')},{t:'☁️ Usar o da nuvem',cls:tn>tl?'primary':'',on:()=>pgEscolher('nuvem')},
+     {t:'🔀 Juntar o melhor dos dois',cls:'ghost',on:()=>pgEscolher('juntar')},{t:'Decidir depois',cls:'ghost',on:()=>{ pgConf=null; closeEnd(); }}]);
+}
+async function pgEscolher(op){
+  if(pgBusy) return; pgBusy=true; const nome=myNick(), k=pinChave(); toast('☁️ Salvando…');
+  try{
+    let ok=false;
+    for(let i=0;i<5&&!ok;i++){
+      const r=await rkFetch('rpc/ler_progresso',{body:{p_nome:nome}}), t0=store.get('ddb_pglocal',0), loc=pgLocal();
+      if(op==='nuvem'&&!pgVazio(r.dados)){ pgAplicar(r.dados,true); pgEmDia(k,r.rev,t0); ok=true; break; }
+      const m=op==='juntar'?pgMerge(loc,r.dados):loc; if(op==='juntar') pgAplicar(m);
+      ok=await pgGravar(nome,k,m,r.rev,t0);
+    }
+    if(!ok){ toast('Não deu certo agora. Tente de novo.'); return; }
+    pgConf=null; closeEnd(); pinRender();
+    toast(op==='nuvem'?'☁️ Pronto! Este aparelho está com o progresso da nuvem.':op==='local'?'☁️ Pronto! A nuvem agora tem o progresso deste aparelho.':'☁️ Pronto! Juntamos o melhor dos dois.');
+  }catch(e){ if(/pin:/.test(e.message)){ pgConf=null; closeEnd(); pinPerdeu(); } else toast('Sem internet agora. Tente de novo daqui a pouco.'); }
+  finally{ pgBusy=false; }
 }
 /* ao abrir o jogo: com PIN, sincroniza; sem PIN, convida (uma vez por dia) ou pede o PIN se o nome já tem */
 function pinInicio(){
@@ -139,4 +188,4 @@ function pinInicio(){
     if(r.estado==='com_pin') pinAbrir('entrar');
     else if(store.get('ddb_pinconvite','')!==diaBR()){ store.set('ddb_pinconvite',diaBR()); pinAbrir('criar'); } }).catch(()=>{});
 }
-if(rkOn()){ setTimeout(pinInicio,3500); window.addEventListener('online',()=>{ if(pinTok()) pgAgendar(); }); }
+if(rkOn()){ setTimeout(pinInicio,3500); window.addEventListener('online',()=>{ if(pinTok()){ clearTimeout(pgT); pgT=setTimeout(pgSync,2000); } }); }

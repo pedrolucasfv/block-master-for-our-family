@@ -32,7 +32,7 @@ async function avDesativar(){ const sub=await avSub(); if(sub){ rkFetch('rpc/rem
 async function avRender(){
   const box=$('#avBox'); if(!box) return; box.hidden=false; const b=$('#avBtn'), t=$('#avTxt');
   if(avInApp()){ b.hidden=true; t.textContent='🔔 Você abriu o jogo dentro do WhatsApp (ou de outro app), e por aqui não dá para receber avisos. Toque nos três pontinhos (⋮) e em "Abrir no Chrome", e ligue os avisos lá.'; return; }
-  if(!avOk()){ b.hidden=true; t.textContent=avIOS()?'No iPhone, os avisos só funcionam com o jogo adicionado à Tela de Início (Compartilhar → Adicionar à Tela de Início). Sem isso, use o aviso pelo WhatsApp.':'Este navegador não mostra avisos. Use o aviso pelo WhatsApp.'; return; }
+  if(!avOk()){ b.hidden=true; t.textContent=avIOS()?'No iPhone, os avisos só funcionam com o jogo instalado na Tela de Início (no menu, toque em "📲 Instalar o jogo" para ver como). Sem isso, use o aviso pelo WhatsApp.':'Este navegador não mostra avisos. Use o aviso pelo WhatsApp.'; return; }
   const on=Notification.permission==='granted'&&!!(await avSub())&&!!store.get('ddb_avnome','');
   b.hidden=false; b.textContent=on?'🔕 Desligar avisos':'🔔 Me avisar quando for a minha vez';
   b.classList.toggle('primary',!on); b.onclick=on?avDesativar:avAtivar;

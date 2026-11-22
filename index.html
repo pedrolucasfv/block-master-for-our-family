@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2b4590">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/icone-apple.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Duelo de Blocos">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Duelo de Blocos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +37,7 @@
       <button class="btn big" id="goWith">Jogar com alguém<small>por código ou conectado</small></button>
       <button class="btn big" id="goCamp">🧸 Campanha<small>mundos, fases e chefões</small></button>
       <button class="btn" id="goDaily">Desafio do dia</button>
+      <button class="btn" id="goInstalar" hidden>📲 Instalar o jogo<small>ícone na tela, abre sem internet</small></button>
       <div class="row"><button class="btn" id="goHistory">Histórico</button><button class="btn nvbtn" id="goNews">✨ Novidades<i id="goNewsDot" hidden></i></button><button class="btn" id="goSettings">Configurações</button></div>
     </div>
     <p class="muted ver" id="verTxt"></p>
@@ -355,5 +363,6 @@
 <script src="js/22-ja.js"></script>
 <script src="js/23-idioma.js"></script>
 <script src="js/24-novidades.js"></script>
+<script src="js/25-instalar.js"></script>
 </body>
 </html>

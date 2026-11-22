@@ -78,7 +78,7 @@
 .who{display:flex;gap:6px;margin-top:6px}.who .btn{flex:1;padding:10px 6px;font-size:14px}
 .sep{height:1px;background:var(--line);margin:12px 0}
 .btn.big{padding:16px;font-size:19px}
-.btn.big small{display:block;font-size:13px;font-weight:400;opacity:.75;margin-top:2px}
+.btn.big small,#goInstalar small{display:block;font-size:13px;font-weight:400;opacity:.75;margin-top:2px}
 .homebest{display:flex;justify-content:space-around;text-align:center;gap:8px}
 .homebest b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
 .homebest span{font-size:12px;color:var(--muted)}
@@ -358,3 +358,8 @@ input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:non
 .bpause{font-size:11px;color:var(--muted)}
 #game.bossmode .scorerow,#game.bossmode .subline,#game.bossmode .status{padding-right:var(--bossW,118px)}
 #game.bossmode #gInfo{min-height:190px}
+/* qual progresso usar: este aparelho ou a nuvem (js/20-pin.js) */
+.pgop{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;background:color-mix(in srgb,currentColor 5%,transparent);border:2px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}
+.pgop b{font-size:15px}.pgop span{opacity:.85}
+.pgop.novo{border-color:#f3c22f}
+.pgop em{position:absolute;top:8px;right:10px;font-style:normal;font-size:11px;font-weight:700;background:#f3c22f;color:#3a2a00;border-radius:8px;padding:1px 7px}

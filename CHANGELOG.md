@@ -3,6 +3,11 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.15 · 22/11/2026
+- 📲 **Instale o jogo:** no menu, o botão "📲 Instalar o jogo" coloca o Duelo de Blocos na tela do celular ou do computador, com ícone próprio e em tela cheia, sem a barra do navegador. No iPhone ele mostra o passo a passo, e só com o jogo instalado o iPhone recebe os avisos 🔔.
+- 📴 **Joga sem internet:** depois de aberto uma vez, o jogo fica guardado no aparelho e abre mesmo sem internet (Sozinho, Campanha, Desafio do dia, duelo no mesmo aparelho). Com internet, sempre abre a versão mais nova.
+- ☁️ **Qual progresso usar:** se você jogou sem internet ou em outro aparelho e o progresso ficou diferente do que está na nuvem, o jogo pergunta qual fica: o deste aparelho ou o da nuvem, mostrando a data da última atualização, as estrelas e o recorde de cada um. Também dá para juntar o melhor dos dois.
+
 ## 1.14 · 22/11/2026
 - ❄️ **Congelado não faz mais perder:** no duelo com tempo por peça (morte súbita ou "Sem limite com progressão"), se alguém congelar suas peças, o tempo para pôr a peça fica parado até descongelar.
 - 🧊 **Gelo bem visível:** os blocos de gelo ganharam moldura azul, reflexo e um floco de neve ❄ no meio, em todos os temas das peças.
