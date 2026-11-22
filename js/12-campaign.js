@@ -269,7 +269,9 @@ function campHook(cfg){
     if(def.goal==='boss'&&!SH.bossIntro){ SH.bossIntro=true; const s0=SH; bossPrep(W.boss).then(()=>{ if(SH===s0&&!SH.over){ bossDock(cp.rage); bossShow('enter'); setTimeout(()=>bossSay(BS.say.enter,1900),350); } }); }
     $('#gLabel').textContent=`Fase ${ph} · ${def.name}`; $('#scoreLbl').textContent=cfg.solo?'Pontos':'Pontos do grupo';
     /* embaixo: a descrição e o que precisa para as estrelas; o andamento vai no cartão ao lado dos pontos (setStatus) */
-    { const st=$('#subTxt'), html=`${def.icon} ${esc(campDesc(def,sc,w))}`;
+    /* chefão: a descrição fica só na pausa; o andamento ("Limpe linhas para atacar") vai nessa linha (setStatus), e o chefão ganha o espaço do cartão */
+    if(def.goal==='boss') SH.bossUI=true;
+    else { const st=$('#subTxt'), html=`${def.icon} ${esc(campDesc(def,sc,w))}`;
       if(st._h!==html){ st._h=html; st.innerHTML=html; } const m=$('#mission'); if(m.hidden){ m.hidden=false; layout(); } }
     const tb=$('#timebar'); tb.classList.remove('hp');
     if(def.goal==='boss') bossHP(cp.hp,cp.hpMax);

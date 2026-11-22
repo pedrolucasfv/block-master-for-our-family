@@ -1426,4 +1426,10 @@ const JA={
 "➕ Entrar no time":"➕ このチームに入る",
 "Entrar no time":"このチームに入る",
 "👇 Escolha seu time: toque em \"Entrar no time\"":"👇 チームを選んでください：「このチームに入る」をタップ",
+"Limpe linhas para atacar":"ラインを消して攻撃",
+"⏸ Regras do chefão: toque na pausa":"⏸ ボスのルール：一時停止をタップ",
+"❄️ Congelado ·":"❄️ 凍結中 ·",
+"❄️ Congelado":"❄️ 凍結中",
+"❄️ Congelado: o tempo para pôr a peça está parado ({} s)":"❄️ 凍結中：ピースを置く時間は止まっています（{}秒）",
+"bold {}px system-ui,sans-serif":null,
 };

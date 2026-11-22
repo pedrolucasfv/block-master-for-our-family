@@ -412,7 +412,11 @@ function overlays(w,dpr,rad,dia){
   return {
     b:mk(x=>{ const g=x.createRadialGradient(w*.42,w*.42,0,w*.5,w*.5,w*.28); g.addColorStop(0,'#5a5a5a'); g.addColorStop(.7,'#111'); g.addColorStop(1,'#111');
       x.beginPath(); x.arc(w/2,w/2,w*.28,0,7); x.fillStyle=g; x.fill(); x.lineWidth=1.5*dpr; x.strokeStyle='rgba(255,255,255,.55)'; x.stroke(); }),
-    i:mk(x=>{ rrect(x,w,w*rad); x.clip(); const g=x.createLinearGradient(0,0,w,w); g.addColorStop(0,'rgba(255,255,255,.7)'); g.addColorStop(.55,'rgba(190,225,255,.35)'); g.addColorStop(1,'rgba(255,255,255,.55)'); x.fillStyle=g; x.fillRect(0,0,w,w); }),
+    /* gelo: camada azul-gelo, moldura grossa clara, reflexos e um floco de neve no meio (bem visível em qualquer tema) */
+    i:mk(x=>{ rrect(x,w,w*rad); x.save(); x.clip(); const g=x.createLinearGradient(0,0,w,w); g.addColorStop(0,'rgba(235,248,255,.78)'); g.addColorStop(.5,'rgba(150,210,255,.5)'); g.addColorStop(1,'rgba(220,243,255,.7)'); x.fillStyle=g; x.fillRect(0,0,w,w);
+      x.strokeStyle='rgba(255,255,255,.75)'; x.lineWidth=w*.07; x.beginPath(); x.moveTo(w*.05,w*.42); x.lineTo(w*.42,w*.05); x.moveTo(w*.18,w*.62); x.lineTo(w*.62,w*.18); x.stroke(); x.restore();
+      x.lineWidth=Math.max(2,w*.09); x.strokeStyle='#e9f8ff'; rrect(x,w,w*rad); x.stroke(); x.lineWidth=Math.max(1,w*.035); x.strokeStyle='#3d8fd6'; x.stroke();
+      x.font=`bold ${Math.round(w*.5)}px system-ui,sans-serif`; x.textAlign='center'; x.textBaseline='middle'; x.lineWidth=Math.max(2,w*.08); x.strokeStyle='#1f5f9e'; x.strokeText('❄',w/2,w*.54); x.fillStyle='#ffffff'; x.fillText('❄',w/2,w*.54); }),
     c:mk(x=>{ x.lineCap='round'; x.lineWidth=Math.max(1,w*.035); x.strokeStyle='rgba(255,255,255,.6)'; x.beginPath(); x.moveTo(w*.1,w*.1); x.lineTo(w*.9,w*.9); x.stroke();
       x.strokeStyle='rgba(255,255,255,.45)'; x.beginPath(); x.moveTo(w*.05,w*.7); x.lineTo(w*.95,w*.3); x.stroke(); }),
     ring:(()=>{ const cs=w/.94, R=Math.round(cs*1.3), c=document.createElement('canvas'); c.width=c.height=R; const x=c.getContext('2d'), sz=cs*1.06, o=(R-sz)/2, r=sz*.22;

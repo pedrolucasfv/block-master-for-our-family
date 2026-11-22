@@ -263,12 +263,12 @@ function bossHide(){ BOSS_Q=null; if(BELT){ BELT=null; bDirty=true; bReq(); } $$
 /* posição do cantinho: medida uma vez e de novo só quando o layout muda */
 let BOSS_Q=null;
 function bossQ(){ return BOSS_Q||(BOSS_Q=bossDockRect()); }
-function bossDockRect(){ const r=$('#gInfo').getBoundingClientRect(), tb=$('#timebar').getBoundingClientRect(), top=tb.bottom+6, sz=Math.max(56,Math.min(104,(r.bottom-top-22)/1.18)); return {left:r.right-sz-6,top,w:sz}; }
+function bossDockRect(){ const r=$('#gInfo').getBoundingClientRect(), tb=$('#timebar').getBoundingClientRect(), top=tb.bottom+6, sz=Math.max(56,Math.min(132,(r.bottom-top-22)/1.18)); return {left:r.right-sz-6,top,w:sz}; }
 function bossDock(angry){
   if(!$('#game').classList.contains('bossmode')){ $('#game').classList.add('bossmode'); layout(); BOSS_Q=null; }
   let d=$('#fxl .bossdock'); if(d&&bossStale(d)){ const hp=d.querySelector('.bosshp').outerHTML; d.innerHTML=bearHTML('idle')+hp; }
   if(!d){ d=document.createElement('div'); d.className='bossdock'; d.innerHTML=bearHTML('idle')+`<div class="bosshp"><i></i><b></b></div>`; $('#fxl').appendChild(d); BOSS_Q=null; }
-  const q=bossQ(); if(d._q!==q){ d._q=q; d.style.left=q.left+'px'; d.style.top=q.top+'px'; d.style.width=q.w+'px'; }
+  const q=bossQ(); if(d._q!==q){ d._q=q; d.style.left=q.left+'px'; d.style.top=q.top+'px'; d.style.width=q.w+'px'; $('#game').style.setProperty('--bossW',(q.w+14)+'px'); }
   d.querySelector('.bossbear').classList.toggle('angry',!!angry); return d;
 }
 function bossHP(hp,max){ const d=$('#fxl .bossdock'); if(!d) return; const r=Math.max(0,hp)/max; d.querySelector('.bosshp i').style.width=(r*100)+'%'; d.querySelector('.bosshp b').textContent=`❤️ ${Math.max(0,hp)}/${max}`; d.querySelector('.bosshp').classList.toggle('low',r<=.5); }

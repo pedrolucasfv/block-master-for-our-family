@@ -24,6 +24,8 @@ function showScore(v){ cancelAnimationFrame(scoreRaf); const el=$('#score'), fro
 function resetScore(v=0){ cancelAnimationFrame(scoreRaf); shownScore=v; const el=$('#score'); el.textContent=fmtN(v); el.style.setProperty('--sl',el.textContent.length); }
 function setStatus(t,warn){ const s=$('#status'), m=$('#mission');
   /* na campanha o andamento (linhas, peças, o que falta…) vai no cartão ao lado dos pontos, uma informação por linha */
+  if(SH&&SH.bossUI){ const st=$('#subTxt'), html=`<span class="bgoal${warn?' warn':''}">${esc(String(t||'').split(' · ').filter(Boolean).join(' · '))}</span><small class="bpause">⏸ Regras do chefão: toque na pausa</small>`;
+    if(st._h!==html){ st._h=html; st.innerHTML=html; } s.textContent=''; return; }
   if(SH&&SH.type==='camp'&&m&&!m.hidden){ const parts=String(t||'').split(' · ').filter(Boolean), html=parts.map((p,i)=>`<div class="${i?'mline':'mbig'}">${esc(p)}</div>`).join('');
     if(m._h!==html){ m._h=html; m.innerHTML=html; } m.classList.toggle('warn',!!warn); s.textContent=''; return; }
   s.textContent=t||''; s.classList.toggle('warn',!!warn); }
@@ -206,10 +208,11 @@ const RAMP=[[180,8],[360,5],[540,3]];
 function rampLim(el){ let l=0; for(const [t,s] of rampOf(D.o)) if(el>=t*1000) l=s; return l; }
 function rampTick(){
   const el=D.elapsed, l=rampLim(el);
-  if(l!==(D.rampL||0)){ D.rampL=l; D.suddenAt=Math.min(D.suddenAt,el+l*1000); praise(`⏱ Agora ${l} s por peça!`); SFX.alert(); }
+  if(l!==(D.rampL||0)){ D.rampL=l; D.suddenAt=Math.min(D.suddenAt,Math.max(el,D.frozenUntil||0)+l*1000); praise(`⏱ Agora ${l} s por peça!`); SFX.alert(); }
   const R=rampOf(D.o);
   if(!l){ const nx=R[0][0]*1000-el; setStatus(`Tempo livre por mais ${fmtT(nx)} · depois ${R[0][1]} s por peça`,false); return true; }
   const left=D.suddenAt-el, nxt=R.find(([t])=>t*1000>el);
+  if(D.frozenUntil>el){ setStatus(`❄️ Congelado: o tempo para pôr a peça está parado (${(left/1000).toFixed(1).replace('.',',')} s)`,false); return true; }
   setStatus(`⏱ ${(Math.max(0,left)/1000).toFixed(1).replace('.',',')} s para pôr a peça`+(nxt?` · em ${fmtT(nxt[0]*1000-el)}: ${nxt[1]} s`:''),left<2000);
   if(left<=0){ duelEnd('sudden'); return false; } return true;
 }
@@ -220,6 +223,8 @@ function duelTick(t){
     /* jogando sozinho: o relógio só começa depois do primeiro toque ou da primeira peça */
     if(D.wait){ if(!D.waitShown){ D.waitShown=1; setStatus('⏸ Relógio parado · toque na tela ou jogue uma peça para começar'); } requestAnimationFrame(duelTick); return; }
     D.elapsed+=dt;
+    /* congelado por um poder: o tempo para pôr a peça (morte súbita / progressão) fica parado até descongelar */
+    if(D.frozenUntil>D.elapsed&&isFinite(D.suddenAt)) D.suddenAt+=dt;
     const tot=TIMES[D.o.time]*1000;
     if(tot){ const left=tot-D.elapsed; setTimer(left,tot,finalOn());
       if(finalOn()&&!D.finalShown){ D.finalShown=true; praise('Reta final: pontos em dobro'); SFX.alert(); }
@@ -227,7 +232,7 @@ function duelTick(t){
       if(left<=0){ duelEnd('time'); return; } }
     else if(GOALS[D.o.goal]) $('#timebarFill').style.transform=`scaleX(${Math.min(1,D.score/GOALS[D.o.goal])})`;
     if(rampOn(D.o)&&!rampTick()) return;
-    if(D.o.sudden){ const l=D.suddenAt-D.elapsed; setStatus('Coloque a peça: '+(Math.max(0,l)/1000).toFixed(1).replace('.',',')+' s',l<2000); if(l<=0){ duelEnd('sudden'); return; } }
+    if(D.o.sudden){ const l=D.suddenAt-D.elapsed; setStatus((D.frozenUntil>D.elapsed?'❄️ Congelado · ':'')+'Coloque a peça: '+(Math.max(0,l)/1000).toFixed(1).replace('.',',')+' s',l<2000&&!(D.frozenUntil>D.elapsed)); if(l<=0){ duelEnd('sudden'); return; } }
     if(D.o.play===2&&t-D.lastBlind>250){ D.lastBlind=t; renderBoard(D.animBoard||D.eng.b,D.o,D.pv); }
     if(D.frozenUntil&&D.elapsed>D.frozenUntil){ D.frozenUntil=0; renderDuel(); }
     if(D.fog&&D.elapsed>D.fog.until){ D.fog=null; $('#fog').classList.remove('show'); }

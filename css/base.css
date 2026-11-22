@@ -177,7 +177,7 @@ textarea{width:100%;min-height:70px;font:12px/1.35 ui-monospace,Menlo,monospace;
 [data-col="5"]{--flesh:#5b7be0;--seed:#26357a;--rind1:#dfe6ff;--rind2:#36489e}
 [data-col="6"]{--flesh:#9a5bd8;--seed:#3a1a5c;--rind1:#f0e5ff;--rind2:#5f3596}
 .sp-bomb .blk::after{content:"";position:absolute;inset:22%;border-radius:50%;background:radial-gradient(circle at 35% 35%,#5a5a5a,#111 70%);box-shadow:0 0 0 1.5px rgba(255,255,255,.55)}
-.sp-ice .blk::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(190,225,255,.35) 55%,rgba(255,255,255,.55));border-radius:inherit}
+.sp-ice .blk::after{content:"❄";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cs)*var(--ts,1)*.5);font-weight:700;color:#fff;-webkit-text-stroke:1px #1f5f9e;background:linear-gradient(135deg,rgba(235,248,255,.78),rgba(150,210,255,.5) 50%,rgba(220,243,255,.7));border-radius:inherit;box-shadow:inset 0 0 0 2px #e9f8ff,inset 0 0 0 3px #3d8fd6}
 .sp-wild .blk.bev{background:conic-gradient(#e5483f,#f3c22f,#4cbb47,#2cb4d6,#8a52d8,#e5483f)!important;border-color:rgba(255,255,255,.4)!important}
 .cr .blk::after{content:"";position:absolute;inset:0;background:linear-gradient(45deg,transparent 46%,rgba(255,255,255,.6) 48%,transparent 52%),linear-gradient(-30deg,transparent 46%,rgba(255,255,255,.45) 48%,transparent 52%)}
 .gold .blk::after{content:"★";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(90,60,0,.7);font-size:calc(var(--cs)*.42)}

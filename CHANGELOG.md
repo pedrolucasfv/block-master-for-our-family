@@ -3,6 +3,11 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.14 · 22/11/2026
+- ❄️ **Congelado não faz mais perder:** no duelo com tempo por peça (morte súbita ou "Sem limite com progressão"), se alguém congelar suas peças, o tempo para pôr a peça fica parado até descongelar.
+- 🧊 **Gelo bem visível:** os blocos de gelo ganharam moldura azul, reflexo e um floco de neve ❄ no meio, em todos os temas das peças.
+- 🐻 **Mais espaço para o chefão:** o chefão ficou maior e o cartão do lado dos pontos saiu. O que fazer agora ("⚔️ Limpe linhas para atacar") aparece embaixo dos pontos, e as regras do chefão ficam na pausa (⏸).
+
 ## 1.13 · 22/11/2026
 - ✨ **Novidades:** no menu, ao lado das Configurações, o botão "✨ Novidades" mostra o que mudou em cada versão, em cartões (novidade ou correção). Um pontinho vermelho avisa quando sai versão nova.
 - 👥 **Times na aba Sala:** a aba "Sala" mostra o estilo de jogo que quem criou escolheu, com o desenho e a explicação, e nos modos de times um botão bem visível "➕ Entrar no time" em cada time (no seu time aparece "✓ Você está neste time", e no outro "↔ Trocar para este time").

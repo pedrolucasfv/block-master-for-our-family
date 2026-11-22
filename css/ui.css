@@ -352,3 +352,9 @@ input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:non
 .teamBtn.sel .tjoin{background:transparent;color:var(--tc);border:2px solid var(--tc);padding:6px}
 .teams.pick .tjoin{animation:tjoinPulse 1.6s ease-in-out infinite}
 @keyframes tjoinPulse{0%,100%{transform:none}50%{transform:scale(1.05)}}
+/* chefão: linha do andamento embaixo dos pontos (sem o cartão da missão) e o aviso de que as regras estão na pausa */
+#game.bossmode #subTxt{display:flex;flex-direction:column;align-items:center;gap:2px}
+.bgoal{font-size:14px;font-weight:700;color:var(--text)}.bgoal.warn{color:var(--bad)}
+.bpause{font-size:11px;color:var(--muted)}
+#game.bossmode .scorerow,#game.bossmode .subline,#game.bossmode .status{padding-right:var(--bossW,118px)}
+#game.bossmode #gInfo{min-height:190px}
