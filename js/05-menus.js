@@ -369,7 +369,9 @@ function renderProfile(){
     <p class="muted" style="margin-top:6px">Ataque: até 3,5 segundos. Combo: até 2,5 segundos. Fica só neste aparelho e vai para quem estiver na mesma sala.</p>`;
   let nt=0; $('#profNick').addEventListener('input',e=>{ clearTimeout(nt); nt=setTimeout(()=>{ store.set('ddb_nick',e.target.value.trim().slice(0,16)); const av=box.querySelector('.profhead .av'); if(av) av.outerHTML=avatarHTML(null,64,'big'); profileChanged(true,true); },350); });
   /* o ranking só recebe o nome quando a pessoa termina de digitar (sai do campo): senão cada pedaço do nome vira um jogador */
-  $('#profNick').addEventListener('change',e=>{ clearTimeout(nt); store.set('ddb_nick',e.target.value.trim().slice(0,16)); profileChanged(true); });
+  /* quem tem PIN troca o nome levando tudo junto; "ADM" só para quem cuida do jogo (nickDefinir, em 20-pin.js) */
+  let nickAntes=myNick(); $('#profNick').addEventListener('focus',()=>{ nickAntes=myNick(); });
+  $('#profNick').addEventListener('change',e=>{ clearTimeout(nt); nickDefinir(e.target.value,e.target,nickAntes).then(()=>{ nickAntes=myNick(); }); });
   $('#profPhoto').addEventListener('click',()=>{ const i=$('#profPhotoIn'); i.value=''; i.click(); });
   $('#profPhotoIn').addEventListener('change',async e=>{ const f=e.target.files[0]; if(!f) return; try{ store.set('ddb_photo',await readPhoto(f)); renderProfile(); profileChanged(); }catch(err){ toast('Não consegui abrir essa imagem'); } });
   const pd=$('#profPhotoDel'); if(pd) pd.addEventListener('click',()=>{ store.set('ddb_photo',''); renderProfile(); profileChanged(); });

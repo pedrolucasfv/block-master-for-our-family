@@ -362,6 +362,8 @@ let nickT=0;
 $('#nickIn').addEventListener('input',()=>{ clearTimeout(nickT); nickT=setTimeout(()=>{
   const v=$('#nickIn').value.trim().slice(0,16); store.set('ddb_nick',v); if(!NET.open) return;
   NET.names[NET.role]=v; if(NET.role==='A') sendRoster(); else { send({t:'nick',name:v}); renderLobby(); } },350); });
+let nickInAntes=''; $('#nickIn').addEventListener('focus',()=>{ nickInAntes=myNick(); });
+$('#nickIn').addEventListener('change',()=>{ clearTimeout(nickT); nickDefinir($('#nickIn').value,$('#nickIn'),nickInAntes).then(()=>{ nickInAntes=myNick(); if(NET.open&&NET.role!=='A') renderLobby(); }); });
 function renderLobby(){
   renderNight();
   const host=NET.role==='A', ids=NET.players, n=ids.length, L=NET.lobby;

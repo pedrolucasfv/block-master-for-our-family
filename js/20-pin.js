@@ -6,7 +6,10 @@ const pinChave=()=>myNick().toLowerCase();
 function pinSalvar(chave,tok){ const m=store.get('ddb_pins',{}); if(tok) m[chave]=tok; else delete m[chave]; store.set('ddb_pins',m); }
 function pinEstado(){ return rkFetch('rpc/pin_estado',{body:{p_nome:myNick()}}); }
 /* o servidor recusou o token (PIN trocado em outro aparelho ou apagado): pede o PIN de novo */
-function pinPerdeu(){ if(!pinTok()) return; pinSalvar(pinChave(),''); toast('🔒 O PIN do seu nome mudou. Entre de novo no Perfil.'); pinRender(); }
+function pinPerdeu(){ if(!pinTok()) return; const velho=myNick();
+  /* antes de esquecer o PIN: o nome pode ter sido trocado em outro aparelho (aí só passa para o nome novo) */
+  pinEstado().then(r=>{ if(!(r&&r.estado==='trocado'&&r.nome&&myNick()===velho)) throw 0; nickAdotar(velho,r.nome); toast(`Seu nome mudou para ${r.nome} em outro aparelho`); })
+    .catch(()=>{ if(myNick()!==velho||!pinTok()) return; pinSalvar(pinChave(),''); toast('🔒 O PIN do seu nome mudou. Entre de novo no Perfil.'); pinRender(); }); }
 
 /* ===================== janela do PIN ===================== */
 /* modo: 'entrar' (nome já tem PIN), 'criar' (nome ainda sem PIN) ou 'trocar'. ok: chamado depois de dar certo */
@@ -43,7 +46,7 @@ async function pinEnviar(modo,ok){
     store.set('ddb_rksync',''); store.set('ddb_rkfoto',''); await pinFoto();
     const antes=campTotal(campLoad('solo')), sync=await pgSync(), depois=campTotal(campLoad('solo'));
     if(!pgConf) toast(modo==='criar'?'🔒 PIN criado! Seu progresso está guardado na nuvem.':!sync?'🔒 Entrou! O progresso vai para a nuvem quando a internet voltar.':depois>antes?`☁️ Progresso recuperado: ${depois} ⭐`:'🔒 Entrou! Progresso em dia.');
-    rkSyncMe(); pinRender(); if(ok) ok();
+    rkSyncMe(); admConferir().then(pinRender); pinRender(); if(ok) ok();
   }catch(e){ msg.textContent=/pin:/.test(e.message)?'O PIN mudou em outro aparelho. Entre de novo.':'Sem internet agora. Tente de novo daqui a pouco.'; if(/pin:/.test(e.message)) pinSalvar(chave,''); }
   finally{ pinBusy=false; }
 }
@@ -68,11 +71,14 @@ function pinRender(){
   const bt=(id,t,cls)=>`<button type="button" class="btn small ${cls||''}" id="${id}">${t}</button>`;
   const poe=(html,ev)=>{ box.innerHTML='<h3 class="pinh">🔒 PIN e progresso na nuvem</h3>'+html; (ev||[]).forEach(([id,f])=>{ const b=$('#'+id); if(b) b.addEventListener('click',f); }); };
   if(!nome){ poe('<p class="muted">Coloque seu apelido acima para criar um PIN e guardar seu progresso na nuvem.</p>'); return; }
-  if(pinTok()){ poe(`<p class="muted">✅ <b>${esc(nome)}</b> está protegido com PIN. ☁️ Progresso guardado na nuvem${q?' '+pgQuando(q):''}.</p><div class="row" style="margin-top:8px">${bt('pgNow','☁️ Salvar agora')}${bt('pinTroca','Trocar PIN')}${bt('pinSai','Sair do nome','ghost')}</div>`,
+  if(pinTok()){ poe(`<p class="muted">✅ <b>${esc(nome)}</b> está protegido com PIN. ☁️ Progresso guardado na nuvem${q?' '+pgQuando(q):''}.</p>${souAdm()?'<p class="muted">⭐ Você cuida do jogo: responde as sugestões e recebe aviso de sugestão nova.</p>':''}<p class="muted" style="font-size:12px">Quer outro nome? É só mudar o apelido acima: estrelas, recordes, desafios e o PIN vão junto.</p><div class="row" style="margin-top:8px">${bt('pgNow','☁️ Salvar agora')}${bt('pinTroca','Trocar PIN')}${bt('pinSai','Sair do nome','ghost')}</div>`,
     [['pgNow',()=>{ toast('☁️ Salvando…'); pgSync().then(ok=>{ if(pgConf) return; toast(ok?'☁️ Progresso salvo na nuvem!':'Sem internet agora. Tente de novo daqui a pouco.'); pinRender(); }); }],['pinTroca',()=>pinAbrir('trocar')],['pinSai',pinSair]]); return; }
   poe('<p class="muted">Conferindo…</p>');
   clearTimeout(pinRT); pinRT=setTimeout(()=>pinEstado().then(r=>{ if(nome!==myNick()) return;
-    if(r&&r.estado==='com_pin') poe(`<p class="muted">Esse nome já tem PIN. Se é você, entre com o PIN para trazer seu progresso para este aparelho. Se não é, escolha outro apelido.</p><div class="row" style="margin-top:8px">${bt('pinIn','🔒 Entrar com PIN','primary')}</div>`,[['pinIn',()=>pinAbrir('entrar')]]);
+    if(r&&r.estado==='trocado'&&r.guardado) poe(`<p class="muted">“${esc(nome)}” agora se chama <b>${esc(r.nome)}</b>. Se é você, use o nome novo; se não, escolha outro apelido.</p>`);
+    else if(r&&r.estado==='adm') poe('<p class="muted">“ADM” no nome é só para quem cuida do jogo. Escolha outro apelido.</p>');
+    else if(r&&r.estado==='parecido') poe(`<p class="muted">Já existe <b>${esc(r.nome)}</b>, quase igual a esse nome. Se é você, escreva exatamente “${esc(r.nome)}”; se não, escolha outro apelido.</p>`);
+    else if(r&&r.estado==='com_pin') poe(`<p class="muted">Esse nome já tem PIN. Se é você, entre com o PIN para trazer seu progresso para este aparelho. Se não é, escolha outro apelido.</p><div class="row" style="margin-top:8px">${bt('pinIn','🔒 Entrar com PIN','primary')}</div>`,[['pinIn',()=>pinAbrir('entrar')]]);
     else poe(`<p class="muted">Crie um PIN de 4 números para ninguém usar o seu nome e para guardar estrelas, temas, conquistas e recordes na nuvem. Trocou de celular? É só pôr o nome e o PIN.</p><div class="row" style="margin-top:8px">${bt('pinNew','🔒 Criar PIN','primary')}</div>`,[['pinNew',()=>pinAbrir('criar')]]);
   }).catch(()=>poe('<p class="muted">Sem internet agora. O PIN e a nuvem aparecem aqui quando a internet voltar.</p>')),400);
 }
@@ -182,10 +188,49 @@ async function pgEscolher(op){
 /* ao abrir o jogo: com PIN, sincroniza; sem PIN, convida (uma vez por dia) ou pede o PIN se o nome já tem */
 function pinInicio(){
   if(!rkOn()||!myNick()) return;
-  if(pinTok()){ pgSync(); return; }
+  if(pinTok()){ pinEstado().then(r=>{ if(r&&r.estado==='trocado'&&r.nome) nickAdotar(myNick(),r.nome); }).catch(()=>{}).then(()=>{ pgSync(); admConferir(); }); return; }
   const livre=()=>$('#home').classList.contains('active')&&!$('#end').classList.contains('show');
   pinEstado().then(r=>{ if(!r||!livre()||pinTok()) return;
     if(r.estado==='com_pin') pinAbrir('entrar');
     else if(store.get('ddb_pinconvite','')!==diaBR()){ store.set('ddb_pinconvite',diaBR()); pinAbrir('criar'); } }).catch(()=>{});
 }
 if(rkOn()){ setTimeout(pinInicio,3500); window.addEventListener('online',()=>{ if(pinTok()){ clearTimeout(pgT); pgT=setTimeout(pgSync,2000); } }); }
+
+/* ===================== trocar o nome e quem cuida do jogo (ADM) ===================== */
+/* nome com um espaço só entre as palavras; nickBase = sem acento e minúsculo (para comparar) */
+const nickLimpo=v=>String(v||'').replace(/\s+/g,' ').trim().slice(0,16);
+const nickBase=v=>nickLimpo(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+/* "ADM" (ou "ADMIN") como palavra do nome, ou colado no fim: só para quem cuida do jogo (igual a rk_tem_adm no banco) */
+const nickTemAdm=v=>/(^|[^a-z0-9])adm(in)?([^a-z0-9]|$)|adm(in)?$/.test(nickBase(v));
+/* ddb_adm = nome (em minúsculas) que o banco disse ser de quem cuida do jogo */
+const souAdm=()=>!!pinTok()&&store.get('ddb_adm','')===pinChave();
+function admConferir(){ if(!rkOn()||!pinTok()) return Promise.resolve(false); const k=pinChave();
+  return rkFetch('rpc/sou_adm',{body:{}}).then(r=>{ if(pinChave()===k) store.set('ddb_adm',r?k:''); return !!r; }).catch(()=>souAdm()); }
+/* o apelido mudou (Perfil ou sala). antes = o nome de quando começou a digitar.
+   Barra o "ADM" de quem não cuida do jogo e, se o nome antigo tem PIN neste aparelho, troca o nome no servidor levando tudo junto */
+async function nickDefinir(v,campo,antes){
+  const novo=nickLimpo(v), velho=nickLimpo(antes), kv=velho.toLowerCase(), tok=store.get('ddb_pins',{})[kv];
+  const volta=msg=>{ store.set('ddb_nick',velho); if(campo) campo.value=velho; if(msg) toast(msg); profileChanged(true); };
+  if(campo&&campo.value!==novo) campo.value=novo;
+  if(nickTemAdm(novo)&&!(tok&&store.get('ddb_adm','')===kv)) return volta('“ADM” no nome é só para quem cuida do jogo');
+  if(!tok||novo.toLowerCase()===kv){ store.set('ddb_nick',novo); profileChanged(true); return; }
+  if(!novo) return volta('Seu nome tem PIN: para trocar, escreva o nome novo');
+  store.set('ddb_nick',velho); /* o pedido vai com o PIN do nome antigo */
+  if(!confirm(`Trocar seu nome de “${velho}” para “${novo}”? Estrelas, recordes, desafios, foto, avisos e o PIN vão junto para o nome novo.`)) return volta();
+  try{
+    const r=await rkFetch('rpc/trocar_nome',{body:{p_antigo:velho,p_novo:novo}});
+    if(!r||!r.ok) return volta({usado:'Esse nome já é de outra pessoa. Escolha outro.',parecido:`Já existe “${r&&r.nome}”, quase igual. Escolha outro nome.`,guardado:'Esse nome foi trocado há pouco e fica guardado por 30 dias. Escolha outro.',adm:'“ADM” no nome é só para quem cuida do jogo'}[r&&r.erro]||'Esse nome não dá. Escolha outro.');
+    nickAdotar(velho,r.nome); if(campo) campo.value=r.nome; toast(`✅ Pronto! Agora você é ${r.nome}`);
+  }catch(e){ volta(/pin:/.test(e.message)?'O PIN do seu nome mudou. Entre de novo no Perfil.':'Sem internet agora. Tente trocar o nome de novo depois.'); }
+}
+/* o nome foi trocado no servidor (aqui ou em outro aparelho): passa o PIN, os avisos e o que falta enviar para o nome novo */
+function nickAdotar(velho,novo){
+  const kv=nickLimpo(velho).toLowerCase(), kn=nickLimpo(novo).toLowerCase(), m=store.get('ddb_pins',{});
+  if(m[kv]){ m[kn]=m[kv]; if(kn!==kv) delete m[kv]; store.set('ddb_pins',m); }
+  if(store.get('ddb_adm','')===kv) store.set('ddb_adm',kn);
+  const ref=store.get('ddb_pgrev',null); if(ref&&ref.k===kv) store.set('ddb_pgrev',{k:kn,rev:ref.rev});
+  if(store.get('ddb_avnome','')===kv) store.set('ddb_avnome',kn);
+  ['ddb_rkq','ddb_rkpin'].forEach(f=>store.set(f,store.get(f,[]).map(x=>String(x.args.p_nome||'').toLowerCase()===kv?{fn:x.fn,args:Object.assign({},x.args,{p_nome:novo})}:x)));
+  store.set('ddb_rksync',''); store.set('ddb_nick',nickLimpo(novo)); profileChanged(true);
+  const pn=$('#profNick'); if(pn&&document.activeElement!==pn) pn.value=myNick(); avBellLoad();
+}

@@ -36,21 +36,22 @@ async function avRender(){
   const on=Notification.permission==='granted'&&!!(await avSub())&&!!store.get('ddb_avnome','');
   b.hidden=false; b.textContent=on?'🔕 Desligar avisos':'🔔 Me avisar quando for a minha vez';
   b.classList.toggle('primary',!on); b.onclick=on?avDesativar:avAtivar;
-  t.textContent=on?'Avisos ligados neste aparelho: sua vez nos desafios, recordes batidos e o Desafio do dia de manhã.':Notification.permission==='denied'?'Os avisos estão bloqueados neste navegador. Para ligar, toque no cadeado ao lado do endereço do site e permita as notificações.':'Chega uma notificação quando for sua vez num desafio, quando alguém passar seu recorde, e de manhã quando sair o Desafio do dia. Funciona mesmo com o jogo fechado.';
+  t.textContent=on?'Avisos ligados neste aparelho: sua vez nos desafios, recordes batidos, respostas das suas sugestões e o Desafio do dia de manhã.':Notification.permission==='denied'?'Os avisos estão bloqueados neste navegador. Para ligar, toque no cadeado ao lado do endereço do site e permita as notificações.':'Chega uma notificação quando for sua vez num desafio, quando alguém passar seu recorde, e de manhã quando sair o Desafio do dia. Funciona mesmo com o jogo fechado.';
 }
 /* aviso tocado: ?dia=1 abre o Desafio do dia; ?fase=3-8 abre a fase da campanha */
 function avFromLink(){
   let q=null; try{ q=new URLSearchParams(location.search); }catch(e){ return; }
-  if(!q.get('dia')&&!q.get('fase')) return;
+  if(!q.get('dia')&&!q.get('fase')&&!q.get('sug')) return;
   try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
   avGo('?'+q.toString());
 }
-/* abre o que o aviso fala: ?d=id (desafio), ?dia=1 (Desafio do dia), ?fase=3-8 (fase da campanha) */
+/* abre o que o aviso fala: ?d=id (desafio), ?dia=1 (Desafio do dia), ?fase=3-8 (fase da campanha), ?sug=12 (sugestão) */
 function avGo(url){
   let q; try{ q=new URLSearchParams(String(url||'').split('?')[1]||''); }catch(e){ return; }
   const d=q.get('d'), fase=q.get('fase');
   if(d&&/^[0-9a-f]{8}$/.test(d)){ dsList(); dsOpen(d); return; }
   if(q.get('dia')){ closeEnd(); $('#goDaily').click(); return; }
+  const sg=q.get('sug'); if(sg&&/^\d{1,12}$/.test(sg)){ closeEnd(); sugTela(+sg); return; }
   const m=/^(\d{1,2})-(\d{1,2})$/.exec(fase||''); if(!m) return; const w=+m[1], ph=+m[2];
   if(!CWORLDS[w-1]||!CWORLDS[w-1].phases[ph-1]) return; closeEnd(); openCamp(w); if(campOpen(campLoad('solo'),w,ph)) campIntro(w,ph);
 }
@@ -72,7 +73,7 @@ function avBellRender(){
 function avBellOpen(){
   if(AV_LIST.length) store.set('ddb_avlido',AV_LIST[0].quando); avBellRender();
   const body='<h2>🔔 Avisos</h2>'+(AV_LIST.length?'<div class="avhist">'+AV_LIST.map((a,i)=>`<button type="button" class="avitem" data-i="${i}"><b>${esc(a.titulo)}</b><span>${esc(a.corpo)}</span><small>${avAgo(a.quando)}</small></button>`).join('')+'</div><p class="muted" style="font-size:12px">Os avisos ficam aqui por 30 dias. Toque num aviso para abrir.</p>'
-    :'<p class="muted">Nenhum aviso ainda. Aqui aparecem os desafios, os recordes batidos e o Desafio do dia.</p>');
+    :'<p class="muted">Nenhum aviso ainda. Aqui aparecem os desafios, os recordes batidos, as respostas das suas sugestões e o Desafio do dia.</p>');
   openEnd(body,[{t:'Fechar',cls:'ghost',on:closeEnd}]);
   $$('#endBody .avitem').forEach(x=>x.addEventListener('click',()=>{ const a=AV_LIST[+x.dataset.i]; if(a&&a.url) avGo(a.url); else closeEnd(); }));
 }

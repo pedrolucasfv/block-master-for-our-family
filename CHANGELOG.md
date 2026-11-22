@@ -3,6 +3,12 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.17 · 22/11/2026
+- 💡 **Sugestões:** novo botão "Sugestões" no menu. Conte o que você queria mudar ou ter no jogo, veja as ideias da família e curta as que você gostou. Cada sugestão ganha uma etiqueta: Nova, Em análise, Pergunta, Vai entrar, Implementada (com a versão em que entrou) ou Não vai entrar (sempre com o motivo).
+- ❓ **Perguntas e respostas:** quem cuida do jogo pode fazer perguntas sobre a sua sugestão, e você responde ali mesmo. Cada resposta, pergunta ou etiqueta nova chega como aviso no celular e fica no sino 🔔 do menu.
+- ✏️ **Trocar o nome sem perder nada:** quem tem PIN agora pode mudar o apelido no Perfil, e estrelas, recordes, desafios, foto, avisos e o PIN vão junto para o nome novo. Os outros celulares onde você entrou passam para o nome novo sozinhos.
+- 🪪 **Nomes únicos de verdade:** não dá mais para criar um nome quase igual a um que já existe (só mudando acento, maiúscula ou espaço, como "Lúcia" e "Lucia"). E "ADM" no nome fica só para quem cuida do jogo.
+
 ## 1.16.2 · 22/11/2026
 - ⚡ **Ajustes abrem na hora:** a tela de Ajustes demorava para abrir porque desenhava todas as miniaturas dos estilos de bloco antes de aparecer. Agora ela abre direto, e as miniaturas já vêm prontas (o jogo prepara enquanto você está no menu).
 - 📲 **Some o "Instalar o jogo" de quem já instalou:** se o jogo já foi aberto pelo ícone neste aparelho, ou o Android avisou que instalou, o botão não aparece mais. No iPhone o Safari não tem como saber, então a janela do passo a passo ganhou o botão "✅ Já instalei", que esconde o botão de vez.

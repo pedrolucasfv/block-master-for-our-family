@@ -39,7 +39,7 @@
         <button class="btn big mcamp" id="goCamp"><span class="ico" aria-hidden="true">🗺️</span>Campanha<small>mundos, fases e chefões</small></button>
       </div>
       <button class="btn minst" id="goInstalar" hidden><span class="ico" aria-hidden="true">📲</span><span class="dtx"><b>Instalar o jogo</b><small>ícone na tela, abre sem internet</small></span><span class="go" aria-hidden="true">›</span></button>
-      <div class="row navbar"><button class="btn" id="goHistory"><span class="ico" aria-hidden="true">📊</span><small>Histórico</small></button><button class="btn nvbtn" id="goNews"><span class="ico" aria-hidden="true">✨</span><small>Novidades</small><i id="goNewsDot" hidden></i></button><button class="btn" id="goSettings"><span class="ico" aria-hidden="true">⚙️</span><small>Ajustes</small></button></div>
+      <div class="row navbar"><button class="btn" id="goHistory"><span class="ico" aria-hidden="true">📊</span><small>Histórico</small></button><button class="btn nvbtn" id="goNews"><span class="ico" aria-hidden="true">✨</span><small>Novidades</small><i id="goNewsDot" hidden></i></button><button class="btn nvbtn" id="goSug"><span class="ico" aria-hidden="true">💡</span><small>Sugestões</small><i id="goSugDot" hidden></i></button><button class="btn" id="goSettings"><span class="ico" aria-hidden="true">⚙️</span><small>Ajustes</small></button></div>
     </div>
     <p class="muted ver" id="verTxt"></p>
   </div>
@@ -52,6 +52,14 @@
     <h1>Novidades</h1>
     <p class="muted">O que mudou em cada versão do jogo. A mais nova fica em cima.</p>
     <div id="newsList"></div>
+  </div>
+</section>
+
+<!-- SUGESTÕES (ideias da família para o jogo; quem cuida do jogo responde) -->
+<section id="sug" class="screen">
+  <div class="pad">
+    <div class="topnav"><button class="back" id="sugBack">← Voltar</button></div>
+    <div id="sugBody"></div>
   </div>
 </section>
 
@@ -369,5 +377,6 @@
 <script src="js/24-novidades.js"></script>
 <script src="js/25-instalar.js"></script>
 <script src="js/26-voltar.js"></script>
+<script src="js/27-sugestoes.js"></script>
 </body>
 </html>
