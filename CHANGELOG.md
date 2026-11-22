@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.20 · 22/11/2026
+- 🎓 **Como jogar:** novo botão no menu com um tutorial que você joga enquanto aprende. São 7 aulas curtinhas, cada uma com um tabuleiro de treino: o básico (encaixar e limpar linhas e colunas), combo e tabuleiro limpo, blocos especiais (bomba, gelo, coringa e bônus de cor), ataques e blocos blindados, blocos de poder (com martelo e bloco dourado), os modos Gravidade e Cego, e onde jogar (o menu, os estilos da sala e todos os modificadores). Tem perguntas rápidas no fim das aulas, dica 💡 quando travar e ✓ nas aulas que você já fez.
+
 ## 1.19 · 22/11/2026
 - 📺 **Espectador pelo mesmo link:** o link da sala agora serve também para a TV. Quem abre o link escolhe "🎮 Jogar" ou "📺 Assistir". Para a TV, mande o link para você mesmo (no WhatsApp Web, por exemplo) e abra no computador ligado nela, sem precisar ler o QR pela webcam. Na sala, o botão virou "📺 Colocar na TV" e mostra o QR e o link, que aparece escrito na tela, para digitar no navegador se preferir.
 

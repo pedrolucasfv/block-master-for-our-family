@@ -475,3 +475,50 @@ textarea.sgta{font:inherit;font-size:15px;line-height:1.4;word-break:normal;min-
 .sgchips .sgtag{font-size:13px;padding:8px 12px}.sgchips .sel{outline:3px solid currentColor;outline-offset:-3px}.sgchips .chip.sel{background:var(--sel);color:var(--selText);outline:0}
 .sglike{border:0;font:inherit;cursor:pointer;color:var(--text)}.sglike.on{background:var(--sel);color:var(--selText)}
 .sgadm{display:flex;flex-direction:column;gap:6px;margin-top:8px}.sgadm h3{margin:0 0 4px;font-size:16px}.sgadm .ghost{align-self:center}
+/* tutorial (#tut): lista de aulas, tabuleiro de treino, bandeja, perguntas */
+.mtut{position:relative;border-style:solid!important}.mtut #goTutDot{position:absolute;top:10px;right:12px;width:10px;height:10px;border-radius:50%;background:#e5483f}
+.tutaulas{display:flex;flex-direction:column;gap:10px}
+.tutaula{display:flex!important;align-items:center;gap:12px;text-align:left!important;padding:12px 16px!important;border-radius:18px!important}
+.tutaula .ico{font-size:26px}.tutaula .dtx{flex:1;display:flex;flex-direction:column}.tutaula .dtx small{font-size:12px;font-weight:500;opacity:.75}.tutaula .go{font-size:22px;opacity:.7}
+.tutaula.feita .go{color:var(--win);opacity:1;font-weight:700}
+.tuttop{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.tutdots{display:flex;gap:6px}.tutdots i{flex:1;height:6px;border-radius:99px;background:var(--gline)}.tutdots i.ok{background:var(--win)}.tutdots i.on{background:var(--text)}
+.tuttxt p{margin:0;font-size:16px;line-height:1.45}
+.tutsub{font-size:12px;text-align:center;margin:6px 0}
+.tuthud{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0 6px;min-height:44px}
+.tuthud>div:first-child{display:flex;flex-direction:column;align-items:center;line-height:1}.tuthud b{font-family:var(--hfont);font-size:30px;font-variant-numeric:tabular-nums}.tuthud small{font-size:11px;color:var(--muted)}
+.tutcombo{display:flex;flex-direction:column;align-items:center;font-weight:700;color:var(--gold)}.tutcombo:empty{display:none}.tutcombo small{font-weight:500;color:var(--muted);font-size:11px;margin-top:2px}
+.tutwrap{position:relative;display:flex;justify-content:center}
+.tutboard{--cs:var(--tcs,36px);padding:6px;border-radius:18px;background:var(--board);box-shadow:var(--boardFx);border:2px solid var(--frame);touch-action:none;cursor:pointer}
+.tutgrid{display:grid;grid-template-columns:repeat(8,var(--cs));grid-auto-rows:var(--cs)}
+.tutgrid.mini{--cs:16px;padding:4px;border-radius:10px;background:var(--board);box-shadow:var(--boardFx);margin:6px auto 0;width:max-content}
+.tq{position:relative;width:var(--cs);height:var(--cs)}
+.tq.vazio::before{content:"";position:absolute;inset:calc(var(--cs)*.05);border-radius:calc(var(--cs)*.16);background:var(--slot);box-shadow:var(--slotFx)}
+.tq.gh .blk{opacity:.45}.tq.hl .blk{filter:brightness(1.25) saturate(1.1);box-shadow:0 0 0 2px rgba(255,255,255,.8),0 0 10px rgba(255,255,255,.6)}
+.tq.dica::before{outline:3px dashed var(--gold);outline-offset:-3px;animation:tutPulsa 1s ease-in-out infinite}
+.tq.sai .blk{animation:tutSai .36s ease-in forwards}.tq.bad .blk{outline:3px solid var(--bad)}
+.martelo .tq:not(.vazio){cursor:crosshair}.martelo .tq:not(.vazio) .blk{animation:tutTreme 1.2s ease-in-out infinite}
+.tuttray{display:flex;justify-content:space-around;align-items:center;gap:6px;margin-top:12px;min-height:calc(var(--tcs,36px)*1.9);touch-action:none}
+.tslot{flex:1;display:flex;align-items:center;justify-content:center;min-height:calc(var(--tcs,36px)*1.9);border-radius:16px;cursor:grab}
+.tslot.sel{background:var(--gline);outline:2px solid var(--text);outline-offset:-2px}
+.tpc{position:relative;--cs:calc(var(--tcs,36px)*.55);transition:opacity .2s}.tpc.nofit{opacity:.3;filter:grayscale(.9)}.tpc.hide{opacity:0}.tpc.pulsa{animation:tutPulsa 1s ease-in-out infinite}
+.tutdrag{position:fixed;left:0;top:0;z-index:60;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.3))}
+#tutPop{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.tutpopt{position:absolute;font-family:var(--hfont);font-size:28px;font-weight:700;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35),0 0 12px rgba(0,0,0,.25);animation:tutSobe 1.3s ease-out forwards;white-space:nowrap}
+.tutmsg{margin:12px 0 0;font-size:15px;line-height:1.45;border-radius:14px}.tutmsg:empty{display:none}
+.tutmsg.bom{padding:12px 14px;background:color-mix(in srgb,var(--win) 18%,transparent);border:2px solid var(--win)}
+.tutmsg.mau{padding:12px 14px;background:color-mix(in srgb,var(--bad) 14%,transparent);border:2px solid var(--bad)}
+.tutmini{text-align:center;margin-top:8px}.tutmini .muted{font-size:12px}
+.tutbtns{margin-top:14px;flex-wrap:wrap}.tutbtns .btn.small{flex:0 0 auto;width:auto}.tutbtns #tutNext{flex:1}
+.btn.pulsa{animation:tutPulsa .9s ease-in-out 3}
+.tutquiz b{display:block;font-size:16px;margin-bottom:10px}.tutops{display:flex;flex-direction:column;gap:8px}
+.tutops .btn.certo{background:var(--win);color:#fff}.tutops .btn.errado{opacity:.45;text-decoration:line-through}
+.tutinfo{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.tutit{display:flex;gap:12px;align-items:flex-start;background:var(--panel);color:var(--ptext);border-radius:16px;padding:12px 14px;box-shadow:var(--neu-out);border:1px solid var(--line)}
+.tutit p{margin:3px 0 0;font-size:13px;color:var(--pmuted);line-height:1.4}.tutic{font-size:24px;line-height:1;min-width:28px;text-align:center}
+.tutmp{flex-direction:column;align-items:stretch}.tutmp .mpic{width:100%;max-width:200px;height:auto;align-self:center}
+.tutfim .tutbig{font-size:64px;line-height:1.1}
+@keyframes tutPulsa{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes tutSai{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15);filter:brightness(1.6)}100%{transform:scale(.2);opacity:0}}
+@keyframes tutTreme{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+@keyframes tutSobe{0%{transform:translateY(10px) scale(.6);opacity:0}20%{transform:translateY(0) scale(1.15);opacity:1}70%{opacity:1}100%{transform:translateY(-60px) scale(1);opacity:0}}

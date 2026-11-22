@@ -247,17 +247,17 @@ textarea{width:100%;min-height:70px;font:12px/1.35 ui-monospace,Menlo,monospace;
 .gold .blk::after{content:"★";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(90,60,0,.7);font-size:calc(var(--cs)*.42)}
 
 /* blocos pré-desenhados (imagem pronta no lugar das camadas) */
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="0"]>.bev{background:var(--spr0) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="1"]>.bev{background:var(--spr1) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="2"]>.bev{background:var(--spr2) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="3"]>.bev{background:var(--spr3) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="4"]>.bev{background:var(--spr4) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="5"]>.bev{background:var(--spr5) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="6"]>.bev{background:var(--spr6) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="s"]>.bev{background:var(--sprs) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
-body.spr :is(#grid,#tray,#holdRow,.drag) [data-col="g"]>.bev{background:var(--sprg) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="0"]>.bev{background:var(--spr0) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="1"]>.bev{background:var(--spr1) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="2"]>.bev{background:var(--spr2) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="3"]>.bev{background:var(--spr3) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="4"]>.bev{background:var(--spr4) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="5"]>.bev{background:var(--spr5) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="6"]>.bev{background:var(--spr6) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="s"]>.bev{background:var(--sprs) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="g"]>.bev{background:var(--sprg) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
 /* pompom tem contorno de pelinhos: sem cor de reserva atrás nem cantos cortados */
-body.spr.skin-velvet :is(#grid,#tray,#holdRow,.drag) [data-col]>.bev{background-color:transparent!important;border-radius:0!important}
+body.spr.skin-velvet :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col]>.bev{background-color:transparent!important;border-radius:0!important}
 /* jogo */
 #game{overflow:hidden;touch-action:none;align-items:center;padding:6px 8px 8px}
 .gtop{width:100%;display:flex;align-items:center;gap:6px}
