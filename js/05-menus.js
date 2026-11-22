@@ -246,13 +246,15 @@ async function playClip(url,vol=1.6){
     const s=a.createBufferSource(), g=a.createGain(); s.buffer=buf; g.gain.value=vol; s.connect(g); g.connect(master); s.start(now()+.02); return true;
   }catch(e){ return false; }
 }
-/* foto: recorta o centro em quadrado de 128 px, JPEG leve */
+/* foto: recorta o centro em quadrado de 256 px (dá para ampliar sem ficar borrada), JPEG leve */
 function readPhoto(file){
   return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>{ const im=new Image(); im.onerror=rej; im.onload=()=>{
-    const S=128, c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d'), m=Math.min(im.width,im.height);
-    x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S,S); res(c.toDataURL('image/jpeg',.75)); }; im.src=fr.result; }; fr.readAsDataURL(file); });
+    const S=256, c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d'), m=Math.min(im.width,im.height);
+    x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S,S); res(c.toDataURL('image/jpeg',.72)); }; im.src=fr.result; }; fr.readAsDataURL(file); });
 }
 let profRec=null;
+/* tempo máximo de cada gravação: o bordão de ataque pode ser um pouco mais longo */
+const BORD_MS={ddb_bord_atk:3500,ddb_bord_combo:2500};
 async function recordBordao(key){
   if(profRec){ if(profRec.mr.state!=='inactive') profRec.mr.stop(); return; }
   if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ mediaHelp('mic',null); return; }
@@ -264,18 +266,20 @@ async function recordBordao(key){
       if(url.length>PROF_MAX*1.37){ toast('Gravação grande demais, tente de novo mais curta'); renderProfile(); return; }
       store.set(key,url); renderProfile(); ac(); playClip(url); profileChanged(); };
     fr.readAsDataURL(new Blob(chunks,{type:mr.mimeType||'audio/webm'})); };
-  mr.start(); profRec.to=setTimeout(()=>{ if(mr.state!=='inactive') mr.stop(); },2500);
+  mr.start(); profRec.to=setTimeout(()=>{ if(mr.state!=='inactive') mr.stop(); },BORD_MS[key]||2500);
 }
 function renderProfile(){
   const box=$('#profBox'); if(!box) return; const p=myProfile();
   const clip=(key,label,hint)=>{ const has=!!store.get(key,''), rec=profRec&&profRec.key===key;
-    return `<div class="vrow"><div><b>${label}</b><small>${has?'gravado':hint}</small></div><div class="row"><button type="button" class="chip ${rec?'rec':''}" data-prec="${key}">${rec?'⏹ Parar':'🎙 Gravar'}</button><button type="button" class="chip" data-pplay="${key}" ${has?'':'disabled'} aria-label="Ouvir">▶</button><button type="button" class="chip" data-pdel="${key}" ${has?'':'disabled'} aria-label="Apagar">🗑</button></div></div>`; };
+    /* gravando: barra que enche até o tempo acabar */
+    const bar=rec?`<div class="recbar"><i style="animation-duration:${(BORD_MS[key]||2500)/1000}s"></i></div>`:'';
+    return `<div class="vrow"><div style="flex:1;min-width:0"><b>${label}</b><small>${rec?'gravando…':has?'gravado':hint}</small>${bar}</div><div class="row"><button type="button" class="chip ${rec?'rec':''}" data-prec="${key}">${rec?'⏹ Parar':'🎙 Gravar'}</button><button type="button" class="chip" data-pplay="${key}" ${has?'':'disabled'} aria-label="Ouvir">▶</button><button type="button" class="chip" data-pdel="${key}" ${has?'':'disabled'} aria-label="Apagar">🗑</button></div></div>`; };
   box.innerHTML=`<div class="profhead">${avatarHTML(null,64,'big')}<div style="flex:1;min-width:0"><label class="muted" for="profNick" style="font-size:13px">Apelido</label><input class="code nick" id="profNick" maxlength="16" placeholder="Como você quer aparecer" autocomplete="off" spellcheck="false" value="${esc(p.name)}"></div></div>
     <div class="row" style="margin:10px 0 4px"><button type="button" class="btn small" id="profPhoto">📷 ${p.photo?'Trocar foto':'Pôr foto'}</button>${p.photo?'<button type="button" class="btn small" id="profPhotoDel">Remover foto</button>':''}</div>
     <input type="file" id="profPhotoIn" accept="image/*" hidden>
     ${clip('ddb_bord_atk','Bordão de ataque','toca no celular de quem você atacar')}
     ${clip('ddb_bord_combo','Bordão de combo','toca quando você fizer combo x3 ou mais')}
-    <p class="muted" style="margin-top:6px">Até 2 segundos cada. Fica só neste aparelho e vai para quem estiver na mesma sala.</p>`;
+    <p class="muted" style="margin-top:6px">Ataque: até 3,5 segundos. Combo: até 2,5 segundos. Fica só neste aparelho e vai para quem estiver na mesma sala.</p>`;
   let nt=0; $('#profNick').addEventListener('input',e=>{ clearTimeout(nt); nt=setTimeout(()=>{ store.set('ddb_nick',e.target.value.trim().slice(0,16)); const av=box.querySelector('.profhead .av'); if(av) av.outerHTML=avatarHTML(null,64,'big'); profileChanged(true); },350); });
   $('#profPhoto').addEventListener('click',()=>{ const i=$('#profPhotoIn'); i.value=''; i.click(); });
   $('#profPhotoIn').addEventListener('change',async e=>{ const f=e.target.files[0]; if(!f) return; try{ store.set('ddb_photo',await readPhoto(f)); renderProfile(); profileChanged(); }catch(err){ toast('Não consegui abrir essa imagem'); } });
@@ -286,6 +290,7 @@ function renderProfile(){
 }
 /* mudou o perfil: avisa a sala (o apelido vai junto) */
 function profileChanged(nickOnly){
+  rkSyncMe(); /* nome e foto no ranking e nos desafios */
   if(typeof NET==='undefined'||!NET.open) return;
   const v=myNick(); NET.names[NET.role]=v; const ni=$('#nickIn'); if(ni&&document.activeElement!==ni) ni.value=v;
   if(NET.role==='A') sendRoster(); else send({t:'nick',name:v});

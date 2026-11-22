@@ -113,7 +113,7 @@ function drawCell(c,x,y,bs,sc,al,t,i){
   const img=(c.mode===3?S.hl:S.cv)[c.key];
   if(sc!==1){ const d=bs*sc; x+=(bs-d)/2; y+=(bs-d)/2; bs=d; }
   bx.globalAlpha=al*(c.mode===2?.35:1);
-  if(img) bx.drawImage(img,x,y,bs,bs); else { bx.fillStyle=c.key==='s'?STONE:c.key==='g'?GOLD:c.key==='w'?WILDC:c.key==='u'?BEARC:c.key==='m'?GUMC:c.key==='f'?RIPEC:c.key==='r'?ROTC:c.key==='k'?STALKC:c.key==='p'?PETALC:c.key==='c'?COINC:c.key==='n'?NUTC:(PALETTE[+c.key]||'#999'); rrect2(x,y,bs,bs*.16); bx.fill(); }
+  if(img) bx.drawImage(img,x,y,bs,bs); else { bx.fillStyle=c.key==='s'?STONE:c.key==='g'?goldCol():c.key==='w'?WILDC:c.key==='u'?BEARC:c.key==='m'?GUMC:c.key==='f'?RIPEC:c.key==='r'?ROTC:c.key==='k'?STALKC:c.key==='p'?PETALC:c.key==='c'?COINC:c.key==='n'?NUTC:(PALETTE[+c.key]||'#999'); rrect2(x,y,bs,bs*.16); bx.fill(); }
   if(c.ov&&c.mode===1) for(const o of c.ov){ const im=S.ov&&S.ov[o]; if(im) bx.drawImage(im,x,y,bs,bs); }
   if(c.pw&&c.mode===1){ bx.font=`${Math.round(bs*.56)}px system-ui,sans-serif`; bx.textAlign='center'; bx.textBaseline='middle'; bx.fillText(PWI[c.pw],x+bs/2,y+bs*.54); }
   if(c.tb!=null&&c.mode===1){ bx.font=`${Math.round(bs*.42)}px system-ui,sans-serif`; bx.textAlign='center'; bx.textBaseline='middle'; bx.fillText('💣',x+bs*.36,y+bs*.42);
@@ -171,7 +171,7 @@ function layout(){
   TS=ts; bSize(); buildSlots(); BOSS_Q=null; clearTimeout(SPR.t); SPR.t=setTimeout(()=>{ buildSprites(); buildSlots(); },180);
   root.style.setProperty('--ts',ts.toFixed(3)); root.style.setProperty('--trayH',(ts*5+.25).toFixed(3));
 }
-function cellColor(v){ if(!v) return 'transparent'; if(v.c===-5) return BEARC; if(v.c===-6) return GUMC; if(v.c===-7) return RIPEC; if(v.c===-8) return ROTC; if(v.c===-9) return STALKC; if(v.c===-10) return PETALC; if(v.c===-11) return COINC; if(v.c===-12) return NUTC; if(v.c===-1) return STONE; if(v.c===-2) return GOLD; if(v.s==='wild') return WILDC; return PALETTE[v.c]; }
+function cellColor(v){ if(!v) return 'transparent'; if(v.c===-5) return BEARC; if(v.c===-6) return GUMC; if(v.c===-7) return RIPEC; if(v.c===-8) return ROTC; if(v.c===-9) return STALKC; if(v.c===-10) return PETALC; if(v.c===-11) return COINC; if(v.c===-12) return NUTC; if(v.c===-1) return STONE; if(v.c===-2) return goldCol(); if(v.s==='wild') return WILDC; return PALETTE[v.c]; }
 const reveal={};
 function renderBoard(b,o,pv,extra={}){
   const now=performance.now(), blind=o.play===2;
@@ -244,7 +244,7 @@ function yarnAdd(i,c,s,delay,dir,flip){
   if(YARN.cv.parentNode!==g) g.appendChild(YARN.cv);
   if(YARN.cv.width!==W*dpr){ YARN.cv.width=YARN.cv.height=W*dpr; YARN.cv.style.width=YARN.cv.style.height=W+'px'; }
   YARN.dpr=dpr;
-  const key=s==='wild'?'w':c>=0?String(c):KEY_OF[c]||'s', col=c>=0?PALETTE[c]:c===-2?GOLD:STONE;
+  const key=s==='wild'?'w':c>=0?String(c):KEY_OF[c]||'s', col=c>=0?PALETTE[c]:c===-2?goldCol():STONE;
   YARN.list.push({x:i%N,y:(i/N)|0,key,col,lite:hmix(col,'#ffffff',.55),dark:hmix(col,'#000000',.6),v:dir==='v',flip,t0:performance.now()+delay,ph:Math.random()*6});
   if(!YARN.raf) YARN.raf=requestAnimationFrame(yarnStep);
 }
@@ -285,7 +285,7 @@ function spawnClear(i,c,s,delay,dir){
   /* o fio corre para a casa vizinha da mesma linha (ou coluna); na ponta do tabuleiro ele volta para dentro */
   const flip=vert?y>=N-1:(dir==='h'?x>=N-1:Math.random()<.5);
   d.className='fxc fx-'+sk+(s==='bomb'?' sp-bomb':'')+(flip?' flip':'')+(vert?' vert':''); d.dataset.col=s==='wild'?'x':c===-1?'s':c===-2?'g':c>=0?c:'x';
-  d.style.setProperty('--x',x); d.style.setProperty('--y',y); const cc=c===-1?STONE:c===-2?GOLD:c===-5?BEARC:c===-6?GUMC:c===-7?RIPEC:c===-8?ROTC:c===-9?STALKC:c===-10?PETALC:c===-11?COINC:c===-12?NUTC:(PALETTE[c]||WILDC); d.style.setProperty('--c',cc);
+  d.style.setProperty('--x',x); d.style.setProperty('--y',y); const cc=c===-1?STONE:c===-2?goldCol():c===-5?BEARC:c===-6?GUMC:c===-7?RIPEC:c===-8?ROTC:c===-9?STALKC:c===-10?PETALC:c===-11?COINC:c===-12?NUTC:(PALETTE[c]||WILDC); d.style.setProperty('--c',cc);
   d.style.setProperty('--dl',delay+'ms'); d.style.animationDelay=delay+'ms';
   d.innerHTML=sk==='brick'?'<div class="blk bev q q1"></div><div class="blk bev q q2"></div><div class="blk bev q q3"></div><div class="blk bev q q4"></div>'
     :sk==='crochet'?'<div class="blk bev"></div><svg class="yarn" viewBox="0 0 100 100" aria-hidden="true"><path pathLength="100" d="M50 50 C 64 36, 80 64, 96 50 S 124 38, 136 52 S 160 62, 172 50"/><path class="ply" pathLength="100" d="M50 50 C 64 36, 80 64, 96 50 S 124 38, 136 52 S 160 62, 172 50"/></svg>'

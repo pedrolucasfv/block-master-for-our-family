@@ -266,7 +266,7 @@ function common(m){
     case 'pw': if(m.to===NET.role) receivePower(m.k,m.side,f); break;
     case 'blk': if(m.to===NET.role) toast(`🛡️ ${nm(f)} bloqueou seu ataque com o escudo`); break;
     case 'gold': applyGold(m.y,m.x); break;
-    case 'goldWon': if(D&&!D.over){ removeGold(); toast(`${nm(f)} pegou o bloco dourado`); } break;
+    case 'goldWon': if(D&&!D.over){ removeGold(); toast(goldTxt(`${nm(f)} pegou o bloco dourado`)); } break;
     case 'emo': bigEmoji(m.e); break;
     case 'prof': storeProf(m); break;
     case 'pause': setPaused(true,f||true); break;

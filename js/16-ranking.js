@@ -30,7 +30,12 @@ function rkSyncMe(){
   const bs=store.get('ddb_bests',{}), solo=Math.max(soloStats().bestScore||0,...Object.keys(bs).filter(k=>k.startsWith('sozinho|')).map(k=>bs[k]||0),0);
   const est=campTotal(campLoad('solo')), key=[nome.toLowerCase(),est,solo].join('|');
   if(store.get('ddb_rksync','')!==key){ store.set('ddb_rksync',key); rkQueue('salvar_jogador',{p_nome:nome,p_estrelas:est,p_solo:solo}); } else rkFlush();
+  /* foto do perfil: vai junto uma miniatura (para as listas); a grande só é baixada quando alguém toca para ampliar */
+  const ph=store.get('ddb_photo',''), pk=[nome.toLowerCase(),ph.length,ph.slice(-24)].join('|');
+  if(store.get('ddb_rkfoto','')!==pk) rkMini(ph).then(mini=>{ store.set('ddb_rkfoto',pk); rkQueue('salvar_foto',{p_nome:nome,p_foto:ph,p_mini:mini}); }).catch(()=>{});
 }
+function rkMini(url){ return new Promise((res,rej)=>{ if(!url){ res(''); return; } const im=new Image(); im.onerror=rej;
+  im.onload=()=>{ const S=64, c=document.createElement('canvas'); c.width=c.height=S; c.getContext('2d').drawImage(im,0,0,S,S); res(c.toDataURL('image/jpeg',.7)); }; im.src=url; }); }
 /* fim de uma fase da campanha jogada sozinho */
 function rkCampEnd(info,cfg){
   if(!rkOn()||!cfg.solo) return; const nome=myNick();

@@ -94,7 +94,7 @@ function specDraw(cv,b,n,o={}){
     x.moveTo(px+p+rr,py+p); x.arcTo(px+p+w,py+p,px+p+w,py+p+w,rr); x.arcTo(px+p+w,py+p+w,px+p,py+p+w,rr); x.arcTo(px+p,py+p+w,px+p,py+p,rr); x.arcTo(px+p,py+p,px+p+w,py+p,rr); x.fill(); x.globalAlpha=1;
     const v=b[r]&&b[r][c]; if(!v) continue;
     const key=v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.c===-7?'f':v.c===-8?'r':v.c===-9?'k':v.c===-10?'p':v.c===-11?'c':v.c===-12?'n':v.s==='wild'?'w':String(v.c), img=SPR.cv&&SPR.cv[key];
-    if(img) x.drawImage(img,px+cs*.03,py+cs*.03,cs*.94,cs*.94); else { x.fillStyle=v.c===-1?STONE:v.c===-2?GOLD:(PALETTE[v.c]||'#999'); x.fillRect(px+cs*.06,py+cs*.06,cs*.88,cs*.88); }
+    if(img) x.drawImage(img,px+cs*.03,py+cs*.03,cs*.94,cs*.94); else { x.fillStyle=v.c===-1?STONE:v.c===-2?goldCol():(PALETTE[v.c]||'#999'); x.fillRect(px+cs*.06,py+cs*.06,cs*.88,cs*.88); }
     const ov=SPR.ov||{}; if(v.s==='ice'&&ov.i) x.drawImage(ov.i,px+cs*.03,py+cs*.03,cs*.94,cs*.94); if(v.s==='bomb'&&ov.b) x.drawImage(ov.b,px+cs*.03,py+cs*.03,cs*.94,cs*.94); if(v.cr&&ov.c) x.drawImage(ov.c,px+cs*.03,py+cs*.03,cs*.94,cs*.94);
   }
   if(o.marks){ const M=o.marks, lw=Math.max(2,cs*.07); x.save(); x.lineWidth=lw; x.setLineDash([cs*.18,cs*.12]); x.strokeStyle='rgba(58,209,255,.95)'; x.fillStyle='rgba(58,209,255,.13)';

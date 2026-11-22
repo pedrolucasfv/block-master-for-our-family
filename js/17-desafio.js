@@ -34,7 +34,7 @@ function dsOpen(id,delay){
   setTimeout(()=>dsGet(id).then(d=>{
     if(!d){ openEnd('<h2>⚔️ Desafio</h2><p class="reason">Esse desafio não existe mais.</p>',[{t:'Fechar',cls:'ghost',on:closeEnd}]); return; }
     const side=dsSide(d), [wa,wb]=dsWins(d), my=side==='b'?wb:wa, ot=side==='b'?wa:wb, mi=side==='b'?1:0, last=d.rodadas.length-1;
-    let body=`<h2>⚔️ ${esc(d.a_nome)} × ${esc(d.b_nome||'?')}</h2><p class="muted">Melhor de 5 · ${TIME_L[d.tempo]} por rodada</p>`;
+    let body=`<div class="dsvs"><div>${dsAv(d.a,d.a_nome,52)}<b>${esc(d.a_nome)}</b></div><span>×</span><div>${d.b?dsAv(d.b,d.b_nome,52):'<span class="av dsq" style="width:52px;height:52px;line-height:52px">?</span>'}<b>${esc(d.b_nome||'?')}</b></div></div><p class="muted">Melhor de 5 · ${TIME_L[d.tempo]} por rodada</p>`;
     body+=`<div class="endscore">${wa} × ${wb}</div>`;
     if(d.vez==='fim') body+=`<div class="winner ${d.vencedor===side?'win':d.vencedor==='empate'?'':'lose'}">${d.vencedor==='empate'?'Empate!':d.vencedor===side?'Você venceu! 🏆':`${esc(d.vencedor==='a'?d.a_nome:d.b_nome)} venceu`}</div>`;
     body+='<div class="rank">'+d.rodadas.map((r,i)=>{ const open=i===last&&d.vez!=='fim';
@@ -88,25 +88,41 @@ function dsList(){
     setTimeout(()=>{
       dsMine().then(list=>{ DS_LIST=list; dsRenderMine(); dsRenderPeople(); dsBadge(list.filter(dsMyTurn).length); })
         .catch(()=>{ $('#chalMine').innerHTML='<div class="card"><p class="reason">Sem internet agora. Volte e tente de novo daqui a pouco.</p></div>'; });
-      rkFetch('jogadores?select=nome,chave,estrelas&order=atualizado.desc&limit=100').then(r=>{ DS_PEOPLE=r.filter(x=>x.chave!==dsKey()); dsRenderPeople(); })
+      rkFetch('jogadores?select=nome,chave,estrelas,mini&order=atualizado.desc&limit=100').then(r=>{ DS_ALL={}; r.forEach(p=>DS_ALL[p.chave]=p); DS_PEOPLE=r.filter(x=>x.chave!==dsKey()); dsRenderMine(); dsRenderPeople(); })
         .catch(()=>{ $('#chalPeople').innerHTML='<p class="muted">Sem internet agora.</p>'; });
     },store.get('ddb_rkq',[]).length?1500:0);
   });
 }
+/* foto (miniatura) de alguém da lista; sem foto, a inicial numa bolinha colorida. Tocar amplia. */
+let DS_ALL={};
+function dsAv(chave,nome,px){
+  const p=DS_ALL[chave]||{}, n=nome||p.nome||'?';
+  if(p.mini) return `<img class="av dsav" data-k="${esc(chave)}" data-n="${esc(n)}" src="${p.mini}" alt="" style="width:${px}px;height:${px}px">`;
+  let h=0; for(const ch of String(chave||n)) h=(h*31+ch.charCodeAt(0))>>>0;
+  return `<span class="av" style="width:${px}px;height:${px}px;line-height:${px}px;font-size:${Math.round(px*.48)}px;background:${AVC[h%AVC.length]}">${esc(n.trim().charAt(0).toUpperCase()||'?')}</span>`;
+}
+/* foto grande por cima da tela; toca em qualquer lugar para fechar */
+function dsZoom(chave,nome){
+  const ov=document.createElement('div'); ov.className='zoomov'; const p=DS_ALL[chave]||{};
+  ov.innerHTML=`<div><img src="${p.mini||''}" alt=""><b>${esc(nome)}</b></div>`; ov.addEventListener('click',()=>ov.remove()); document.body.appendChild(ov);
+  rkFetch(`jogadores?chave=eq.${encodeURIComponent(chave)}&select=foto`).then(r=>{ const f=r&&r[0]&&r[0].foto; if(f&&ov.isConnected) ov.querySelector('img').src=f; }).catch(()=>{});
+}
+document.addEventListener('click',e=>{ const im=e.target.closest&&e.target.closest('.dsav'); if(!im) return; e.stopPropagation(); e.preventDefault(); dsZoom(im.dataset.k,im.dataset.n); },true);
 function dsRenderMine(){
-  const row=d=>{ const side=dsSide(d), [wa,wb]=dsWins(d), my=side==='b'?wb:wa, ot=side==='b'?wa:wb;
+  const row=d=>{ const side=dsSide(d), [wa,wb]=dsWins(d), my=side==='b'?wb:wa, ot=side==='b'?wa:wb, oc=side==='a'?d.b:d.a;
     const st=d.vez==='fim'?(d.vencedor===side?'🏆 venceu':d.vencedor==='empate'?'empate':'perdeu'):dsMyTurn(d)?'▶ sua vez':!d.b?'esperando alguém aceitar':`vez de ${dsOther(d,side)}`;
-    return `<button type="button" class="kv dsrow" data-id="${esc(d.id)}"><span>vs ${esc(dsOther(d,side))} · <b>${my} × ${ot}</b></span><b>${esc(st)}</b></button>`; };
+    return `<div class="kv dsrow" data-id="${esc(d.id)}"><span class="dswho">${oc?dsAv(oc,dsOther(d,side),34):'<span class="av dsq" style="width:34px;height:34px;line-height:34px">?</span>'}<span>${esc(dsOther(d,side))}<small class="muted"> · ${my} × ${ot}</small></span></span><b>${esc(st)}</b></div>`; };
   const L=DS_LIST, turn=L.filter(dsMyTurn), wait=L.filter(d=>d.vez!=='fim'&&!dsMyTurn(d)), done=L.filter(d=>d.vez==='fim').slice(0,10);
-  const sec=(t,a)=>a.length?`<div class="card"><h2>${t}</h2><div class="rank">${a.map(row).join('')}</div></div>`:'';
-  $('#chalMine').innerHTML=sec('▶ Sua vez',turn)+sec('⏳ Esperando',wait)+sec('Terminados',done);
+  const sec=(t,a)=>a.length?`<p class="dssec">${t}</p><div class="rank">${a.map(row).join('')}</div>`:'';
+  $('#chalMine').innerHTML=`<div class="card dsmine"><h2>⚔️ Meus desafios</h2>${L.length?sec('▶ Sua vez',turn)+sec('⏳ Esperando',wait)+sec('Terminados',done)
+    :'<div class="dsempty"><span>🗡️</span><p>Você ainda não tem desafios.<br>Escolha alguém aqui embaixo para desafiar!</p></div>'}</div>`;
   $$('#chalMine .dsrow').forEach(b=>b.addEventListener('click',()=>dsOpen(b.dataset.id)));
 }
 function dsRenderPeople(){
   const box=$('#chalPeople'), q=($('#chalFind').value||'').trim().toLowerCase();
   const busy=new Set(DS_LIST.filter(d=>d.vez!=='fim').map(d=>dsSide(d)==='a'?d.b:d.a));
   const list=DS_PEOPLE.filter(p=>!q||p.chave.includes(q));
-  box.innerHTML=list.length?'<div class="rank">'+list.slice(0,40).map(p=>`<div class="kv"><span>${esc(p.nome)}${p.estrelas?` <small class="muted">${p.estrelas}⭐</small>`:''}${busy.has(p.chave)?' <small class="muted">· em andamento</small>':''}</span><button type="button" class="btn small dsgo" data-n="${esc(p.nome)}" style="width:auto">Desafiar</button></div>`).join('')+'</div>'
+  box.innerHTML=list.length?'<div class="rank">'+list.slice(0,40).map(p=>`<div class="kv"><span class="dswho">${dsAv(p.chave,p.nome,30)}<span>${esc(p.nome)}${p.estrelas?` <small class="muted">${p.estrelas}⭐</small>`:''}${busy.has(p.chave)?' <small class="muted">· em andamento</small>':''}</span></span><button type="button" class="btn small dsgo" data-n="${esc(p.nome)}" style="width:auto">Desafiar</button></div>`).join('')+'</div>'
     :`<p class="muted">${q?'Ninguém com esse nome.':'Ainda não tem ninguém na lista. Quem coloca o nome no Perfil e joga aparece aqui.'}</p>`;
   $$('#chalPeople .dsgo').forEach(b=>b.addEventListener('click',()=>dsNew(null,b.dataset.n)));
 }

@@ -159,7 +159,7 @@ function duelDrop(src,r,c){
   const res=D.eng.place(p,r,c,performance.now());
   D.placed++; if(D.wait){ D.wait=false; setStatus(''); }
   const tb=tickBombs(D.eng); if(tb.boom){ setTimeout(()=>BC.drop(tb.added),0); toast('💣 A bomba explodiu! Blocos cinza no seu tabuleiro'); SFX.boom(); shake(); }
-  duelApply(res,r+p.h/2,c+p.w/2,'Bloco dourado é seu! +150');
+  duelApply(res,r+p.h/2,c+p.w/2,goldTxt('Bloco dourado é seu! +150'));
   const refilled=D.tray.every(x=>!x);
   if(refilled) D.tray=gen3(D.rng,D.o);
   renderDuel(refilled);
@@ -276,10 +276,10 @@ function applyGold(y,x){
     const safe=free.filter(([a,c])=>!e.wouldFill(a,c)), pool=safe.length?safe:free; [y,x]=pool[Math.floor(Math.random()*pool.length)]; }
   b[y][x]={c:-2,s:null,t:performance.now()};
   const fl=e.fullLines();
-  if(!fl.rows.length&&!fl.cols.length){ renderDuel(); toast('Bloco dourado! Quem eliminar primeiro leva +150'); return; }
+  if(!fl.rows.length&&!fl.cols.length){ renderDuel(); toast(goldTxt('Bloco dourado! Quem eliminar primeiro leva +150')); return; }
   /* caiu no último buraco de uma linha ou coluna: fecha na hora e o dono do tabuleiro leva tudo */
   const res=e.settle(0);
-  duelApply(res,y+.5,x+.5,'O dourado fechou sua linha! +150 para você');
+  duelApply(res,y+.5,x+.5,goldTxt('O dourado fechou sua linha! +150 para você'));
   renderDuel(); glowCells([y*N+x],b); duelAfter(false);
 }
 /* ataques e poderes vão para o líder (quem está jogando com mais pontos, fora você) */

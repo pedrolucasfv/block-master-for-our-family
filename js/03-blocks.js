@@ -407,7 +407,7 @@ function variant(src,kind){
     catch(e){ x.globalCompositeOperation='source-atop'; x.fillStyle='rgba(40,40,48,.7)'; x.fillRect(0,0,w,w); } }
   return c;
 }
-function overlays(w,dpr,rad){
+function overlays(w,dpr,rad,dia){
   const mk=f=>{ const c=document.createElement('canvas'); c.width=c.height=w; f(c.getContext('2d')); return c; };
   return {
     b:mk(x=>{ const g=x.createRadialGradient(w*.42,w*.42,0,w*.5,w*.5,w*.28); g.addColorStop(0,'#5a5a5a'); g.addColorStop(.7,'#111'); g.addColorStop(1,'#111');
@@ -417,7 +417,8 @@ function overlays(w,dpr,rad){
       x.strokeStyle='rgba(255,255,255,.45)'; x.beginPath(); x.moveTo(w*.05,w*.7); x.lineTo(w*.95,w*.3); x.stroke(); }),
     ring:(()=>{ const cs=w/.94, R=Math.round(cs*1.3), c=document.createElement('canvas'); c.width=c.height=R; const x=c.getContext('2d'), sz=cs*1.06, o=(R-sz)/2, r=sz*.22;
       x.translate(o,o); x.shadowColor='rgba(255,255,255,.75)'; x.shadowBlur=cs*.4; x.lineWidth=2*dpr; x.strokeStyle='rgba(255,255,255,.95)'; rrect(x,sz,r); x.stroke(); x.stroke(); return c; })(),
-    g:mk(x=>{ x.fillStyle='rgba(90,60,0,.7)'; x.font=`${Math.round(w*.45)}px system-ui,sans-serif`; x.textAlign='center'; x.textBaseline='middle'; x.fillText('★',w/2,w*.53); })
+    /* marca do bloco dourado: estrela; com tema dourado, um diamante */
+    g:mk(x=>{ if(dia){ drawGem(x,w/2,w*.5,w*.3,'#e9fbff'); return; } x.fillStyle='rgba(90,60,0,.7)'; x.font=`${Math.round(w*.45)}px system-ui,sans-serif`; x.textAlign='center'; x.textBaseline='middle'; x.fillText('★',w/2,w*.53); })
   };
 }
 function buildSprites(){
@@ -425,14 +426,14 @@ function buildSprites(){
   const dpr=Math.min(2.5,window.devicePixelRatio||1), w=Math.max(16,Math.round(CS*.94*dpr));
   if(SPR.skin===skin&&SPR.lite===SET.lite&&SPR.px===w) return;
   const job=++SPR.job;
-  const list=[...PALETTE.map((c,i)=>[String(i),c,skin==='fruit'?FRUIT[i]:null]),['s',STONE,null],['g',GOLD,null],['w','#fff',null,'wild'],['u',BEARC,null,'bear'],['m',GUMC,null,'gum'],['f',RIPEC,null,'ripe'],['r',ROTC,null,'rotten'],['k',STALKC,null,'stalk'],['p',PETALC,null,'petal'],['c',COINC,null,'koban'],['n',NUTC,null,'nut']];
+  const list=[...PALETTE.map((c,i)=>[String(i),c,skin==='fruit'?FRUIT[i]:null]),['s',STONE,null],['g',isGold(skin)?DIAMC:GOLD,null,isGold(skin)?baseSkin(skin):null],['w','#fff',null,'wild'],['u',BEARC,null,'bear'],['m',GUMC,null,'gum'],['f',RIPEC,null,'ripe'],['r',ROTC,null,'rotten'],['k',STALKC,null,'stalk'],['p',PETALC,null,'petal'],['c',COINC,null,'koban'],['n',NUTC,null,'nut']];
   const out=[]; let i=0;
   const step=()=>{ if(job!==SPR.job) return;
     const t0=performance.now();
     while(i<list.length&&performance.now()-t0<6){ const [k,c,fr,sk]=list[i++]; out.push([k,drawBlock(sk||skin,c,fr,w,dpr,SET.lite)]); }
     if(i<list.length){ setTimeout(step,0); return; }
     const cv={}, hl={}, dead={}; out.forEach(([k,c])=>{ cv[k]=c; hl[k]=variant(c,'hl'); dead[k]=variant(c,'dead'); });
-    SPR.cv=cv; SPR.hl=hl; SPR.dead=dead; SPR.ov=overlays(w,dpr,skinR(skin)); SPR.w=w; bDirty=true; bReq();
+    SPR.cv=cv; SPR.hl=hl; SPR.dead=dead; SPR.ov=overlays(w,dpr,skinR(skin),isGold(skin)); SPR.w=w; bDirty=true; bReq();
     /* imagens em data URL: funcionam em todo navegador (blob: falhava em alguns celulares e a peça sumia) */
     const enc=out.filter(o=>o[0]!=='w'), urls=[]; let j=0;
     const encStep=()=>{ if(job!==SPR.job) return; const t1=performance.now();

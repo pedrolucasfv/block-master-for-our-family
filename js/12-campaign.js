@@ -117,7 +117,7 @@ function campScale(def,P){
   if(def.st.by==='lines'){ sc.st2=r(def.st.two*m); sc.st3=r(def.st.three*m); }
   return sc;
 }
-function campDesc(def,sc){ return def.desc.replace('{v}',fmtN(sc.v||def.v||0)).replace('{k}',def.k||0).replace('{limit}',sc.limit||def.limit||0).replace('{rain}',sc.rain||def.rain||0).replace('{gum}',def.gum||0); }
+function campDesc(def,sc,w){ const t=def.desc.replace('{v}',fmtN(sc.v||def.v||0)).replace('{k}',def.k||0).replace('{limit}',sc.limit||def.limit||0).replace('{rain}',sc.rain||def.rain||0).replace('{gum}',def.gum||0); return w&&isGold(campSkin({camp:{w}}))?t.replace(/blocos dourados/g,'blocos de diamante'):goldTxt(t); }
 function campStarTxt(def,sc){
   const by=def.st.by;
   if(by==='pieces') return [`em até ${sc.st2} peças`,`em até ${sc.st3} peças`];
@@ -269,7 +269,7 @@ function campHook(cfg){
     if(def.goal==='boss'&&!SH.bossIntro){ SH.bossIntro=true; const s0=SH; bossPrep(W.boss).then(()=>{ if(SH===s0&&!SH.over){ bossDock(cp.rage); bossShow('enter'); setTimeout(()=>bossSay(BS.say.enter,1900),350); } }); }
     $('#gLabel').textContent=`Fase ${ph} · ${def.name}`; $('#scoreLbl').textContent=cfg.solo?'Pontos':'Pontos do grupo';
     /* embaixo: a descrição e o que precisa para as estrelas; o andamento vai no cartão ao lado dos pontos (setStatus) */
-    { const st=$('#subTxt'), html=`${def.icon} ${esc(campDesc(def,sc))}`;
+    { const st=$('#subTxt'), html=`${def.icon} ${esc(campDesc(def,sc,w))}`;
       if(st._h!==html){ st._h=html; st.innerHTML=html; } const m=$('#mission'); if(m.hidden){ m.hidden=false; layout(); } }
     const tb=$('#timebar'); tb.classList.remove('hp');
     if(def.goal==='boss') bossHP(cp.hp,cp.hpMax);
@@ -333,7 +333,7 @@ function campHook(cfg){
 function campPauseInfo(){
   const box=$('#pauseGoal'); if(!box) return; if(!SH||SH.type!=='camp'){ box.hidden=true; return; }
   const c=SH.cfg.camp, W=CWD(c.w), def=W.phases[c.ph-1], sc=campScale(def,SH.cfg.players.length), tx=campStarTxt(def,sc), cp=SH.view&&SH.view.cp, used=cp&&cp.used&&cp.used.length;
-  box.innerHTML=`<p class="reason">${def.icon} ${esc(campDesc(def,sc))}</p><div class="kv"><span>★</span><b>completar</b></div><div class="kv"><span>★★</span><b>${esc(tx[0])}</b></div><div class="kv"><span>★★★</span><b>${esc(tx[1])}</b></div>${used?'<p class="muted">Você usou ajuda: nesta tentativa o máximo é ★★.</p>':''}`;
+  box.innerHTML=`<p class="reason">${def.icon} ${esc(campDesc(def,sc,c.w))}</p><div class="kv"><span>★</span><b>completar</b></div><div class="kv"><span>★★</span><b>${esc(tx[0])}</b></div><div class="kv"><span>★★★</span><b>${esc(tx[1])}</b></div>${used?'<p class="muted">Você usou ajuda: nesta tentativa o máximo é ★★.</p>':''}`;
   box.hidden=false;
 }
 function campEnd(info,cfg){
@@ -457,7 +457,7 @@ function campIntro(w,ph){
   const W=CWD(w), def=W.phases[ph-1];
   if(def.goal==='boss') bossPrep(W.boss);
   const sc=campScale(def,1), st=campLoad('solo'), tx=campStarTxt(def,sc), s=st.stars[ck(w,ph)]||0;
-  openEnd(`<h2>${def.icon} Fase ${ph} · ${esc(def.name)}</h2><p class="reason" style="margin:8px 0 12px">${esc(campDesc(def,sc))}</p>
+  openEnd(`<h2>${def.icon} Fase ${ph} · ${esc(def.name)}</h2><p class="reason" style="margin:8px 0 12px">${esc(campDesc(def,sc,w))}</p>
     <div class="kv"><span>★</span><b>completar</b></div><div class="kv"><span>★★</span><b>${tx[0]}</b></div><div class="kv"><span>★★★</span><b>${tx[1]}</b></div>
     <p class="muted" style="margin-top:8px">${s?`Seu melhor: ${'★'.repeat(s)}`:'Ainda não concluída'} · usar ajuda limita a ★★</p><div id="rkPhase"></div>`,
     [{t:'Começar',cls:'primary',on:()=>{ closeEnd(); startCampSolo(w,ph); }},{t:'Voltar',cls:'ghost',on:closeEnd}]);

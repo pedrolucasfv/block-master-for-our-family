@@ -3,6 +3,12 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.6 · 22/11/2026
+- ⚔️ **Meus desafios** em destaque: sempre aparece (mesmo vazio), com a foto de cada pessoa e sem o "vs" antes do nome.
+- 🖼️ Tocar na foto de alguém (nos desafios) amplia a foto. As fotos do perfil agora sobem para o servidor e ficam com mais qualidade.
+- 🎙️ Bordão de ataque pode ter até 3,5 segundos (combo continua 2,5 s), com uma barra mostrando quanto falta na gravação.
+- 💎 Correção: com um tema dourado equipado, o bloco dourado (de pegar) vira **bloco de diamante**, para não confundir com as peças.
+
 ## 1.5.1 · 21/11/2026
 - 🔔 Correção: os avisos não chegavam (a função de aviso não conseguia ler o banco). Agora o banco manda tudo o que ela precisa.
 - 🔔 Quem abre o jogo dentro do WhatsApp vê como abrir no Chrome para ligar os avisos; se der erro, a tela mostra onde parou.

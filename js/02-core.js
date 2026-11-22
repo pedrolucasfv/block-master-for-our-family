@@ -1,7 +1,7 @@
 'use strict';
 /* utilidades, store (localStorage/SIM), SET (configurações salvas), temas ganhos e dourados */
 /* versão do jogo: aparece no rodapé do menu. A cada mudança publicada, suba o número e anote em CHANGELOG.md */
-const VERSAO='1.5.1', VERSAO_DATA='21/11/2026';
+const VERSAO='1.6', VERSAO_DATA='21/11/2026';
 /* ===================== utilidades ===================== */
 const PALETTE=['#e5483f','#f08c25','#f3c22f','#4cbb47','#2cb4d6','#3e6fe0','#8a52d8'];
 const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#eab526', RIPEC='#ff4b3e', ROTC='#8d5a2b', STALKC='#8fcf5a', PETALC='#ffb3cc', COINC='#e0a83a', NUTC='#9aa6b8';
@@ -55,6 +55,11 @@ const WON=new Set(store.get('ddb_won',[])); if(store.get('ddb_bear',false)) WON.
 const GOLDS=new Set(store.get('ddb_gold',[]));
 SKIN_REW.forEach(k=>{ if(WON.has(k)) SKINS.push(k); });
 const isGold=s=>typeof s==='string'&&s.endsWith('Gold'), baseSkin=s=>isGold(s)?s.slice(0,-4):s;
+/* com um tema dourado equipado, todas as peças já são de ouro: o bloco dourado (de pegar) vira bloco de DIAMANTE para não confundir */
+const DIAMC='#8fe3ff';
+const diaOn=()=>isGold(effSkin());
+const goldCol=()=>diaOn()?DIAMC:GOLD;
+function goldTxt(s){ return diaOn()?s.replace(/blocos dourados/g,'blocos de diamante').replace(/Bloco dourado/g,'Bloco de diamante').replace(/bloco dourado/g,'bloco de diamante').replace(/O dourado/g,'O diamante'):s; }
 const hasSkin=k=>SKINS.includes(k)||devAll(), hasGold=k=>SKIN_REW.includes(k)&&(GOLDS.has(k)||devAll());
 function fixSkin(){ if(isGold(SET.skin)&&!hasGold(baseSkin(SET.skin))) SET.skin=baseSkin(SET.skin); if(!hasSkin(baseSkin(SET.skin))) SET.skin='velvet'; }
 fixSkin();
