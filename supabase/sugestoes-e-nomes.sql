@@ -10,7 +10,7 @@
 --     Nome novo não pode ser quase igual a um que já existe (só muda acento, maiúscula ou espaço: "Lúcia" × "Lucia"), nem ter dois espaços seguidos.
 --   • "ADM" (ou "ADMIN") como palavra do nome só para quem tem contas.adm = true.
 --   • trocar_nome: quem tem PIN troca de nome e leva tudo junto (ranking, recordes, Desafio do dia, desafios, foto, avisos, PIN e progresso).
---     O nome antigo fica guardado por 30 dias (ninguém pega) e os outros aparelhos da pessoa passam para o nome novo sozinhos.
+--     O nome antigo fica guardado por 6 horas (ninguém pega) e os outros aparelhos da pessoa passam para o nome novo sozinhos.
 --   • Sugestões: todo mundo vê e curte; quem sugeriu responde as perguntas; quem cuida do jogo muda a etiqueta e escreve o motivo. Cada passo vira aviso.
 
 -- ===== trocar o nome leva tudo junto: as ligações com o nome acompanham a troca (on update cascade) =====
@@ -32,7 +32,7 @@ alter table sessoes drop constraint if exists sessoes_chave_fkey,
 -- ===== quem cuida do jogo =====
 alter table contas add column if not exists adm boolean not null default false;
 
-/* nomes trocados: o antigo fica 30 dias guardado e aponta para o novo (os outros aparelhos da pessoa se acertam por aqui) */
+/* nomes trocados: o antigo fica 6 horas guardado e aponta para o novo (os outros aparelhos da pessoa se acertam por aqui) */
 create table if not exists nomes_antigos (
   antiga text primary key,
   nova text not null,
@@ -65,7 +65,7 @@ begin
   if p_nome ~ '\s\s' then raise exception 'nome: dois espaços seguidos'; end if;
   select nome into o from jogadores where rk_base(nome) = rk_base(p_nome) and chave <> k and chave is distinct from p_eu limit 1;
   if found then raise exception 'nome: parecido com %', o; end if;
-  if exists (select 1 from nomes_antigos where antiga = k and nova is distinct from p_eu and quando > now() - interval '30 days') then
+  if exists (select 1 from nomes_antigos where antiga = k and nova is distinct from p_eu and quando > now() - interval '6 hours') then
     raise exception 'nome: trocado há pouco'; end if;
 end $$;
 revoke all on function rk_nome_novo(text,text) from public, anon, authenticated;
@@ -89,7 +89,7 @@ end $$;
 revoke all on function salvar_jogador(text,int,int) from public;
 grant execute on function salvar_jogador(text,int,int) to anon, authenticated;
 
-/* situação de um nome: 'com_pin' (com 'adm'), 'sem_pin', 'trocado' (virou 'nome'; 'guardado' = ainda nos 30 dias), 'adm' (não pode), 'parecido' (com 'nome') ou 'livre' */
+/* situação de um nome: 'com_pin' (com 'adm'), 'sem_pin', 'trocado' (virou 'nome'; 'guardado' = ainda nas 6 horas), 'adm' (não pode), 'parecido' (com 'nome') ou 'livre' */
 create or replace function pin_estado(p_nome text) returns jsonb
 language plpgsql stable security definer set search_path = public as $$
 declare k text := rk_chave(p_nome); o text; a nomes_antigos;
@@ -99,7 +99,7 @@ begin
   if exists (select 1 from jogadores j where j.chave = k) then
     return jsonb_build_object('estado', 'sem_pin', 'estrelas', (select estrelas from jogadores where chave = k)); end if;
   select * into a from nomes_antigos where antiga = k;
-  if found then return jsonb_build_object('estado', 'trocado', 'nome', (select nome from jogadores where chave = a.nova), 'guardado', a.quando > now() - interval '30 days'); end if;
+  if found then return jsonb_build_object('estado', 'trocado', 'nome', (select nome from jogadores where chave = a.nova), 'guardado', a.quando > now() - interval '6 hours'); end if;
   if rk_tem_adm(p_nome) then return jsonb_build_object('estado', 'adm'); end if;
   select nome into o from jogadores where rk_base(nome) = rk_base(p_nome) limit 1;
   if found then return jsonb_build_object('estado', 'parecido', 'nome', o); end if;
@@ -121,7 +121,7 @@ begin
     if exists (select 1 from jogadores where chave = kn) then return jsonb_build_object('ok', false, 'erro', 'usado'); end if;
     select nome into o from jogadores where rk_base(nome) = rk_base(n) and chave <> k limit 1;
     if found then return jsonb_build_object('ok', false, 'erro', 'parecido', 'nome', o); end if;
-    if exists (select 1 from nomes_antigos where antiga = kn and nova <> k and quando > now() - interval '30 days') then
+    if exists (select 1 from nomes_antigos where antiga = kn and nova <> k and quando > now() - interval '6 hours') then
       return jsonb_build_object('ok', false, 'erro', 'guardado'); end if;
   end if;
   /* a troca da chave em jogadores leva junto recordes, Desafio do dia, avisos, PIN, aparelhos e progresso (on update cascade) */

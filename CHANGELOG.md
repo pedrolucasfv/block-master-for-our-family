@@ -6,7 +6,7 @@ Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = corre
 ## 1.17 · 22/11/2026
 - 💡 **Sugestões:** novo botão "Sugestões" no menu. Conte o que você queria mudar ou ter no jogo, veja as ideias da família e curta as que você gostou. Cada sugestão ganha uma etiqueta: Nova, Em análise, Pergunta, Vai entrar, Implementada (com a versão em que entrou) ou Não vai entrar (sempre com o motivo).
 - ❓ **Perguntas e respostas:** quem cuida do jogo pode fazer perguntas sobre a sua sugestão, e você responde ali mesmo. Cada resposta, pergunta ou etiqueta nova chega como aviso no celular e fica no sino 🔔 do menu.
-- ✏️ **Trocar o nome sem perder nada:** quem tem PIN agora pode mudar o apelido no Perfil, e estrelas, recordes, desafios, foto, avisos e o PIN vão junto para o nome novo. Os outros celulares onde você entrou passam para o nome novo sozinhos.
+- ✏️ **Trocar o nome sem perder nada:** quem tem PIN agora pode mudar o apelido no Perfil, e estrelas, recordes, desafios, foto, avisos e o PIN vão junto para o nome novo. Os outros celulares onde você entrou passam para o nome novo sozinhos, e o nome antigo fica livre de novo depois de algumas horas.
 - 🪪 **Nomes únicos de verdade:** não dá mais para criar um nome quase igual a um que já existe (só mudando acento, maiúscula ou espaço, como "Lúcia" e "Lucia"). E "ADM" no nome fica só para quem cuida do jogo.
 
 ## 1.16.2 · 22/11/2026

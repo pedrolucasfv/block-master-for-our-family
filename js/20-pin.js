@@ -219,7 +219,7 @@ async function nickDefinir(v,campo,antes){
   if(!confirm(`Trocar seu nome de “${velho}” para “${novo}”? Estrelas, recordes, desafios, foto, avisos e o PIN vão junto para o nome novo.`)) return volta();
   try{
     const r=await rkFetch('rpc/trocar_nome',{body:{p_antigo:velho,p_novo:novo}});
-    if(!r||!r.ok) return volta({usado:'Esse nome já é de outra pessoa. Escolha outro.',parecido:`Já existe “${r&&r.nome}”, quase igual. Escolha outro nome.`,guardado:'Esse nome foi trocado há pouco e fica guardado por 30 dias. Escolha outro.',adm:'“ADM” no nome é só para quem cuida do jogo'}[r&&r.erro]||'Esse nome não dá. Escolha outro.');
+    if(!r||!r.ok) return volta({usado:'Esse nome já é de outra pessoa. Escolha outro.',parecido:`Já existe “${r&&r.nome}”, quase igual. Escolha outro nome.`,guardado:'Esse nome foi trocado há pouco e fica guardado por algumas horas. Escolha outro ou tente mais tarde.',adm:'“ADM” no nome é só para quem cuida do jogo'}[r&&r.erro]||'Esse nome não dá. Escolha outro.');
     nickAdotar(velho,r.nome); if(campo) campo.value=r.nome; toast(`✅ Pronto! Agora você é ${r.nome}`);
   }catch(e){ volta(/pin:/.test(e.message)?'O PIN do seu nome mudou. Entre de novo no Perfil.':'Sem internet agora. Tente trocar o nome de novo depois.'); }
 }

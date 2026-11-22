@@ -1540,7 +1540,7 @@ const JA={
 "Escreva sua resposta":"返事を書いてね",
 "Essa sugestão não existe mais.":"この提案はもうありません。",
 "Esse apelido não pode ser usado. Troque no Perfil.":"このニックネームは使えません。プロフィールで変えてね。",
-"Esse nome foi trocado há pouco e fica guardado por 30 dias. Escolha outro.":"この名前は最近変更されたので30日間ほかの人は使えません。別の名前にしてね。",
+"Esse nome foi trocado há pouco e fica guardado por algumas horas. Escolha outro ou tente mais tarde.":"この名前は最近変更されたので数時間はほかの人は使えません。別の名前にするか、あとでもう一度やってね。",
 "Esse nome já é de outra pessoa. Escolha outro.":"この名前はもうほかの人のものです。別の名前にしてね。",
 "Esse nome não dá. Escolha outro.":"この名前は使えません。別の名前にしてね。",
 "Explique melhor (se quiser)":"くわしく（書きたければ）",
