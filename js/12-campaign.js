@@ -164,7 +164,7 @@ function campHook(cfg){
     if(def.setup==='bamboo') bambooPlant(e,def.k);
     if(def.setup==='ice'){ const idx=e.addStones(rnd,def.k,0); idx.forEach(i=>{ e.b[(i/N)|0][i%N]={c:Math.floor(rnd()*NCOL),s:'ice',t:0,ic:1}; }); }
     if(def.setup==='puzzle'){ const pz=makePuzzle(w===1?'W1P7':'W'+w+'P'+ph,def.bands); e.b=pz.board; const q={}; SH.ids.forEach(id=>q[id]=[]); pz.pieces.forEach((p,i)=>q[SH.ids[i%SH.ids.length]].push(p));
-      SH.ids.forEach(id=>{ H.trays[id]=[null,null,null]; for(let s=0;s<3&&q[id].length;s++) H.trays[id][s]=q[id].shift(); }); H.campQ=q; }
+      SH.ids.forEach(id=>{ H.trays[id]=[null,null,null]; if(q[id].length) H.trays[id][1]=q[id].shift(); }); H.campQ=q; } /* quebra-cabeça: uma peça por vez, no meio da bandeja */
     H.cp={wait:!!(def.mt||def.rain||((def.time||def.setup==='puzzle')&&cfg.solo)),w,gumN:0,gum:0,ripe:0,ripeN:0,petal:0,petalN:0,beltN:0,bambN:0,bamb:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
     hk.progress(H);
   };
@@ -218,7 +218,7 @@ function campHook(cfg){
       const have=B.eng.b.reduce((a,row)=>a+row.filter(v=>v&&v.c===-7).length,0);
       if(have<def.ripe.k&&cp.ripeN>=def.ripe.every){ cp.ripeN=0; const add=ripeAdd(B.eng,1,def.ripe.life); if(add.length) H.ev.ripe=add; } }
     if(def.gum&&B.eng.b.some(row=>row.some(v=>v&&v.c===-6))){ cp.gumN++; if(cp.gumN>=def.gum){ cp.gumN=0; const i=gumSpread(B.eng); if(i>=0) H.ev.gum=[i]; } }
-    if(hk.noRegen){ const q=H.campQ[who]; if(H.trays[who].every(x=>!x)&&q.length) for(let s=0;s<3&&q.length;s++) H.trays[who][s]=q.shift(); }
+    if(hk.noRegen){ const q=H.campQ[who]; if(H.trays[who].every(x=>!x)&&q.length) H.trays[who][1]=q.shift(); }
     if(hk.progress(H)){ hk.finish(true); return; }
     if(sc.limit&&cp.placed>=sc.limit){ hk.finish(false,'Acabaram as peças'); return; }
     if(hk.noRegen&&cp.left===0){ hk.finish(false,'As peças acabaram e sobrou bloco no tabuleiro'); return; }
