@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.11.2 · 22/11/2026
+- 🏆 Ranking, desafios e avisos não ficam mais "Carregando…" para sempre quando a internet ou o servidor demoram: depois de 12 segundos, aparece que está indisponível (é só abrir de novo).
+
 ## 1.11.1 · 22/11/2026
 - 💬 **Chat da sala com histórico:** quem entra na sala depois vê a conversa que já tinha acontecido (com uma linha "antes de você entrar"). A conversa fica guardada só nos celulares da sala, enquanto ela existir, e some quando a sala fecha.
 

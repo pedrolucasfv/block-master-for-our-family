@@ -9,7 +9,10 @@ function pinTok(){ return store.get('ddb_pins',{})[myNick().toLowerCase()]||''; 
 function rkFetch(path,opt){
   opt=opt||{}; const h={apikey:SUPA_KEY,'Content-Type':'application/json'}; if(/^eyJ/.test(SUPA_KEY)) h.Authorization='Bearer '+SUPA_KEY; /* chave antiga (anon) também vai no Authorization; a nova (sb_publishable_) só no apikey */
   const tk=pinTok(); if(tk) h['x-pin']=tk; /* o banco confere se este aparelho pode gravar com o nome (supabase/pin-e-progresso.sql) */
-  return fetch(SUPA_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method:opt.body?'POST':'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined})
+  /* sem resposta em 12 s (internet ruim ou servidor demorando): desiste, para a tela não ficar "Carregando…" para sempre */
+  const ab=typeof AbortController==='function'?new AbortController():null, tm=ab&&setTimeout(()=>ab.abort(),12000);
+  return fetch(SUPA_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method:opt.body?'POST':'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined,signal:ab?ab.signal:undefined})
+    .finally(()=>clearTimeout(tm))
     /* erro: a mensagem do banco vai junto ("pin: ..." quando falta o PIN) */
     .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error('ranking '+r.status+' '+t); }); return r.text().then(t=>t?JSON.parse(t):null); });
 }
