@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2b4590">
+<meta name="theme-color" content="#fff1e2">
 <title>Duelo de Blocos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/worlds.css">
 <link rel="stylesheet" href="css/ui.css">
@@ -21,16 +21,17 @@
     <button type="button" class="bellbtn" id="avBell" hidden aria-label="Histórico de avisos">🔔<span id="avBellN" hidden></span></button>
     <div class="logo">
       <div class="logo-blocks" aria-hidden="true"><i class="bev" style="--c:#e5483f"></i><i class="bev" style="--c:#f3c22f"></i><i class="bev" style="--c:#4cbb47"></i><i class="bev" style="--c:#3e6fe0"></i></div>
-      <h1>Duelo de Blocos</h1>
-      <p class="muted">Encaixe as peças e feche linhas e colunas. Sozinho ou contra alguém.</p>
+      <h1>Duelo<br>de Blocos</h1>
     </div>
     <div class="card homebest" id="homeBest"></div>
     <div class="menu">
-      <button class="btn primary big" id="goSolo">Jogar sozinho<small>bata seus recordes</small></button>
-      <button class="btn big" id="goWith">Jogar com alguém<small>por código ou conectado</small></button>
-      <button class="btn big" id="goCamp">🧸 Campanha<small>mundos, fases e chefões</small></button>
-      <button class="btn" id="goDaily">Desafio do dia</button>
-      <div class="row"><button class="btn" id="goHistory">Histórico</button><button class="btn nvbtn" id="goNews">✨ Novidades<i id="goNewsDot" hidden></i></button><button class="btn" id="goSettings">Configurações</button></div>
+      <button class="btn mdaily" id="goDaily"><span class="ico" aria-hidden="true">📅</span><span class="dtx"><b>Desafio do dia</b><small id="goDailySub">mesmas peças para todo mundo · vale até meia-noite</small></span><span class="go" aria-hidden="true">›</span></button>
+      <button class="btn primary big msolo" id="goSolo"><span class="ico" aria-hidden="true">🎯</span>Jogar sozinho<small>bata seus recordes</small></button>
+      <div class="mgrid">
+        <button class="btn big mwith" id="goWith"><span class="ico" aria-hidden="true">👨‍👩‍👧</span>Jogar com alguém<small>por código ou conectado</small></button>
+        <button class="btn big mcamp" id="goCamp"><span class="ico" aria-hidden="true">🗺️</span>Campanha<small>mundos, fases e chefões</small></button>
+      </div>
+      <div class="row navbar"><button class="btn" id="goHistory"><span class="ico" aria-hidden="true">📊</span><small>Histórico</small></button><button class="btn nvbtn" id="goNews"><span class="ico" aria-hidden="true">✨</span><small>Novidades</small><i id="goNewsDot" hidden></i></button><button class="btn" id="goSettings"><span class="ico" aria-hidden="true">⚙️</span><small>Ajustes</small></button></div>
     </div>
     <p class="muted ver" id="verTxt"></p>
   </div>
@@ -181,7 +182,7 @@
       <p class="muted tcenter" id="liftTxt"></p>
     </div>
     <div class="card" data-notr><h2>🌐 Idioma · 言語</h2><div class="seg" id="langSeg"></div></div>
-    <div class="card"><h2>Tema do app</h2><div class="seg" id="themeSeg"></div></div>
+    <div class="card"><h2>Tema do app</h2><p class="muted" style="margin:-4px 0 10px">As cores do jogo todo. O tema das peças fica logo abaixo.</p><div class="thgrid" id="themeSeg"></div></div>
     <div class="card"><h2>Tema das peças</h2><div class="seg" id="skinSeg"></div>
       <div class="toggles" style="margin-top:12px;grid-template-columns:1fr"><button type="button" class="tog" id="tAuto"><span>Trocar ao limpar o tabuleiro</span><small>muda o tema das peças com uma animação</small></button></div>
     </div>
@@ -250,17 +251,19 @@
     <div class="ltab" data-tab="sala">
     <div class="card">
       <div class="optrow"><label for="nickIn">Seu apelido</label><input class="code nick" id="nickIn" maxlength="16" placeholder="Como você quer aparecer" autocomplete="off" spellcheck="false" enterkeyhint="done"></div>
-      <div class="players" id="lobbyPlayers"></div>
-      <div class="row"><button class="btn small" id="lobbyAdd">+ Adicionar jogador</button><button class="btn small" id="lobbySpec">📺 Conectar espectador</button></div>
-      <div class="row" id="lobbySimRow" hidden><button class="btn small" id="lobbySim">🤖 Aparelho de teste</button><button class="btn small ghost" id="lobbySimDel">Remover testes</button></div>
+      <div class="seats" id="lobbyPlayers"></div>
+      <button class="btn small" id="lobbyAdd" hidden>+ Adicionar jogador</button>
+      <button class="btn small" id="lobbySpec">📺 Conectar espectador (TV)</button>
+      <p class="muted tcenter" id="lobbySpecOn" hidden>📺 Espectador conectado</p>
+      <div class="simrow" id="lobbySimRow" hidden><span>Modo teste:</span><button type="button" id="lobbySim">🤖 + aparelho de teste</button><button type="button" id="lobbySimDel">remover testes</button></div>
     </div>
     <div class="card salamode"><div class="muted" style="font-size:12px">Estilo de jogo escolhido</div><h2 id="salaModeT"></h2><div id="salaModeHint"></div><div id="teamBox" hidden></div></div>
     <div class="card lchat"><h2>💬 Chat da sala</h2><p class="muted" style="font-size:12px;margin:0 0 6px">Só quem está na sala vê. Some quando a sala fecha.</p><div id="chatHome"></div></div>
     </div>
     <div class="ltab" data-tab="placar">
     <div class="card" id="roomCard" hidden><h2>Resultados da sala</h2><div id="roomList"></div><button class="btn small" id="roomShare" style="margin-top:8px">Compartilhar no WhatsApp</button></div>
-    <div class="card night"><div><div class="muted">Placar da noite (suas vitórias × derrotas)</div><b id="lobbyNight"></b></div></div>
-    <div class="card"><div class="muted">Desafio do dia</div><div id="lobbyDaily"></div></div>
+    <div class="card bignight"><div class="muted">🌙 Placar da noite</div><b id="lobbyNight"></b><small class="muted">suas vitórias × derrotas</small></div>
+    <div class="card"><h2>📅 Desafio do dia de hoje</h2><div id="lobbyDaily"></div></div>
     </div>
     <div class="ltab" data-tab="partida">
     <div class="card" id="lobbyCard">
@@ -306,6 +309,7 @@
     <div class="opps" id="opps" hidden></div>
     <div class="subline"><span id="subTxt"></span></div>
     <div class="status" id="status"></div>
+    <div class="bosshp wide" id="bossBar" hidden><i></i><b></b></div>
   </div>
   <div class="boardwrap"><div id="board"><div id="grid"><div id="sheen"><i></i></div><div id="fx"></div><div id="fog">Névoa</div></div></div></div>
   <div class="tray" id="tray">

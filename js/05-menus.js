@@ -133,7 +133,9 @@ function buildOpts(el,o,type,cfg={}){
   const seg=(key,label,labels,order)=>applies(type,key)?`<div class="optrow"><label>${label}</label><div class="seg" data-k="${key}">${(order||labels.map((_,i)=>i)).map(i=>`<button type="button" data-v="${i}" class="${o[key]===i?'sel':''}">${labels[i]}</button>`).join('')}</div></div>`:'';
   const local=type==='solo'||type==='duel'; if(local&&o.time>3&&o.time!==6) o.time=1; if(o.time===6&&!RAMP_TYPES.includes(type)) o.time=3;
   const togs=(keys,label)=>{ const ks=keys.filter(k=>applies(type,k)); if(!ks.length) return '';
-    return `<div class="optrow"><label>${label}</label><div class="toggles">${ks.map(k=>`<button type="button" class="tog ${o[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div></div>`; };
+    /* grupo que abre e fecha; no título, quantos estão ligados (abre sozinho se tiver algum) */
+    const on=ks.filter(k=>o[k]).length;
+    return `<details class="optrow ogrp"${on?' open':''}><summary>${label}<span class="ocnt">${ogrpTxt(on)}</span></summary><div class="toggles">${ks.map(k=>`<button type="button" class="tog ${o[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div></details>`; };
   const pane=(k,h)=>h?`<div class="opane" data-pane="${k}">${h}</div>`:'';
   const rampOk=applies(type,'time')&&RAMP_TYPES.includes(type)&&type!=='duel'; /* no duelo por código as etapas não cabem no código: fica o padrão */
   el.innerHTML=pane('regras',seg('time','Tempo',TIME_L,(local?TIME_ORDER_LOCAL:TIME_ORDER_NET).filter(t=>t!==6||RAMP_TYPES.includes(type)))+(rampOk?'<div class="optrow rampbox"></div>':'')+seg('play','Modo de jogo',PLAYS)+seg('goal','Meta de pontos',GOAL_L)+seg('series','Série',SERIES_L))
@@ -142,8 +144,10 @@ function buildOpts(el,o,type,cfg={}){
   if(cfg.ro) return; /* só leitura: quem entrou na sala vê, mas não muda */
   const ch=()=>{ rampShow(); if(cfg.onChange) cfg.onChange(); };
   el.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{ const k=b.parentElement.dataset.k; o[k]=+b.dataset.v; b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('sel',x===b)); ch(); }));
-  el.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.t; o[k]=!o[k]; b.classList.toggle('on',o[k]); ch(); }));
+  el.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.t; o[k]=!o[k]; b.classList.toggle('on',o[k]);
+    const g=b.closest('.ogrp'); if(g) g.querySelector('.ocnt').textContent=ogrpTxt(g.querySelectorAll('.tog.on').length); ch(); }));
 }
+function ogrpTxt(on){ return on?`✓ ${on} ${on>1?'ligados':'ligado'}`:'nenhum ligado'; }
 function summary(o,type){
   const a=[TIMES[o.time]?TIME_L[o.time]:o.time===6?TIME_L[6]:'Sem limite de tempo', PLAYS[o.play]];
   if(o.goal&&applies(type,'goal')) a.push('Meta '+GOAL_L[o.goal]);
@@ -220,7 +224,8 @@ function skinPreviews(){
 }
 function renderSettings(){
   renderLift(); renderProfile();
-  $('#themeSeg').innerHTML=Object.keys(THEMES).map(k=>`<button type="button" data-k="${k}" class="${SET.theme===k?'sel':''}">${THEMES[k]}</button>`).join('');
+  /* cada tema aparece como uma miniatura do menu, já com as cores dele */
+  $('#themeSeg').innerHTML=Object.keys(THEMES).map(k=>`<button type="button" data-k="${k}" class="thopt ${SET.theme===k?'sel':''}"><span class="tpv" data-t="${k}" aria-hidden="true"><b>Duelo de Blocos</b><i class="t4"></i><i class="t1"></i><span class="tg"><i class="t2"></i><i class="t3"></i></span><span class="tb">${[0,2,3,5].map(c=>`<i style="background:${PALETTE[c]}"></i>`).join('')}</span></span><span class="thn">${SET.theme===k?'✓ ':''}${THEMES[k]}</span></button>`).join('');
   $('#skinSeg').innerHTML=SKINS_ALL.map(k=>{ const lock=!hasSkin(k), sel=baseSkin(SET.skin)===k, gold=sel&&isGold(SET.skin), has=hasGold(k), rw=SKIN_REW.indexOf(k);
     const sub=lock?esc(SKIN_LOCK[k]||'em breve'):has?(sel?(gold?'✨ dourado · toque para o normal':'toque de novo: ✨ dourado'):'✨ tem versão dourada'):rw>=0?`3⭐ em todo o Mundo ${rw+1}: versão dourada`:'';
     return `<button type="button" data-k="${k}" class="skinopt ${sel?'sel':''}${lock?' locked':''}${gold?' gold':''}"><span class="skp skin-${gold?k+'Gold':k}">${[0,3,5,6].map(c=>`<i data-col="${c}" style="--c:${PALETTE[c]}"><b class="blk bev"></b></i>`).join('')}</span><span>${lock?'🔒 ':''}${SKIN_L[k]}${gold?' dourado':''}</span>${sub?`<small>${sub}</small>`:''}</button>`; }).join('');

@@ -102,7 +102,7 @@
 #app.shake{animation:shake .45s}
 #fog{position:absolute;z-index:4;pointer-events:none;background:linear-gradient(180deg,rgba(200,210,235,.96),rgba(160,172,205,.96));border-radius:8px;display:none;align-items:center;justify-content:center;color:#22305f;font-weight:600}
 #fog.show{display:flex;animation:screenIn .3s}
-.tray{display:flex;width:calc(var(--CS)*(var(--N,8) + .42));height:calc(var(--CS)*var(--trayH,2.75));margin:calc(var(--CS)*.3) 0 0;position:relative}
+.tray{display:flex;width:calc(var(--CS)*(var(--N,8) + .42));height:calc(var(--CS)*var(--trayH,2.75));margin:calc(var(--CS)*.3) 0 0;position:relative;background:var(--trayBg);box-shadow:var(--trayFx);border-radius:22px}
 .tray.frozen::after{content:"Congelado";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(190,225,255,.55);border-radius:12px;color:#163066;font-weight:700;font-size:18px}
 .slot{flex:1;display:flex;align-items:center;justify-content:center;position:relative;touch-action:none;border-radius:12px}
 .slot.chosen{background:var(--chip);box-shadow:inset 0 0 0 2px var(--text)}

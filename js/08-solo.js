@@ -54,7 +54,12 @@ function renderHome(){
   const st=soloStats(), el=$('#homeBest'); if(!el) return;
   el.innerHTML=st.games?`<div><b>${fmtN(st.bestScore)}</b><span>seu recorde</span></div><div><b>${st.bestCombo?'x'+st.bestCombo:'0'}</b><span>maior combo</span></div><div><b>${st.ach.length}/${ACH.length}</b><span>conquistas</span></div>`
     :`<div class="muted" style="padding:2px 4px">Jogue sozinho para começar a juntar recordes e conquistas.</div>`;
+  const dl=store.get('ddb_daily',{}), hj=dl[diaBR()+'|R'], sq=dailyStreak(), sub=$('#goDailySub');
+  if(sub) sub.textContent=(hj?`✓ jogado hoje: ${fmtN(hj.score)} pts · veja o ranking`:'mesmas peças para todo mundo · vale até meia-noite')+(sq>1?` · 🔥 ${sq} dias seguidos`:'');
 }
+/* dias seguidos jogando o Desafio do dia (conta até hoje, ou até ontem se ainda não jogou hoje) */
+function dailyStreak(){ const dl=store.get('ddb_daily',{}), back=k=>{ const [y,m,dd]=k.split('-').map(Number); return todayKey(new Date(y,m-1,dd-1)); };
+  let d=diaBR(), n=0; if(!dl[d+'|R']) d=back(d); while(dl[d+'|R']){ n++; d=back(d); } return n; }
 $('#goSolo').addEventListener('click',openSolo);
 $('#soloStart').addEventListener('click',()=>{ store.set('ddb_soloOpts',soloOpts); if(soloOpts.npc) startNpc(soloOpts); else startSolo(soloOpts); });
 $('#goWith').addEventListener('click',()=>{ renderNight(); show('with'); });
@@ -82,19 +87,22 @@ $('#codeIn').addEventListener('input',()=>$('#joinErr').textContent='');
 function showReady(){
   $('#readyResult').innerHTML=''; $('#btnStart').hidden=false;
   if(setup.type==='daily'){
-    $('#readyTitle').textContent='Desafio do dia'; $('#readyCode').textContent=dailyCode(setup.key);
-    $('#readyChips').innerHTML=['Clássico','⏱ tempo por peça que aperta'].map(s=>`<span>${s}</span>`).join('');
-    $('#readySeries').textContent='';
+    /* no lugar do código, a data por extenso; as regras do tempo viram etiquetas */
+    const [dy,dm,dd]=setup.key.split('|')[0].split('-').map(Number), sq=dailyStreak();
+    $('#ready').classList.add('dailyr');
+    $('#readyTitle').textContent='📅 Desafio do dia'; $('#readyCode').textContent=`${['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][new Date(dy,dm-1,dd).getDay()]}, ${dd} de ${RK_MES[dm-1]}`;
+    $('#readyChips').innerHTML=['Clássico',`⏱ 0–${RAMP[0][0]/60} min livre`,...RAMP.map(([t,x])=>`${t/60} min: ${x} s/peça`)].map(s=>`<span>${s}</span>`).join('');
+    $('#readySeries').innerHTML=sq?`<span class="streak">🔥 ${sq} ${sq>1?'dias seguidos':'dia'}</span>`:'';
     const done=store.get('ddb_daily',{})[setup.key];
     if(done){
       $('#readyHint').textContent='Você já jogou o desafio de hoje. Volte amanhã para um novo.';
       $('#readyResult').innerHTML=`<div class="card"><div class="endscore">${fmtN(done.score)}</div><p class="muted">${done.lines} linhas · combo x${done.combo}</p><button class="btn" id="dailyShare">Compartilhar resultado</button></div>`;
       $('#btnStart').hidden=true;
       $('#dailyShare').addEventListener('click',()=>{ let t=`Duelo de Blocos · Desafio do dia ${dailyCode(setup.key)}\n${fmtN(done.score)} pontos · ${done.lines} linhas · combo x${done.combo}\nConsegue bater?`; const l=gameLink(); if(l) t+='\n'+l; shareText(t); });
-    } else $('#readyHint').textContent=`Mesmas peças para todo mundo hoje, uma tentativa por dia. Os primeiros ${RAMP[0][0]/60} minutos são livres; depois você tem ${RAMP.map(([t,x])=>x+' s por peça'+(t>RAMP[0][0]?` (a partir de ${t/60} min)`:'')).join(', ')}.`;
+    } else $('#readyHint').textContent='Mesmas peças para todo mundo, uma tentativa por dia. Depois do tempo livre, cada peça tem um tempo que vai apertando.';
     $('#readyResult').insertAdjacentHTML('beforeend','<div id="rkDaily"></div>'); rkDailyBox('#rkDaily',setup.key);
   } else {
-    const n=SERIES_N[setup.opts.series], need=Math.ceil(n/2);
+    $('#ready').classList.remove('dailyr'); const n=SERIES_N[setup.opts.series], need=Math.ceil(n/2);
     if(n>1&&(setup.ser.me>=need||setup.ser.other>=need)) setup.ser={me:0,other:0};
     $('#readyTitle').textContent='Rodada '+setup.round; $('#readyCode').textContent=setup.code;
     $('#readyChips').innerHTML=summary(setup.opts,'duel').map(s=>`<span>${s}</span>`).join('');

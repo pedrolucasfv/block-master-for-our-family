@@ -278,7 +278,9 @@ function campHook(cfg){
     const tb=$('#timebar'); tb.classList.remove('hp');
     if(def.goal==='boss') bossHP(cp.hp,cp.hpMax);
     if(cp.tl){ tb.style.visibility='visible'; } else { tb.style.visibility='hidden'; if(!hk.noRegen) $('#timer').textContent=''; }
-    $$('#actions [data-help]').forEach(b=>{ const k=b.dataset.help; b.disabled=!cp.helps.includes(k)||cp.used.includes(k)||(k==='swap'&&hk.noRegen)||!SH.playing; });
+    $$('#actions [data-help]').forEach(b=>{ const k=b.dataset.help, c=b.querySelector('.hc'); b.disabled=!cp.helps.includes(k)||cp.used.includes(k)||(k==='swap'&&hk.noRegen)||!SH.playing;
+      /* no cantinho: 🔒 se ainda não ganhou essa ajuda, senão quantos usos sobram (1 por fase) */
+      if(c) c.textContent=!cp.helps.includes(k)?'🔒':cp.used.includes(k)?'0':'1'; });
   };
   hk.ev=(ev,mine)=>{
     if(ev.rain){ setTimeout(()=>BC.drop(ev.rain),0); SFX.alert(); }
@@ -298,7 +300,7 @@ function campHook(cfg){
     else if(ev.rage){ setTimeout(()=>{ if(!SH||SH.over) return; bossShow('rage',{rage:true}); setTimeout(()=>bossSay(BS.say.rage,1500),250); },ev.dmg?650:0); }
   };
   hk.actions=()=>{
-    setActions(CHELPS.map(h=>`<button class="chip" data-help="${h.k}" title="${h.d}">${h.i} ${h.n}</button>`).join('')+(cfg.solo?'':emoBtns())); bindEmos();
+    setActions(`<div class="helps">${CHELPS.map(h=>`<button class="hbtn" data-help="${h.k}" title="${h.d}" aria-label="${h.n}"><span class="hi">${h.i}</span><small>${h.n}</small><b class="hc"></b></button>`).join('')}</div>`+(cfg.solo?'':emoBtns())); bindEmos();
     $$('#actions [data-help]').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.help;
       if(k==='row'){ SH.tapMode=SH.tapMode==='row'?null:'row'; if(SH.tapMode) toast('💥 Toque numa casa do tabuleiro: a linha inteira some'); renderShared(); return; }
       act({k:'help',h:k}); if(k==='martelo') toast('🔨 Toque num bloco para quebrar'); }));
@@ -461,8 +463,10 @@ function campIntro(w,ph){
   const W=CWD(w), def=W.phases[ph-1];
   if(def.goal==='boss') bossPrep(W.boss);
   const sc=campScale(def,1), st=campLoad('solo'), tx=campStarTxt(def,sc), s=st.stars[ck(w,ph)]||0;
-  openEnd(`<h2>${def.icon} Fase ${ph} · ${esc(def.name)}</h2><p class="reason" style="margin:8px 0 12px">${esc(campDesc(def,sc,w))}</p>
-    <div class="kv"><span>★</span><b>completar</b></div><div class="kv"><span>★★</span><b>${tx[0]}</b></div><div class="kv"><span>★★★</span><b>${tx[1]}</b></div>
+  /* no topo, o chefão grande (ou o ícone da fase); as estrelas em três cartões, acesos os que você já tem */
+  const top=def.goal==='boss'?`<div class="introboss">${BOSSES[W.boss].svg}</div>`:`<div class="introic">${def.icon}</div>`;
+  openEnd(`${top}<small class="muted">Fase ${ph}</small><h2>${esc(def.name)}</h2><p class="reason" style="margin:6px 0 12px">${esc(campDesc(def,sc,w))}</p>
+    <div class="starsc">${['completar',tx[0],tx[1]].map((t,i)=>`<div class="${i<s?'on':''}"><span>${'★'.repeat(i+1)}</span><small>${t}</small></div>`).join('')}</div>
     <p class="muted" style="margin-top:8px">${s?`Seu melhor: ${'★'.repeat(s)}`:'Ainda não concluída'} · usar ajuda limita a ★★</p><div id="rkPhase"></div>`,
     [{t:'Começar',cls:'primary',on:()=>{ closeEnd(); startCampSolo(w,ph); }},{t:'Voltar',cls:'ghost',on:closeEnd}]);
   rkPhaseBox(w,ph);

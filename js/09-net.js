@@ -366,10 +366,13 @@ function renderLobby(){
   renderNight();
   const host=NET.role==='A', ids=NET.players, n=ids.length, L=NET.lobby;
   $('#lobbyConn').textContent=(host?'Você criou a sala':'Você entrou na sala')+` · ${n} jogador${n>1?'es':''}`;
-  $('#lobbyPlayers').innerHTML=ids.map(id=>`<span>${avatarHTML(id,20)}${id==='A'?'👑 ':''}${esc(nm(id,false))}${id===NET.role?' (você)':''}</span>`).join('');
-  $('#lobbyAdd').hidden=!host||n>=MAXP; $('#lobbyAdd').classList.toggle('primary',n<2); $('#lobbySpec').hidden=!host||!!NET.peers.S;
+  /* cadeiras da sala: quem está (foto grande, 👑 em quem criou) e lugares vazios até 6; quem criou toca no vazio para convidar */
+  $('#lobbyPlayers').innerHTML=ids.map(id=>`<div class="seat${id===NET.role?' me':''}">${avatarHTML(id,48)}${id==='A'?'<i class="crown">👑</i>':''}<b>${esc(nm(id,false))}</b><small>${id===NET.role?'você':id==='A'?'criou a sala':'na sala'}</small></div>`).join('')
+    +Array.from({length:Math.max(0,MAXP-n)},(_,i)=>host&&i===0?'<button type="button" class="seat empty add" data-add><span>+</span><b>Convidar</b><small>mais alguém</small></button>':'<div class="seat empty"><span></span></div>').join('');
+  $$('#lobbyPlayers [data-add]').forEach(b=>b.addEventListener('click',()=>$('#lobbyAdd').click()));
+  $('#lobbySpec').hidden=!host||!!NET.peers.S;
   $('#lobbySimRow').hidden=!host||!devOn(); $('#lobbySim').hidden=n>=MAXP; $('#lobbySimDel').hidden=!SIMS.length;
-  if(NET.specOn||NET.peers.S) $('#lobbyPlayers').insertAdjacentHTML('beforeend','<span>📺 Espectador</span>');
+  $('#lobbySpecOn').hidden=!(NET.specOn||NET.peers.S);
   const tk=diaBR(), fmtD=v=>v!=null?fmtN(v):'–';
   $('#lobbyDaily').innerHTML=ids.map(id=>{ const d=id===NET.role?myDaily():(NET.daily[id]&&NET.daily[id].key===tk?NET.daily[id]:{}); return `<div class="kv"><span>${esc(nm(id))}</span><b>${fmtD(d.t)}</b></div>`; }).join('')+'<p class="muted">Pontos no Desafio do dia de hoje. Traço quer dizer que ainda não jogou.</p>';
   $('#lobbyCard').classList.toggle('ro',!host);
@@ -380,7 +383,7 @@ function renderLobby(){
   const [lo,hi]=LIMITS[L.type]; let warn=n<Math.max(2,lo)?'Chame mais alguém: precisa de pelo menos 2 jogadores.':n>hi?`${TYPES[L.type]} aceita até ${hi} jogadores.`:'';
   if(!warn&&isTeamType(L.type)){ const T=teamsFinal(), c={az:0,la:0}; Object.values(T).forEach(k=>c[k]++); if(!c.az||!c.la) warn='Cada time precisa de pelo menos 1 jogador.'; else if(L.type==='tsplit'&&(c.az>3||c.la>3)) warn='No tabuleiro dividido, cada time pode ter até 3 jogadores.'; }
   renderTeamBox();
-  $('#typeHint').innerHTML=`<span class="tbig">${modePic(L.type,n,tc)}</span>`+esc(TYPE_HINT[L.type])+(warn?`<br><b class="err">${esc(warn)}</b>`:'');
+  $('#typeHint').innerHTML=`<b>${esc(TYPES[L.type])}:</b> `+esc(TYPE_HINT[L.type])+(warn?`<br><b class="err">${esc(warn)}</b>`:'');
   /* aba Sala: o estilo que quem criou escolheu, com a explicação e (nos times) a escolha do time */
   $('#salaModeT').textContent=TYPES[L.type]; $('#salaModeHint').innerHTML=`<span class="tbig">${modePic(L.type,n,tc)}</span><p class="muted">${esc(TYPE_HINT[L.type])}</p>`;
   $('#lobbyStart').disabled=!!warn; $('#lobbyWarn').hidden=!warn; $('#lobbyWarn').textContent=warn||'';
@@ -397,15 +400,16 @@ function renderLobby(){
 }
 /* abas da sala (Sala, Partida, Placar) e sub-abas da partida (Estilo, Regras/Fase, Modificadores — as opções "Conectados" ficam dentro de Modificadores) */
 const TYPE_GROUPS=[['Individual',['live','versus']],['Em times',['tlive','tsplit']],['Cooperação',['coop','halves','camp']]];
-const OPT_TABS=[['estilo','Estilo de jogo'],['fase','Fase'],['regras','Regras'],['mods','Modificadores']];
+/* Regras e Modificadores ficam juntos numa aba só (os modificadores em grupos que abrem e fecham) */
+const OPT_TABS=[['estilo','Estilo de jogo'],['fase','Fase'],['regras','Regras e modificadores']];
 let LTAB='partida', OTAB='estilo';
 function lobbyTabs(){
   $$('#lobbyTabs button').forEach(b=>b.classList.toggle('sel',b.dataset.tab===LTAB));
   $$('#lobby .ltab').forEach(d=>d.hidden=d.dataset.tab!==LTAB);
-  const panes=[...$$('#lobbyCard .opane')].filter(p=>p.innerHTML.trim()), have=new Set(panes.map(p=>p.dataset.pane));
+  const pk=p=>p.dataset.pane==='mods'?'regras':p.dataset.pane, panes=[...$$('#lobbyCard .opane')].filter(p=>p.innerHTML.trim()), have=new Set(panes.map(pk));
   if(!have.has(OTAB)) OTAB='estilo';
   $('#optTabs').innerHTML=OPT_TABS.filter(([k])=>have.has(k)).map(([k,n])=>`<button type="button" data-p="${k}" class="${k===OTAB?'sel':''}">${n}</button>`).join('');
-  $$('#lobbyCard .opane').forEach(p=>p.hidden=p.dataset.pane!==OTAB);
+  $$('#lobbyCard .opane').forEach(p=>p.hidden=pk(p)!==OTAB);
   $$('#optTabs button').forEach(b=>b.addEventListener('click',()=>{ OTAB=b.dataset.p; lobbyTabs(); }));
   chatNaAba();
 }

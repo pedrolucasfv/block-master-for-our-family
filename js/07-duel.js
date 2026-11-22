@@ -24,7 +24,7 @@ function showScore(v){ cancelAnimationFrame(scoreRaf); const el=$('#score'), fro
 function resetScore(v=0){ cancelAnimationFrame(scoreRaf); shownScore=v; const el=$('#score'); el.textContent=fmtN(v); el.style.setProperty('--sl',el.textContent.length); }
 function setStatus(t,warn){ const s=$('#status'), m=$('#mission');
   /* na campanha o andamento (linhas, peças, o que falta…) vai no cartão ao lado dos pontos, uma informação por linha */
-  if(SH&&SH.bossUI){ const st=$('#subTxt'), html=`<span class="bgoal${warn?' warn':''}">${esc(String(t||'').split(' · ').filter(Boolean).join(' · '))}</span><small class="bpause">⏸ Regras do chefão: toque na pausa</small>`;
+  if(SH&&SH.bossUI){ const st=$('#subTxt'), html=`<span class="bgoal${warn?' warn':''}">${esc(String(t||'').split(' · ').filter(Boolean).join(' · '))}</span><small class="bpause">⏸ Regras do chefão na pausa</small>`;
     if(st._h!==html){ st._h=html; st.innerHTML=html; } s.textContent=''; return; }
   if(SH&&SH.type==='camp'&&m&&!m.hidden){ const parts=String(t||'').split(' · ').filter(Boolean), html=parts.map((p,i)=>`<div class="${i?'mline':'mbig'}">${esc(p)}</div>`).join('');
     if(m._h!==html){ m._h=html; m.innerHTML=html; } m.classList.toggle('warn',!!warn); s.textContent=''; return; }

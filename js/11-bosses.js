@@ -258,25 +258,27 @@ const BOSS_URL={};
 function bossBlockUrl(){ const B=BOSS(); if(BOSS_URL[BOSS_ID]!=null) return BOSS_URL[BOSS_ID]; try{ BOSS_URL[BOSS_ID]=drawBlock(B.min,B.minC,null,96,1,false).toDataURL(); }catch(e){ BOSS_URL[BOSS_ID]=''; } return BOSS_URL[BOSS_ID]; }
 /* o desenho guardado é de outro chefão, ou ainda é o SVG e as peças já ficaram prontas? */
 function bossStale(el){ const b=el&&el.querySelector('.bossbear'); return !b||b.dataset.b!==BOSS_ID||(!!BOSS_LAY[BOSS_ID])!==b.classList.contains('lay'); }
-function bossHide(){ BOSS_Q=null; if(BELT){ BELT=null; bDirty=true; bReq(); } $$('#fxl .bosstrip,#fxl .flyb,#fxl .bossdock,#fxl .bossbubble,#fxl .bossdmg').forEach(e=>e.remove()); $('#game').classList.remove('bossmode'); }
+function bossHide(){ BOSS_Q=null; if(BELT){ BELT=null; bDirty=true; bReq(); } $$('#fxl .bosstrip,#fxl .flyb,#fxl .bossdock,#fxl .bossbubble,#fxl .bossdmg').forEach(e=>e.remove()); $('#game').classList.remove('bossmode'); $('#bossBar').hidden=true; }
 /* Ursão parado ao lado dos pontos, da descrição e da vida */
 /* posição do cantinho: medida uma vez e de novo só quando o layout muda */
 let BOSS_Q=null;
 function bossQ(){ return BOSS_Q||(BOSS_Q=bossDockRect()); }
-function bossDockRect(){ const r=$('#gInfo').getBoundingClientRect(), tb=$('#timebar').getBoundingClientRect(), top=tb.bottom+6, sz=Math.max(56,Math.min(132,(r.bottom-top-22)/1.18)); return {left:r.right-sz-6,top,w:sz}; }
+/* a vida do chefão é a barra larga embaixo do cartão (#bossBar): o chefão fica entre o relógio e ela */
+function bossDockRect(){ const r=$('#gInfo').getBoundingClientRect(), tb=$('#timebar').getBoundingClientRect(), bb=$('#bossBar'), bot=bb.hidden?r.bottom-18:bb.getBoundingClientRect().top, top=tb.bottom+6, sz=Math.max(56,Math.min(132,(bot-top-4)/1.24)); return {left:r.right-sz-10,top,w:sz}; }
 function bossDock(angry){
-  if(!$('#game').classList.contains('bossmode')){ $('#game').classList.add('bossmode'); layout(); BOSS_Q=null; }
+  if(!$('#game').classList.contains('bossmode')){ $('#game').classList.add('bossmode'); $('#bossBar').hidden=false; layout(); BOSS_Q=null; }
   let d=$('#fxl .bossdock'); if(d&&bossStale(d)){ const hp=d.querySelector('.bosshp').outerHTML; d.innerHTML=bearHTML('idle')+hp; }
   if(!d){ d=document.createElement('div'); d.className='bossdock'; d.innerHTML=bearHTML('idle')+`<div class="bosshp"><i></i><b></b></div>`; $('#fxl').appendChild(d); BOSS_Q=null; }
   const q=bossQ(); if(d._q!==q){ d._q=q; d.style.left=q.left+'px'; d.style.top=q.top+'px'; d.style.width=q.w+'px'; $('#game').style.setProperty('--bossW',(q.w+14)+'px'); }
   d.querySelector('.bossbear').classList.toggle('angry',!!angry); return d;
 }
-function bossHP(hp,max){ const d=$('#fxl .bossdock'); if(!d) return; const r=Math.max(0,hp)/max; d.querySelector('.bosshp i').style.width=(r*100)+'%'; d.querySelector('.bosshp b').textContent=`❤️ ${Math.max(0,hp)}/${max}`; d.querySelector('.bosshp').classList.toggle('low',r<=.5); }
+function bossHP(hp,max){ const d=$('#fxl .bossdock'); if(!d) return; const r=Math.max(0,hp)/max;
+  [d.querySelector('.bosshp'),$('#bossBar')].forEach(h=>{ h.querySelector('i').style.width=(r*100)+'%'; h.querySelector('b').textContent=`❤️ ${BOSS().name}: ${Math.max(0,hp)}/${max}`; h.classList.toggle('low',r<=.5); }); }
 /* Ursão levou dano: encolhe, fica vermelho, fecha os olhos; número sobe ao lado dele */
 function bossHurt(dmg){
   const d=$('#fxl .bossdock'); if(!d||d.style.visibility==='hidden') return; const b=d.querySelector('.bossbear'), q=bossQ();
   b.classList.remove('hurt'); void b.offsetWidth; b.classList.add('hurt'); setTimeout(()=>b.classList.remove('hurt'),700);
-  const hp=d.querySelector('.bosshp'); hp.classList.remove('hit'); void hp.offsetWidth; hp.classList.add('hit');
+  const hp=$('#bossBar'); hp.classList.remove('hit'); void hp.offsetWidth; hp.classList.add('hit');
   const f=document.createElement('div'); f.className='bossdmg'; f.textContent='-'+dmg; f.style.left=(q.left+q.w/2)+'px'; f.style.top=(q.top-q.w*.18)+'px'; $('#fxl').appendChild(f); setTimeout(()=>f.remove(),1100);
   for(let k=0;k<6;k++){ const s=document.createElement('div'); s.className='bossspark'; s.textContent=['✦','✧','★'][k%3]; s.style.left=(q.left+q.w/2)+'px'; s.style.top=(q.top+q.w*.45)+'px'; s.style.setProperty('--dx',(Math.cos(k*1.05)*q.w*.7)+'px'); s.style.setProperty('--dy',(Math.sin(k*1.05)*q.w*.6-q.w*.2)+'px'); $('#fxl').appendChild(s); setTimeout(()=>s.remove(),700); }
   SFX.oof(); buzz(20);

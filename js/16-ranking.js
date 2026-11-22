@@ -60,28 +60,58 @@ function rkDailyEnd(d){ if(!rkOn()||!myNick()) return; const k=rkDayOf(d.cfg.key
 const rkDayAdd=(dia,n)=>{ const [y,m,dd]=dia.split('-').map(Number); return todayKey(new Date(y,m-1,dd+n)); };
 const rkMonth=(dia,n)=>{ const [y,m]=dia.split('-').map(Number); return todayKey(new Date(y,m-1+n,1)); };
 const RK_MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-/* ranking do Desafio do dia, na caixa sel: aba "Dia" (pontos, com setas para os dias anteriores) e aba "Vitórias do mês" (quantas vezes ficou em 1º) */
+/* ranking do Desafio do dia, na caixa sel: um calendário do mês (toque num dia para ver o ranking dele; ponto = dias em que você jogou, 🥇 = dias em que você ficou em 1º)
+   e duas abas: "Dia" (pódio e lista do dia escolhido, com a sua posição mesmo fora do top 10) e "Vitórias do mês" (quantas vezes cada um ficou em 1º) */
+const RK_SEM=['D','S','T','Q','Q','S','S'];
 function rkDailyBox(sel,key){
   const box=$(sel); if(!box) return; if(!rkOn()){ box.hidden=true; return; }
-  const k=rkDayOf(key), hoje=diaBR(), st={modo:'dia',dia:k.dia,mes:rkMonth(k.dia,0)};
-  box.innerHTML=`<p class="muted" style="margin-top:12px">🏆 Ranking do Desafio do dia</p><div class="tabs rktabs"><button type="button" data-m="dia" class="sel">📅 Dia</button><button type="button" data-m="mes">🥇 Vitórias do mês</button></div>
-    <div class="rknav"><button type="button" class="chip" data-d="-1" aria-label="Anterior">‹</button><b></b><button type="button" class="chip" data-d="1" aria-label="Próximo">›</button></div><div class="rklist"></div>`+rkNoNick();
-  const list=box.querySelector('.rklist'), lab=box.querySelector('.rknav b'), next=box.querySelector('[data-d="1"]');
+  const k=rkDayOf(key), hoje=diaBR(), st={modo:'dia',dia:k.dia,mes:rkMonth(k.dia,0)}, venc={}, me=myNick().toLowerCase();
+  box.innerHTML=`<div class="tabs rktabs"><button type="button" data-m="dia" class="sel">📅 Ranking do dia</button><button type="button" data-m="mes">🥇 Vitórias do mês</button></div>
+    <div class="rkcal"><div class="rkmes"><button type="button" class="chip" data-d="-1" aria-label="Mês anterior">‹</button><b></b><button type="button" class="chip" data-d="1" aria-label="Próximo mês">›</button></div><div class="rkgrid"></div></div>
+    <p class="rkdia"></p><div class="rklist"></div>`+rkNoNick();
+  const list=box.querySelector('.rklist'), lab=box.querySelector('.rkmes b'), next=box.querySelector('[data-d="1"]'), grid=box.querySelector('.rkgrid'), dl=store.get('ddb_daily',{});
+  const nomeDia=d=>{ const [y,m,dd]=d.split('-').map(Number); return d===hoje?'Hoje':d===rkDayAdd(hoje,-1)?'Ontem':`${dd} de ${RK_MES[m-1]}`; };
+  /* desenha o mês: dias futuros apagados, hoje com contorno, o escolhido preenchido */
+  const cal=()=>{ const [y,m]=st.mes.split('-').map(Number), first=new Date(y,m-1,1).getDay(), n=new Date(y,m,0).getDate();
+    lab.textContent=`${RK_MES[m-1][0].toUpperCase()+RK_MES[m-1].slice(1)} de ${y}`; next.disabled=st.mes>=rkMonth(hoje,0);
+    let h=RK_SEM.map(x=>`<span class="wd">${x}</span>`).join('')+'<span></span>'.repeat(first);
+    for(let d=1;d<=n;d++){ const ds=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`, fut=ds>hoje, won=venc[ds]===me&&ds<hoje&&me;
+      h+=`<button type="button" data-day="${ds}" class="${ds===hoje?'today':''}${st.modo==='dia'&&ds===st.dia?' sel':''}${dl[ds+'|R']?' played':''}"${fut?' disabled':''}>${d}${won?'<i>🥇</i>':''}</button>`; }
+    grid.innerHTML=h;
+    grid.querySelectorAll('[data-day]').forEach(b=>b.addEventListener('click',()=>{ st.dia=b.dataset.day; st.modo='dia'; tabs(); load(); }));
+  };
+  /* quem ficou em 1º em cada dia do mês (para a medalha no calendário) */
+  const vencMes=()=>{ const [y,m]=st.mes.split('-').map(Number), fim=`${st.mes.slice(0,8)}${String(new Date(y,m,0).getDate()).padStart(2,'0')}`;
+    if(venc['_'+st.mes]) return; venc['_'+st.mes]=1;
+    rkFetch(`diario?dia=gte.${st.mes}&dia=lte.${fim}&var=eq.${k.v}&select=dia,pontos,jogadores(nome)&order=pontos.desc,quando.asc&limit=2000`)
+      .then(r=>{ (r||[]).forEach(x=>{ if(!(x.dia in venc)) venc[x.dia]=((x.jogadores&&x.jogadores.nome)||'').toLowerCase(); }); if(box.isConnected) cal(); }).catch(()=>{}); };
+  const tabs=()=>box.querySelectorAll('.rktabs button').forEach(x=>x.classList.toggle('sel',x.dataset.m===st.modo));
   const load=()=>{
-    const dia=st.modo==='dia'; let [y,m,dd]=(dia?st.dia:st.mes).split('-').map(Number);
-    lab.textContent=dia?(st.dia===hoje?'Hoje':st.dia===rkDayAdd(hoje,-1)?'Ontem':`${dd}/${String(m).padStart(2,'0')}`):`${RK_MES[m-1][0].toUpperCase()+RK_MES[m-1].slice(1)} de ${y}`;
-    next.disabled=dia?st.dia>=hoje:st.mes>=rkMonth(hoje,0);
+    const dia=st.modo==='dia'; cal(); vencMes();
+    box.querySelector('.rkdia').textContent=dia?`🏆 ${nomeDia(st.dia)}`:`🥇 Quem mais ficou em 1º em ${RK_MES[+st.mes.split('-')[1]-1]}`;
     list.innerHTML='<p class="muted">Carregando…</p>';
     const q=dia?rkFetch(`diario?dia=eq.${st.dia}&var=eq.${k.v}&select=pontos,linhas,jogadores(nome)&order=pontos.desc,quando.asc&limit=10`).then(r=>r.map(x=>({nome:(x.jogadores&&x.jogadores.nome)||'?',txt:`${fmtN(x.pontos)} pts`})))
       :rkFetch('rpc/vitorias_mes',{body:{p_mes:st.mes,p_var:k.v}}).then(r=>(r||[]).map(x=>({nome:x.nome,txt:`${x.vitorias} ${x.vitorias==1?'vitória':'vitórias'}`})));
-    q.then(rows=>{ if(!box.isConnected) return;
-      list.innerHTML=rows.length?rkRows(rows,r=>r.txt)+(dia?'':'<p class="muted" style="font-size:12px">Conta quem terminou o dia em 1º. O dia de hoje entra quando acabar.</p>')
-        :`<p class="muted">${dia?(st.dia===hoje?'Ninguém jogou ainda hoje. Seja o primeiro!':'Ninguém jogou nesse dia.'):'Ninguém venceu um dia neste mês ainda.'}</p>`; })
-     .catch(()=>{ if(box.isConnected) list.innerHTML='<p class="muted">Ranking indisponível sem internet.</p>'; });
+    const qd=st.dia, qm=st.modo;
+    q.then(rows=>{ if(!box.isConnected||qd!==st.dia||qm!==st.modo) return;
+      if(!rows.length){ list.innerHTML=`<p class="muted">${dia?(st.dia===hoje?'Ninguém jogou ainda hoje. Seja o primeiro!':'Ninguém jogou nesse dia.'):'Ninguém venceu um dia neste mês ainda.'}</p>`; return; }
+      list.innerHTML=rkPodium(rows,r=>r.txt)+(dia?'':'<p class="muted" style="font-size:12px">Conta quem terminou o dia em 1º. O dia de hoje entra quando acabar.</p>');
+      /* você jogou esse dia mas ficou fora do top 10: mostra sua posição embaixo */
+      const mine=dl[st.dia+'|R'];
+      if(dia&&me&&mine&&rows.length>=10&&!rows.some(r=>r.nome.toLowerCase()===me))
+        rkFetch(`diario?dia=eq.${st.dia}&var=eq.${k.v}&pontos=gt.${mine.score}&select=pontos&limit=1000`).then(r=>{ if(!box.isConnected||qd!==st.dia) return;
+          list.insertAdjacentHTML('beforeend',`<div class="rank rkme"><div class="kv me"><span>${r.length+1}º ${esc(myNick())} (você)</span><b>${fmtN(mine.score)} pts</b></div></div>`); }).catch(()=>{});
+    }).catch(()=>{ if(box.isConnected) list.innerHTML='<p class="muted">Ranking indisponível sem internet.</p>'; });
   };
-  box.querySelectorAll('.rktabs button').forEach(b=>b.addEventListener('click',()=>{ st.modo=b.dataset.m; box.querySelectorAll('.rktabs button').forEach(x=>x.classList.toggle('sel',x===b)); load(); }));
-  box.querySelectorAll('.rknav button').forEach(b=>b.addEventListener('click',()=>{ const n=+b.dataset.d; if(st.modo==='dia') st.dia=rkDayAdd(st.dia,n); else st.mes=rkMonth(st.mes,n); load(); }));
+  box.querySelectorAll('.rktabs button').forEach(b=>b.addEventListener('click',()=>{ st.modo=b.dataset.m; tabs(); load(); }));
+  box.querySelectorAll('.rkmes button').forEach(b=>b.addEventListener('click',()=>{ st.mes=rkMonth(st.mes,+b.dataset.d); load(); }));
   setTimeout(load,store.get('ddb_rkq',[]).length?1500:0);
+}
+/* os 3 primeiros num pódio (2º, 1º, 3º) e o resto em lista */
+function rkPodium(list,fmt){
+  const me=myNick().toLowerCase(), top=list.slice(0,3), ord=[1,0,2].filter(i=>top[i]);
+  return `<div class="podio">${ord.map(i=>`<div class="pd p${i+1}${top[i].nome.toLowerCase()===me?' me':''}"><span class="md">${['🥇','🥈','🥉'][i]}</span><b>${esc(top[i].nome)}</b><small>${fmt(top[i])}</small><i>${i+1}º</i></div>`).join('')}</div>`
+    +(list.length>3?`<div class="rank">${list.slice(3).map((r,i)=>`<div class="kv${r.nome.toLowerCase()===me?' me':''}"><span>${i+4}º ${esc(r.nome)}</span><b>${fmt(r)}</b></div>`).join('')}</div>`:'');
 }
 function rkRows(list,fmt){
   const me=myNick().toLowerCase();
