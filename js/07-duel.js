@@ -239,8 +239,8 @@ function strBoard(str){ const b=Array.from({length:N},()=>Array(N).fill(null)); 
 function sendState(){ if(!D||!D.live||D.over) return; send({t:'st',seed:D.cfg.seed,s:D.score,m:D.eng.b.flat().map(v=>v?(v.c<0&&v.c!==-2?2:1):0).join(''),b:boardStr(D.eng.b)}); }
 function stillPlaying(){ return D&&D.others?D.others.filter(id=>!D.opps[id].info):[]; }
 const EMOS=['😂','😱','🔥','👏','😈'];
-function emoBtns(){ return EMOS.map(e=>`<button class="emo" data-e="${e}">${e}</button>`).join(''); }
-function bindEmos(){ $$('#actions .emo').forEach(b=>b.addEventListener('click',()=>{ send({t:'emo',e:b.dataset.e}); bigEmoji(b.dataset.e); })); }
+function emoBtns(){ return EMOS.map(e=>`<button class="emo" data-e="${e}">${e}</button>`).join('')+chatBtn(); }
+function bindEmos(){ $$('#actions .emo[data-e]').forEach(b=>b.addEventListener('click',()=>{ send({t:'emo',e:b.dataset.e}); bigEmoji(b.dataset.e); })); }
 function enterSpectate(){
   const d=D; d.spect=true; IN=null; cancelDrag();
   BC.reset();

@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.10 · 22/11/2026
+- 💬 **Chat da sala:** na sala conectada (botão 💬 ao lado de "Desconectar") e durante a partida ao vivo (na barra de emojis). Dá para escrever ou tocar numa frase pronta ("Bora!", "Mais uma?"…). Mensagem nova aparece num aviso rápido e com um número no botão. É temporário: só quem está na sala vê, nada fica guardado e tudo some quando a sala fecha.
+
 ## 1.9 · 22/11/2026
 - 🔒 **PIN do nome:** cada pessoa pode criar um PIN de 4 números (em Configurações → Meu perfil, ou no convite ao abrir o jogo). Com o PIN, ninguém mais consegue usar o seu nome no ranking, nos desafios, no Desafio do dia, na foto ou nos avisos. 5 PINs errados seguidos fazem esperar 15 minutos.
 - ☁️ **Progresso na nuvem:** com o PIN, estrelas da campanha, temas ganhos e dourados, conquistas e recordes ficam guardados no servidor e se atualizam sozinhos. Trocou de celular? Põe o nome e o PIN e tudo volta (a foto do perfil também). Jogando em dois celulares, junta o melhor dos dois, sem perder nada.

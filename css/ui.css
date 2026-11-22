@@ -295,3 +295,21 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 .pinbox .pinh{font-size:15px;margin:0 0 6px}
 input.code.pin{display:block;width:100%;margin-top:10px;font-size:26px;letter-spacing:12px;padding:10px}
 input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:none}
+/* chat da sala (js/21-chat.js): painel embaixo, mensagens em balões; o número de novas fica no botão 💬 */
+#chatOv{align-items:flex-end;z-index:62}
+.chatpanel{display:flex;flex-direction:column;height:min(70vh,560px);margin-bottom:env(safe-area-inset-bottom,0px)}
+.chathead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.chatlist{flex:1;min-height:80px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:6px 2px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.chatmsg{align-self:flex-start;max-width:85%;background:var(--input);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:6px 10px;overflow-wrap:anywhere}
+.chatmsg.meu{align-self:flex-end;border-radius:14px 14px 4px 14px;background:#3e6fe0;border-color:#3e6fe0;color:#fff}
+.chatmsg.meu b{color:rgba(255,255,255,.8)}
+.chatmsg b{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.chatmsg span{font-size:15px}
+.chatrap{display:flex;gap:6px;overflow-x:auto;padding:8px 0 6px;scrollbar-width:none}
+.chatrap .chip{flex:none;padding:6px 10px}
+.chatform{display:flex;gap:8px;align-items:stretch}
+.chatform input{flex:1;min-width:0}
+.chatform .btn{width:auto;flex:none;margin:0;padding-left:16px;padding-right:16px}
+.chatb{position:relative}
+.chatbadge{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e5483f;color:#fff;font:700 11px/17px system-ui,sans-serif;font-style:normal;text-align:center}
+.chatbadge[hidden]{display:none}

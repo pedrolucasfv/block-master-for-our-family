@@ -97,6 +97,7 @@ function closeNet(){
   const kill=c=>{ if(!c) return; try{ c.dc&&c.dc.close(); }catch(e){} try{ c.pc&&c.pc.close(); }catch(e){} };
   const was=NET.open; NET.open=false;
   Object.values(NET.peers).forEach(kill); kill(NET.pend); kill(NET.link);
+  if(typeof chatLimpar==='function') chatLimpar(); /* o chat é só da sala: some quando ela fecha (o aparelho de teste fecha antes do chat carregar) */
   NET.peers={}; NET.pend=null; NET.link=null; NET.players=[]; NET.role=null; NET.match=null; NET.isSpec=false; NET.wantSpec=false; NET.specOn=false;
   return was;
 }
@@ -237,6 +238,7 @@ function hostMsg(m,from){
     case 'atk': case 'pw': case 'blk': if(m.to===NET.role) common(m); else sendTo(m.to,m); if(m.to!=='S'&&NET.peers.S) sendTo('S',m); break;
     case 'cmb': if(NET.peers.S) sendTo('S',m); break;
     case 'st': case 'end': case 'emo': case 'goldWon': case 'pause': case 'resume': relay(m,from); common(m); break;
+    case 'chat': if(from==='S') break; m.from=from; relay(m,from); common(m); break; /* carimba quem mandou: ninguém fala no nome de outro */
   }
 }
 function guestMsg(m){
@@ -268,6 +270,7 @@ function common(m){
     case 'gold': applyGold(m.y,m.x); break;
     case 'goldWon': if(D&&!D.over){ removeGold(); toast(goldTxt(`${nm(f)} pegou o bloco dourado`)); } break;
     case 'emo': bigEmoji(m.e); break;
+    case 'chat': chatRecv(m); break;
     case 'prof': storeProf(m); break;
     case 'pause': setPaused(true,f||true); break;
     case 'resume': setPaused(false,f||true); break;

@@ -232,7 +232,7 @@
 <!-- LOBBY -->
 <section id="lobby" class="screen">
   <div class="pad">
-    <div class="topnav"><button class="back" id="lobbyLeave">Desconectar</button><span class="muted" id="lobbyConn" style="flex:1">Conectado</span><button class="back" id="lobbySet" aria-label="Configurações">⚙</button></div>
+    <div class="topnav"><button class="back" id="lobbyLeave">Desconectar</button><span class="muted" id="lobbyConn" style="flex:1">Conectado</span><button type="button" class="back chatb" id="lobbyChat" aria-label="Chat da sala">💬<i class="chatbadge" hidden></i></button><button class="back" id="lobbySet" aria-label="Configurações">⚙</button></div>
     <h1>Sala conectada</h1>
     <div class="tabs" id="lobbyTabs"><button type="button" data-tab="sala">👥 Sala</button><button type="button" data-tab="partida">🎮 Partida</button><button type="button" data-tab="placar">🏆 Placar</button></div>
     <div class="ltab" data-tab="sala">
@@ -309,6 +309,10 @@
 <div id="quitOv" class="overlay"><div class="panel"><h2>Sair da partida?</h2><p class="muted">A pontuação desta rodada será perdida.</p><div class="row" style="margin-top:12px"><button class="btn" id="qNo">Continuar</button><button class="btn primary" id="qYes">Sair</button></div></div></div>
 <div id="scanner"><p>Aponte para o QR do outro celular</p><video id="video" playsinline muted></video><canvas id="canvas" hidden></canvas><button class="btn" id="scanCancel">Cancelar</button></div>
 <div id="fxl"></div>
+<div id="chatOv" class="overlay"><div class="panel chatpanel"><div class="chathead"><h2>💬 Chat da sala</h2><button type="button" class="back" id="chatClose" aria-label="Fechar">✕</button></div>
+  <p class="muted" style="font-size:12px;margin:0 0 6px">Só quem está na sala vê. Some quando a sala fecha.</p>
+  <div id="chatList" class="chatlist" aria-live="polite"></div><div class="chatrap" id="chatRap"></div>
+  <form id="chatForm" class="chatform" autocomplete="off"><input class="code nick" id="chatIn" maxlength="200" placeholder="Escreva uma mensagem" enterkeyhint="send"><button class="btn primary small" type="submit">Enviar</button></form></div></div>
 <div id="toast" role="status"></div>
 <canvas id="pcv"></canvas>
 
@@ -334,5 +338,6 @@
 <script src="js/18-sala-link.js"></script>
 <script src="js/19-avisos.js"></script>
 <script src="js/20-pin.js"></script>
+<script src="js/21-chat.js"></script>
 </body>
 </html>
