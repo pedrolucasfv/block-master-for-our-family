@@ -94,7 +94,7 @@ function startDuel(cfg){
   const tot=TIMES[o.time]*1000;
   $('#timer').textContent=tot?fmtT(tot):(GOALS[o.goal]?'Meta '+GOAL_L[o.goal]:'Sem limite'); $('#timer').className='timer';
   $('#timebar').style.visibility=(tot||GOALS[o.goal])?'visible':'hidden'; $('#timebarFill').style.transform=tot?'scaleX(1)':'scaleX(0)';
-  $('#mission').hidden=true; $('#subTxt')._h=''; D.oldBest=getBest(cfg.type,o); $('#subTxt').textContent=D.oldBest?'Recorde '+fmtN(D.oldBest):(cfg.type==='solo'?'Primeira partida neste modo':'Recorde 0'); updateCombo(0,0); updTeamLine();
+  $('#mission').hidden=true; $('#subTxt')._h=''; myEndOff(); D.oldBest=getBest(cfg.type,o); $('#subTxt').textContent=D.oldBest?'Recorde '+fmtN(D.oldBest):(cfg.type==='solo'?'Primeira partida neste modo':'Recorde 0'); updateCombo(0,0); updTeamLine();
   if(D.teams) $('#scoreLbl').textContent=`Você · ${TEAM[D.myTeam].e} ${TEAM[D.myTeam].n}`;
   setStatus(D.live?'':(PLAYS[o.play]!=='Clássico'?'Modo '+PLAYS[o.play]:''));
   $('#fog').classList.remove('show');
@@ -259,6 +259,7 @@ function pickWatch(force){
   else if(!d.watch||d.opps[d.watch].info) d.watch=pl.sort((a,b)=>d.opps[b].score-d.opps[a].score)[0];
   d.prevB=null; d.prevC=d.opps[d.watch].c||0; resetScore(d.opps[d.watch].score); renderSpect(); return true;
 }
+function myEndOff(){ const e=$('#myEndBig'); if(e) e.remove(); }
 function renderSpect(){
   const d=D; if(!d||!d.spect||!d.watch) return; const op=d.opps[d.watch];
   const b=strBoard(op.b); renderBoard(b,{...d.o,play:0},null);
@@ -267,10 +268,11 @@ function renderSpect(){
   /* combo de quem você está assistindo (vem junto com o tabuleiro); subiu para x2 ou mais: aparece no tabuleiro */
   const c=op.c||0; updateCombo(c,op.k||0); if(c>=2&&c>(d.prevC||0)) praise('COMBO x'+c,undefined,false,Math.min(7,c+1)); d.prevC=c;
   $('#scoreLbl').textContent=nm(d.watch);
-  /* onde você parou, em destaque, com a sua posição agora (muda se alguém passar) */
+  /* onde você parou, em destaque embaixo do tabuleiro (no lugar das peças), com a sua posição agora (muda se alguém passar) */
   const pos=1+d.others.filter(id=>{ const o=d.opps[id]; return (o.info?o.info.score:o.score)>d.info.score; }).length;
-  const h=`<span class="myend">🏁 Você parou em <b>${fmtN(d.info.score)}</b> <small>${pos}º lugar agora</small></span>`;
-  if($('#subTxt')._h!==h){ $('#subTxt')._h=h; $('#subTxt').innerHTML=h; }
+  let me=$('#myEndBig'); if(!me){ me=document.createElement('div'); me.id='myEndBig'; $('#tray').appendChild(me); }
+  const h=`<small>🏁 Você parou em</small><b>${fmtN(d.info.score)}</b><span>${pos}º lugar agora</span>`;
+  if(me._h!==h){ me._h=h; me.innerHTML=h; } $('#subTxt').textContent='';
   setStatus('Assistindo '+nm(d.watch)+(stillPlaying().length>1?' · toque num placar para trocar':''));
   d.others.forEach(id=>oppSet(id,d.opps[id].score,null,{watch:id===d.watch}));
 }

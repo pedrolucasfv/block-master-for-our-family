@@ -3,6 +3,12 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.13 · 22/11/2026
+- ✨ **Novidades:** no menu, ao lado das Configurações, o botão "✨ Novidades" mostra o que mudou em cada versão, em cartões (novidade ou correção). Um pontinho vermelho avisa quando sai versão nova.
+- 👥 **Times na aba Sala:** a aba "Sala" mostra o estilo de jogo que quem criou escolheu, com o desenho e a explicação, e nos modos de times os botões para entrar no time.
+- 🏁 **Onde você parou:** depois de perder, os seus pontos aparecem grandes embaixo do tabuleiro, no lugar das peças, com a sua posição agora.
+- 🏠 **Criar sala:** agora vai direto para a sala. O QR e o convite por link só aparecem quando você toca em "+ Adicionar jogador".
+
 ## 1.12 · 22/11/2026
 - 💬 **Chat fixo na sala:** na sala conectada, o chat agora fica na aba "Sala", embaixo da lista de jogadores (sem precisar abrir janela). Mensagem nova com você em outra aba aparece com um número no "👥 Sala". Durante a partida, o 💬 da barra de emojis continua abrindo o chat.
 - 🔵🟠 **Duelo em times:** os tabuleiros de cada time ficam juntos, um time de cada lado, com o total do time em cima. Você aparece na coluna do seu time.

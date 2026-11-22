@@ -34,6 +34,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/21-chat.js` | Chat temporário da sala conectada (`CHAT`, só na memória): mensagem `{t:'chat',x}` pela conexão da sala (quem criou carimba `from` e repassa em `hostMsg`; chega em `common` → `chatRecv`), fica fixo na aba Sala (`#chatHome`); na partida o botão `.chatb` da barra de emojis (`chatBtn` em `emoBtns`) abre o painel `#chatOv` (`chatAbrir`/`chatFechar` mudam `#chatBody` de lugar), `chatEnviar`, número de novas (`chatBadge`). Quem criou manda a conversa para quem entra depois (`chatHistPara` no `hello` → `chatHist`). `closeNet` apaga tudo (`chatLimpar`) |
 | `js/22-ja.js` | Dicionário português → japonês (`JA`): chave = texto como aparece na tela, com `{}` no lugar do que muda (e `{v}`, `{limit}`… das metas da campanha); na tradução `{}` segue a ordem e `{1}`, `{2}`… escolhem a lacuna; `null` = não traduzir |
 | `js/23-idioma.js` | Idioma (`SET.lang`, `LANG`): com japonês, traduz na tela tudo que aparece (`trTxt`; observa a página com `MutationObserver`, inclusive `placeholder`/`title`/`aria-label`, `confirm`/`alert`). Texto montado aos pedaços é traduzido por partes (" · ", ", ", frases, emoji na frente, número no fim). `data-notr` = não traduzir. Escolha nas Configurações (`renderIdioma`, recarrega a página) |
+| `js/24-novidades.js` | Tela "✨ Novidades" (`#news`, botão `#goNews` no menu): lê o `CHANGELOG.md` do site e mostra um cartão por versão (`novParse`, `novRender`); `ddb_novVisto` guarda a última versão vista (pontinho vermelho no botão) |
 | `css/base.css` | Variáveis de tema em `:root[data-app=…]`, layout, blocos, jogo |
 | `css/worlds.css` | Visual de cada mundo (`:root[data-world=…]`) e animações de limpeza por skin |
 | `css/ui.css` | Efeitos, sobreposições, histórico, conexão, abas da sala, estrelinha dourada |
@@ -46,7 +47,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 - Valores especiais de cor no tabuleiro (`v.c` negativo) = pedras, ouro, chiclete etc.; veja `cellColor`.
 
 ## Versões
-- `VERSAO` e `VERSAO_DATA` ficam no topo de `js/02-core.js` e aparecem no rodapé do menu. Toda mudança que vai para a `main` sobe a versão (1.x para novidade, 1.x.y para correção) e ganha uma linha em `CHANGELOG.md`.
+- `VERSAO` e `VERSAO_DATA` ficam no topo de `js/02-core.js` e aparecem no rodapé do menu. Toda mudança que vai para a `main` sobe a versão (1.x para novidade, 1.x.y para correção) e ganha uma linha em `CHANGELOG.md` — que o jogo mostra na tela "✨ Novidades": mantenha o formato (`## 1.x · data` e itens `- emoji **Título:** texto`, escritos para o jogador).
 
 ## Convenções
 - Código denso, de propósito: funções curtas numa linha só quando cabem. Não minifique nem encurte nomes; não reformate trechos que não está mudando.

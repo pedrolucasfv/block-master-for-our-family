@@ -239,7 +239,9 @@ body.spr.skin-velvet :is(#grid,#tray,#holdRow,.drag) [data-col]>.bev{background-
 .opps.teams .opp.watch{box-shadow:inset 0 0 0 2px var(--text)!important}
 .opps.teams .opp b{font-size:15px;line-height:1.1}.opps.teams .opp span{max-width:54px;font-size:11px;line-height:1.1}
 .opps.teams .opp.me{background:transparent;border:1px dashed var(--tc);justify-content:center;min-height:56px;min-width:46px}
-/* assistindo depois de terminar: onde você parou, em destaque */
-.myend{display:inline-flex;align-items:baseline;gap:6px;background:#f6c935;color:#3a2a00;border-radius:99px;padding:3px 12px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.18);animation:myendIn .5s ease-out}
-.myend b{font-size:20px;font-variant-numeric:tabular-nums}.myend small{font-size:11px;font-weight:500;opacity:.8}
-@keyframes myendIn{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:none;opacity:1}}
+/* assistindo depois de terminar: onde você parou, grande, embaixo do tabuleiro (no lugar da bandeja) */
+#myEndBig{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;animation:myendIn .5s ease-out}
+#myEndBig small{font-size:15px;font-weight:600;color:var(--muted)}
+#myEndBig b{font-size:52px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;color:var(--scoreColor);text-shadow:var(--scoreFx)}
+#myEndBig span{font-size:14px;font-weight:600;color:var(--text);opacity:.85}
+@keyframes myendIn{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:none;opacity:1}}

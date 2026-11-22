@@ -47,7 +47,7 @@ function startShared(cfg){
   const tot=TIMES[o.time]*1000;
   $('#timer').textContent=tot?fmtT(tot):(GOALS[o.goal]?'Meta '+GOAL_L[o.goal]:'Sem limite'); $('#timer').className='timer';
   $('#timebar').style.visibility=(tot||GOALS[o.goal])?'visible':'hidden'; $('#timebarFill').style.transform=tot?'scaleX(1)':'scaleX(0)';
-  $('#subTxt').textContent=(vs||ts)?'':cfg.solo?'':`Recorde da ${teamWord()} `+fmtN(getBest(cfg.type,o)); updateCombo(0,0); setStatus(''); $('#mission').hidden=true; $('#subTxt')._h='';
+  $('#subTxt').textContent=(vs||ts)?'':cfg.solo?'':`Recorde da ${teamWord()} `+fmtN(getBest(cfg.type,o)); updateCombo(0,0); setStatus(''); $('#mission').hidden=true; $('#subTxt')._h=''; myEndOff();
   $('#fog').classList.remove('show');
   buildSharedActions();
   IN=sharedIN; show('game');

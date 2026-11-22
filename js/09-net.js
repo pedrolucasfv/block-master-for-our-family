@@ -183,7 +183,8 @@ function renderNames(av){
   if(D&&D.live&&D.others) D.others.forEach(id=>oppSet(id,D.opps[id].score,null,{label:nm(id),av:!!av}));
   if(av&&SH&&SH.type==='versus') SH.ids.forEach(id=>{ if(id!==SH.me) oppSet(id,0,null,{av:true}); });
 }
-$('#pHost').addEventListener('click',()=>{ if(!rtcOk()) return; if(NET.open){ toLobby(); return; } hostRoomInit(); hostNewOffer(); });
+/* criar sala: vai direto para a sala (sozinho nela); o QR/link para chamar alguém só aparece em "+ Adicionar jogador" */
+$('#pHost').addEventListener('click',()=>{ if(!rtcOk()) return; if(NET.open){ toLobby(); return; } hostRoomInit(); NET.open=true; LTAB='sala'; toLobby(); });
 $('#pHostScan').addEventListener('click',()=>scan(hostAccept,$('#pHostStatus')));
 $('#pHostConnect').addEventListener('click',()=>{ const v=$('#pHostPaste').value.trim(); if(v) hostAccept(v); });
 $('#pHostCopy').addEventListener('click',e=>copyText($('#pHostCode').value,e.currentTarget));
@@ -337,7 +338,7 @@ $('#roomShare').addEventListener('click',()=>{ if(NET.room.matches.length) share
 
 /* ----- sala ----- */
 function toLobby(){
-  closeEnd(); $('#pauseOv').classList.remove('show'); chatFechar(); cancelDrag(); D=null; SH=null; IN=null; MK=null;
+  closeEnd(); $('#pauseOv').classList.remove('show'); chatFechar(); myEndOff(); cancelDrag(); D=null; SH=null; IN=null; MK=null;
   if(!NET.open){ show('home'); return; }
   NET.rematch={me:false}; if(NET.role==='A') NET.rematchReq=new Set();
   $('#lobbyStart').hidden=NET.role!=='A'; $('#lobbyGuest').hidden=NET.role==='A';
@@ -365,7 +366,7 @@ function renderLobby(){
   const host=NET.role==='A', ids=NET.players, n=ids.length, L=NET.lobby;
   $('#lobbyConn').textContent=(host?'Você criou a sala':'Você entrou na sala')+` · ${n} jogador${n>1?'es':''}`;
   $('#lobbyPlayers').innerHTML=ids.map(id=>`<span>${avatarHTML(id,20)}${id==='A'?'👑 ':''}${esc(nm(id,false))}${id===NET.role?' (você)':''}</span>`).join('');
-  $('#lobbyAdd').hidden=!host||n>=MAXP; $('#lobbySpec').hidden=!host||!!NET.peers.S;
+  $('#lobbyAdd').hidden=!host||n>=MAXP; $('#lobbyAdd').classList.toggle('primary',n<2); $('#lobbySpec').hidden=!host||!!NET.peers.S;
   $('#lobbySimRow').hidden=!host||!devOn(); $('#lobbySim').hidden=n>=MAXP; $('#lobbySimDel').hidden=!SIMS.length;
   if(NET.specOn||NET.peers.S) $('#lobbyPlayers').insertAdjacentHTML('beforeend','<span>📺 Espectador</span>');
   const tk=diaBR(), fmtD=v=>v!=null?fmtN(v):'–';
@@ -379,6 +380,8 @@ function renderLobby(){
   if(!warn&&isTeamType(L.type)){ const T=teamsFinal(), c={az:0,la:0}; Object.values(T).forEach(k=>c[k]++); if(!c.az||!c.la) warn='Cada time precisa de pelo menos 1 jogador.'; else if(L.type==='tsplit'&&(c.az>3||c.la>3)) warn='No tabuleiro dividido, cada time pode ter até 3 jogadores.'; }
   renderTeamBox();
   $('#typeHint').innerHTML=`<span class="tbig">${modePic(L.type,n,tc)}</span>`+esc(TYPE_HINT[L.type])+(warn?`<br><b class="err">${esc(warn)}</b>`:'');
+  /* aba Sala: o estilo que quem criou escolheu, com a explicação e (nos times) a escolha do time */
+  $('#salaModeT').textContent=TYPES[L.type]; $('#salaModeHint').innerHTML=`<span class="tbig">${modePic(L.type,n,tc)}</span><p class="muted">${esc(TYPE_HINT[L.type])}</p>`;
   $('#lobbyStart').disabled=!!warn; $('#lobbyWarn').hidden=!warn; $('#lobbyWarn').textContent=warn||'';
   if(L.type==='camp'){
     const st=host?campLoad('group'):{stars:L.cs||{},att:{}}; L.w=L.w||1; if(!CWORLDS[L.w-1]||!campWOpen(st,L.w)) L.w=1; if(!campOpen(st,L.w,L.ph||1)) L.ph=1;

@@ -30,9 +30,19 @@
       <button class="btn big" id="goWith">Jogar com alguém<small>por código ou conectado</small></button>
       <button class="btn big" id="goCamp">🧸 Campanha<small>mundos, fases e chefões</small></button>
       <button class="btn" id="goDaily">Desafio do dia</button>
-      <div class="row"><button class="btn" id="goHistory">Histórico</button><button class="btn" id="goSettings">Configurações</button></div>
+      <div class="row"><button class="btn" id="goHistory">Histórico</button><button class="btn nvbtn" id="goNews">✨ Novidades<i id="goNewsDot" hidden></i></button><button class="btn" id="goSettings">Configurações</button></div>
     </div>
     <p class="muted ver" id="verTxt"></p>
+  </div>
+</section>
+
+<!-- NOVIDADES (o que mudou em cada versão) -->
+<section id="news" class="screen">
+  <div class="pad">
+    <div class="topnav"><button class="back" data-go="home">← Voltar</button></div>
+    <h1>Novidades</h1>
+    <p class="muted">O que mudou em cada versão do jogo. A mais nova fica em cima.</p>
+    <div id="newsList"></div>
   </div>
 </section>
 
@@ -244,6 +254,7 @@
       <div class="row"><button class="btn small" id="lobbyAdd">+ Adicionar jogador</button><button class="btn small" id="lobbySpec">📺 Conectar espectador</button></div>
       <div class="row" id="lobbySimRow" hidden><button class="btn small" id="lobbySim">🤖 Aparelho de teste</button><button class="btn small ghost" id="lobbySimDel">Remover testes</button></div>
     </div>
+    <div class="card salamode"><div class="muted" style="font-size:12px">Estilo de jogo escolhido</div><h2 id="salaModeT"></h2><div id="salaModeHint"></div><div id="teamBox" hidden></div></div>
     <div class="card lchat"><h2>💬 Chat da sala</h2><p class="muted" style="font-size:12px;margin:0 0 6px">Só quem está na sala vê. Some quando a sala fecha.</p><div id="chatHome"></div></div>
     </div>
     <div class="ltab" data-tab="placar">
@@ -257,7 +268,6 @@
       <div class="opane" data-pane="estilo">
         <div id="typeSeg"></div>
         <p class="muted" id="typeHint"></p>
-        <div id="teamBox" hidden></div>
       </div>
       <div id="lobbyOpts"></div>
     </div>
@@ -344,5 +354,6 @@
 <script src="js/21-chat.js"></script>
 <script src="js/22-ja.js"></script>
 <script src="js/23-idioma.js"></script>
+<script src="js/24-novidades.js"></script>
 </body>
 </html>

@@ -333,3 +333,17 @@ input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:non
 .rstep button{width:28px;height:28px;border-radius:8px;font-size:17px;font-weight:700;line-height:1}
 .rdel{justify-self:end;width:28px;height:28px;border-radius:8px;color:var(--muted)}
 .rbtns{margin-top:6px;gap:6px}.rbtns .chip{font-size:13px;padding:6px 10px}
+.salamode{margin-top:12px}.salamode h2{margin:2px 0 6px}.salamode .tbig{max-width:240px}.salamode p{font-size:13px;margin:0 0 4px}
+/* novidades (js/24-novidades.js): um cartão por versão */
+.nvbtn{position:relative}.nvbtn i{position:absolute;top:6px;right:8px;width:10px;height:10px;border-radius:50%;background:#e5483f}.nvbtn i[hidden]{display:none}
+.nvcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--neu-out);border-left:5px solid #4cbb47}
+.nvcard.fix{border-left-color:#3e6fe0}
+.nvcard summary{display:flex;flex-wrap:wrap;align-items:center;gap:8px;cursor:pointer;list-style:none}.nvcard summary::-webkit-details-marker{display:none}
+.nvcard summary small{margin-left:auto;font-size:12px}
+.nvv{font-size:22px;font-variant-numeric:tabular-nums}
+.nvtag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--input)}.nvtag.me{background:#f6c935;color:#3a2a00}
+.nvcard ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+.nvcard li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.4}
+.nvic{flex:none;width:30px;height:30px;border-radius:9px;background:var(--input);display:flex;align-items:center;justify-content:center;font-size:16px}
+.nvcard code{font-size:12px;background:var(--input);padding:1px 4px;border-radius:4px}
+.menu .row .btn{min-width:0;padding:12px 4px;font-size:15px}
