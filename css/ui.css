@@ -313,3 +313,4 @@ input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:non
 .chatb{position:relative}
 .chatbadge{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e5483f;color:#fff;font:700 11px/17px system-ui,sans-serif;font-style:normal;text-align:center}
 .chatbadge[hidden]{display:none}
+.chatdiv{font-size:11px;margin:2px 0;opacity:.8}

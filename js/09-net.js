@@ -229,7 +229,7 @@ $('#connBack').addEventListener('click',()=>{ stopScan();
 function hostMsg(m,from){
   switch(m.t){
     case 'prof': storeProf(m); relay(m,from); break;
-    case 'hello': if(m.spec&&from!=='S'){ convertToSpec(from); break; } if(from==='S') break; NET.names[from]=String(m.name||'').slice(0,16); NET.daily[from]=m.daily||null; sendRoster(); compareLast(m.last); break;
+    case 'hello': if(m.spec&&from!=='S'){ convertToSpec(from); break; } if(from==='S') break; NET.names[from]=String(m.name||'').slice(0,16); NET.daily[from]=m.daily||null; sendRoster(); compareLast(m.last); chatHistPara(from); break;
     case 'team': if(from==='S') break; NET.teams[from]=m.v==='la'?'la':'az'; sendRoster(); break;
     case 'nick': if(from==='S') break; NET.names[from]=String(m.name||'').slice(0,16); sendRoster(); break;
     case 'act': if(SH&&SH.host) hostAct(from,m.a); break;
@@ -271,6 +271,7 @@ function common(m){
     case 'goldWon': if(D&&!D.over){ removeGold(); toast(goldTxt(`${nm(f)} pegou o bloco dourado`)); } break;
     case 'emo': bigEmoji(m.e); break;
     case 'chat': chatRecv(m); break;
+    case 'chatHist': chatHist(m); break;
     case 'prof': storeProf(m); break;
     case 'pause': setPaused(true,f||true); break;
     case 'resume': setPaused(false,f||true); break;
