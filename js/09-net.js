@@ -97,6 +97,7 @@ function closeNet(){
   const kill=c=>{ if(!c) return; try{ c.dc&&c.dc.close(); }catch(e){} try{ c.pc&&c.pc.close(); }catch(e){} };
   const was=NET.open; NET.open=false;
   Object.values(NET.peers).forEach(kill); kill(NET.pend); kill(NET.link);
+  if(typeof slFechar==='function') slFechar(); /* o link da sala deixa de valer */
   if(typeof chatLimpar==='function') chatLimpar(); /* o chat é só da sala: some quando ela fecha (o aparelho de teste fecha antes do chat carregar) */
   NET.peers={}; NET.pend=null; NET.link=null; NET.players=[]; NET.role=null; NET.match=null; NET.isSpec=false; NET.wantSpec=false; NET.specOn=false;
   return was;
@@ -115,7 +116,7 @@ async function hostNewOffer(spec){
   if(!spec&&NET.players.length>=MAXP){ toast('A sala já tem 6 jogadores'); return; }
   $('#connTitle').textContent='Jogar conectado';
   resetConnectUI(); $('#pHostBox').hidden=false; show('connect');
-  clearInterval(slPoll); $('#pLinkBox').hidden=!!spec||!rkOn(); $('#pLinkStat').textContent='';
+  $('#pLinkBox').hidden=!!spec||!rkOn(); slStat();
   if(NET.pend){ try{ NET.pend.pc.close(); }catch(e){} }
   const pc=newPC(()=>{ if(NET.pend===pend) $('#pHostStatus').textContent='A conexão falhou. Volte e gere um novo código.'; }), pend={pc,dc:null}; NET.pend=pend;
   pend.spec=!!spec;

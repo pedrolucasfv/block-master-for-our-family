@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.18 · 22/11/2026
+- 🔗 **Link da sala:** agora a sala tem um link só, que serve para todo mundo que está longe (até 6 na sala). Quem criou manda o link uma vez no grupo da família, e cada um que abrir entra sozinho, sem precisar de um convite para cada pessoa. O link vale enquanto a sala estiver aberta; quando ela fecha, ele para de funcionar.
+
 ## 1.17 · 22/11/2026
 - 💡 **Sugestões:** novo botão "Sugestões" no menu. Conte o que você queria mudar ou ter no jogo, veja as ideias da família e curta as que você gostou. Cada sugestão ganha uma etiqueta: Nova, Em análise, Pergunta, Vai entrar, Implementada (com a versão em que entrou) ou Não vai entrar (sempre com o motivo).
 - ❓ **Perguntas e respostas:** quem cuida do jogo pode fazer perguntas sobre a sua sugestão, e você responde ali mesmo. Cada resposta, pergunta ou etiqueta nova chega como aviso no celular e fica no sino 🔔 do menu.
