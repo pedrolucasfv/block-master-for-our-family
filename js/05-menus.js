@@ -213,14 +213,30 @@ $('#goHistory').addEventListener('click',()=>{ renderHistory(); show('history');
 /* ===================== configurações ===================== */
 function renderLift(){ $('#liftRange').value=SET.lift; $('#liftTxt').textContent=SET.lift===0?'Peça embaixo do dedo':`${SET.lift.toFixed(1).replace('.',',')} casas acima do dedo`; }
 $('#liftRange').addEventListener('input',e=>{ SET.lift=+e.target.value; store.set('ddb_set',SET); renderLift(); });
-/* miniaturas dos temas nas configurações usam os mesmos desenhos das peças (feitos uma vez e guardados) */
+/* miniaturas dos temas nas configurações usam os mesmos desenhos das peças (feitos uma vez e guardados).
+   Desenhar todas de uma vez travava a abertura dos Ajustes: agora a tela abre na hora e as que faltam são feitas aos poucos, uns milissegundos por vez */
 const PV={};
+let pvVez=0;
+const pvChave=(k,c)=>k+c+(SET.lite?'l':'')+(isGold(k)?'g':'');
+function pvFazer(k,c){ const key=pvChave(k,c); if(PV[key]==null){ const dpr=Math.min(2.5,window.devicePixelRatio||1); try{ PV[key]=drawBlock(k,PALETTE[c],k==='fruit'?FRUIT[c]:null,Math.round(24*dpr),dpr,SET.lite).toDataURL(); }catch(e){ PV[key]=''; } } return PV[key]; }
+function pvPor(i,u){ const b=i.querySelector('.bev'); if(u&&b) b.style.cssText=`background:url("${u}") center/100% 100% no-repeat!important;background-blend-mode:normal;box-shadow:none;border:0`; }
 function skinPreviews(){
-  const dpr=Math.min(2.5,window.devicePixelRatio||1), w=Math.round(24*dpr);
+  const vez=++pvVez, falta=[];
   $$('#skinSeg .skp').forEach(sp=>{ const k=[...sp.classList].find(c=>c.startsWith('skin-')).slice(5);
-    sp.querySelectorAll('i[data-col]').forEach(i=>{ const c=+i.dataset.col, key=k+c+(SET.lite?'l':'')+(isGold(k)?'g':'');
-      if(!PV[key]){ try{ PV[key]=drawBlock(k,PALETTE[c],k==='fruit'?FRUIT[c]:null,w,dpr,SET.lite).toDataURL(); }catch(e){ return; } }
-      const b=i.querySelector('.bev'); b.style.cssText=`background:url("${PV[key]}") center/100% 100% no-repeat!important;background-blend-mode:normal;box-shadow:none;border:0`; }); });
+    sp.querySelectorAll('i[data-col]').forEach(i=>{ const c=+i.dataset.col, u=PV[pvChave(k,c)]; if(u!=null) pvPor(i,u); else falta.push([i,k,c]); }); });
+  let j=0;
+  const passo=()=>{ if(vez!==pvVez) return; const t0=performance.now();
+    while(j<falta.length&&performance.now()-t0<8){ const [i,k,c]=falta[j++]; pvPor(i,pvFazer(k,c)); }
+    if(j<falta.length) requestAnimationFrame(passo); };
+  if(falta.length) requestAnimationFrame(passo);
+}
+/* com o menu parado, já vai preparando as miniaturas, para os Ajustes abrirem prontos */
+function pvAquecer(){
+  const lista=[]; SKINS_ALL.forEach(k=>{ [0,3,5,6].forEach(c=>lista.push([k,c])); if(hasGold(k)) [0,3,5,6].forEach(c=>lista.push([k+'Gold',c])); });
+  let j=0; const passo=d=>{ if(drag){ setTimeout(passo,1000); return; } const t0=performance.now();
+    while(j<lista.length&&performance.now()-t0<6&&(!d||!d.timeRemaining||d.timeRemaining()>2)) pvFazer(...lista[j++]);
+    if(j<lista.length) (window.requestIdleCallback?requestIdleCallback(passo,{timeout:3000}):setTimeout(passo,200)); };
+  setTimeout(passo,2500);
 }
 function renderSettings(){
   renderLift(); renderProfile();

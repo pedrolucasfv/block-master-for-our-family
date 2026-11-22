@@ -1516,4 +1516,6 @@ const JA={
 "Parar de assistir?":"観戦をやめますか？",
 "Sair da sala? Todos serão desconectados.":"ルームを出ますか？全員の接続が切れます。",
 "Toque em voltar de novo para sair":"もう一度「戻る」を押すと終了します",
+"✅ Já instalei":"✅ インストールしたよ",
+"Pronto! Abra o jogo pelo ícone na tela.":"できた！画面のアイコンからゲームを開いてね。",
 };

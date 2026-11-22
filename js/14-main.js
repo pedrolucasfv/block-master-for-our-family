@@ -3,7 +3,7 @@
 /* ===================== inicialização ===================== */
 window.addEventListener('resize',()=>{ grC=null; sizeCanvas(); layout(); });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&D&&(!D.live||D.cfg.npc)&&D.playing&&!D.paused) setPaused(true); });
-applyLook(); sizeCanvas(); renderNight(); renderHome();
+applyLook(); sizeCanvas(); renderNight(); renderHome(); if(SIM==null) pvAquecer();
 loadVoices();
 ['pointerdown','keydown'].forEach(ev=>window.addEventListener(ev,function once(){ ac(); setTimeout(warmSounds,50); if(!Object.values(vbuf).some(Boolean)) loadVoices(); window.removeEventListener(ev,once); },{once:true}));
 /* ================= MODO TESTE: aparelhos de mentira na sala =================

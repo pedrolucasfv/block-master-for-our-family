@@ -3,6 +3,10 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.16.2 · 22/11/2026
+- ⚡ **Ajustes abrem na hora:** a tela de Ajustes demorava para abrir porque desenhava todas as miniaturas dos estilos de bloco antes de aparecer. Agora ela abre direto, e as miniaturas já vêm prontas (o jogo prepara enquanto você está no menu).
+- 📲 **Some o "Instalar o jogo" de quem já instalou:** se o jogo já foi aberto pelo ícone neste aparelho, ou o Android avisou que instalou, o botão não aparece mais. No iPhone o Safari não tem como saber, então a janela do passo a passo ganhou o botão "✅ Já instalei", que esconde o botão de vez.
+
 ## 1.16.1 · 22/11/2026
 - ↩️ **Botão voltar do celular:** com o jogo instalado (ou no navegador), o voltar do celular não fecha mais o jogo. Ele faz o mesmo que o "← Voltar" da tela: fecha a janela aberta, volta do mapa da campanha para o menu, pausa a partida (e, pausado, continua). Na sala conectada, pergunta antes de sair. No menu inicial, é preciso tocar em voltar duas vezes para sair.
 

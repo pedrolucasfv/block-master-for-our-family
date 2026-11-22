@@ -13,9 +13,9 @@ function voltarAcao(){
   if(aberto('#quitOv')){ $('#qNo').click(); return true; }
   if(aberto('#count')) return true;
   if(aberto('#end')){
-    /* nas janelas, o botão claro do fim é sempre o de fechar/voltar (Fechar, Voltar, Menu, Agora não…); sem ele, só um botão = "Entendi" */
-    const bs=[...$('#endBtns').children], ghost=bs.filter(b=>b.classList.contains('ghost')).pop();
-    if(ghost) ghost.click(); else if(bs.length===1) bs[0].click();
+    /* nas janelas, o botão claro do fim é sempre o de fechar/voltar (Fechar, Voltar, Menu, Agora não…); sem ele, o "Entendi" (ou o único botão) */
+    const bs=[...$('#endBtns').children], ghost=bs.filter(b=>b.classList.contains('ghost')).pop(), ok=bs.find(b=>b.textContent==='Entendi'||b.textContent===trTxt('Entendi'));
+    if(ghost) ghost.click(); else if(ok) ok.click(); else if(bs.length===1) bs[0].click();
     return true; }
   if(aberto('#pauseOv')){ if(voltarVisivel($('#pResume'))) $('#pResume').click(); return true; }
   if(tela==='game'){ const g=D||SH; if(g&&g.playing&&!g.paused&&!g.over) $('#gPause').click(); return true; }
