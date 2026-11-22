@@ -105,13 +105,14 @@ function makeCode(o){
   const w=WORDS[Math.floor(Math.random()*WORDS.length)];
   return parseCode(w+enc4(optsToBits(o))+String(Math.floor(Math.random()*100)).padStart(2,'0'));
 }
-function dailyOpts(key,timed=true){
-  /* desafio do dia: sempre clássico e sem modificadores; só as peças (sementes do dia) mudam */
-  const o=defOpts(); o.time=timed?1:3; o.play=0;
+function dailyOpts(){
+  /* desafio do dia: clássico, sem relógio geral; o tempo para pôr cada peça vai apertando (RAMP, no 07-duel) */
+  const o=defOpts(); o.time=3; o.play=0; o.ramp=1;
   return o;
 }
-function dailyCode(dk){ const [k,v]=dk.split('|'); const [y,m,d]=k.split('-'); return 'DIA-'+d+m+(v?'-S':''); }
-function setDaily(timed){ setup.timed=timed; setup.key=setup.day+(timed?'':'|S'); setup.opts=dailyOpts(setup.day,timed); }
+function dailyCode(dk){ const [k,v]=dk.split('|'); const [y,m,d]=k.split('-'); return 'DIA-'+d+m+(v==='S'?'-S':''); }
+/* "|R": modo único com tempo por peça que aperta (desde a versão 1.7) */
+function setDaily(){ setup.key=setup.day+'|R'; setup.opts=dailyOpts(); }
 
 /* ===================== placar da noite, histórico, recordes ===================== */
 function getNight(){ const n=store.get('ddb_night',{me:0,other:0,tie:0,at:0}); if(Date.now()-n.at>8*3600e3){ return {me:0,other:0,tie:0,at:Date.now()}; } return n; }

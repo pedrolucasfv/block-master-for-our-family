@@ -26,7 +26,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/13-spectator.js` | Modo espectador (TV): `specMsg`, `specRender` |
 | `js/14-main.js` | Inicialização e modo teste (`simAdd`, `simBoot`, `simBot`) |
 | `js/15-npc.js` | Duelo contra o robô no Sozinho (`startNpc`, `NPC`, `npcHear`): é um duelo ao vivo (`D.cfg.npc`) com adversário `'npc'`; o `send` desvia para o robô quando não há sala |
-| `js/16-ranking.js` | Ranking online no Supabase (`SUPA_URL`/`SUPA_KEY`; vazio = desligado): recorde por fase da campanha (`rkCampEnd`, `rkPhaseBox`), ranking geral (`rkOpenGeneral`), fila de envio offline (`ddb_rkq`), ranking do Desafio do dia (`rkDailyBox`, `rkDailySync`). Banco: `supabase/ranking.sql` e `supabase/diario-e-recordes.sql` (avisos de recorde batido, 1º lugar do dia e aviso de manhã via pg_cron) |
+| `js/16-ranking.js` | Ranking online no Supabase (`SUPA_URL`/`SUPA_KEY`; vazio = desligado): recorde por fase da campanha (`rkCampEnd`, `rkPhaseBox`), ranking geral (`rkOpenGeneral`), fila de envio offline (`ddb_rkq`), ranking do Desafio do dia por dia e vitórias do mês (`rkDailyBox`, `rkDailyEnd`). Banco: `supabase/ranking.sql` e `supabase/diario-e-recordes.sql` (avisos de recorde batido, 1º lugar do dia e aviso de manhã via pg_cron) |
 | `js/17-desafio.js` | Desafio a distância, melhor de 5 (Supabase; usa `rkFetch`/`rkQueue`): tela `#chal`, aberta pelo topo de "Jogar com alguém" (`dsList`, jogadores para desafiar em `dsRenderPeople`), cartão (`dsOpen`), rodada é um `startDuel` com `type:'chal'` (`dsPlay`, `dsRoundEnd`), aviso por WhatsApp (`dsShare`), link `?d=id` (`dsFromLink`). Banco: `supabase/desafios.sql` |
 | `js/18-sala-link.js` | Sala por link: guarda oferta/resposta do WebRTC no Supabase (`slSend` de quem cria, `slFromLink` de quem abre `?s=id`). Banco: `supabase/salas.sql` |
 | `js/19-avisos.js` | Avisos no celular (Web Push, sem instalar): `sw.js` na raiz recebe e mostra; `avAtivar` inscreve o aparelho (`salvar_inscricao`), `PUSH_KEY` é a chave pública. Quem envia é a função `supabase/functions/avisar`, chamada pelo gatilho `avisar` da tabela `desafios` (pg_net). Banco: `supabase/avisos.sql` |
@@ -35,7 +35,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `css/ui.css` | Efeitos, sobreposições, histórico, conexão, abas da sala, estrelinha dourada |
 
 ## Glossário rápido
-- Tipos de partida (`type`): `solo`, `daily`, `chal` (rodada de desafio a distância), `duel`/`live` (cada um no seu tabuleiro), `versus`, `coop`, `halves`, `camp`, `tlive`/`tsplit` (times).
+- Tipos de partida (`type`): `solo`, `daily` (Desafio do dia: modo único, tempo por peça que aperta em `RAMP`, dia de Brasília em `diaBR`), `chal` (rodada de desafio a distância), `duel`/`live` (cada um no seu tabuleiro), `versus`, `coop`, `halves`, `camp`, `tlive`/`tsplit` (times).
 - `D` = estado da partida de duelo/solo; `SH` = estado do tabuleiro único; `IN` = a interface de entrada ativa (`duelIN` ou `sharedIN`: `piece`, `canDrag`, `check`, `drop`, `tap`, `toHold`).
 - `NET.role`: `'A'` é quem criou a sala, `'S'` é o espectador, os outros são ids de convidado. Quem criou é o dono da verdade e repassa (`relay`).
 - Fase da campanha (`def`): `goal` (`lines`, `score`, `clear`, `golds`, `combo`, `empty`, `survive`, `harvest`, `petals`, `boss`), `setup` (`stones`, `golds`, `gum`, `ice`, `bamboo`, `puzzle`), `st` = regra das estrelas (`by`, `two`, `three`).

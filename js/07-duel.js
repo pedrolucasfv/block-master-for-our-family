@@ -85,7 +85,7 @@ function startDuel(cfg){
   if(cfg.handicapMe) eng.addStones(makeRng(cfg.seed+'|hc'),3);
   D={cfg,o,eng,rng:makeRng(cfg.seed),tray:[null,null,null],hold:null,score:0,placed:0,timeline:[[0,0]],undoUsed:false,snap:null,
      playing:false,over:false,paused:false,elapsed:0,lastTick:0,suddenAt:Infinity,pv:null,finalShown:false,lastBlind:0,
-     live:cfg.type==='live',wait:cfg.type!=='live'&&(TIMES[o.time]>0||!!o.sudden),powers:0,powerLines:0,frozenUntil:0,fog:null,nextGold:30000,others:[],opps:{}};
+     live:cfg.type==='live',wait:cfg.type!=='live'&&(TIMES[o.time]>0||!!o.sudden||!!o.ramp),powers:0,powerLines:0,frozenUntil:0,fog:null,nextGold:30000,others:[],opps:{}};
   if(D.live){ D.others=(cfg.players||[]).filter(id=>id!==NET.role); D.others.forEach(id=>D.opps[id]={score:0,mini:'',b:'',info:null}); D.teams=cfg.teams||null; D.myTeam=D.teams?D.teams[NET.role]:null; }
   resetScore(); animTimers.forEach(clearTimeout); $('#fx').innerHTML=''; BC.reset();
   $('#gLabel').textContent=cfg.label; $('#gMute').textContent=muted?'🔇':'🔊';
@@ -200,7 +200,18 @@ function duelCheckStuck(){ if(!D.playing) return; const ps=[...D.tray,D.hold].fi
   if(holdRescue(D.tray,D.hold,D.o.hold)){ D.holdHint=true; toast('Nenhuma peça cabe: guarde a peça para receber peças novas'); holdPulse(true); setStatus('Guarde a peça!',true); return; }
   duelEnd('stuck'); }
 function holdPulse(on){ const h=$('#holdSlot'); if(h) h.classList.toggle('pulse',!!on); }
-function armSudden(){ if(D&&D.o.sudden) D.suddenAt=D.elapsed+5000; }
+function armSudden(){ if(!D) return; if(D.o.sudden) D.suddenAt=D.elapsed+5000; else if(D.o.ramp){ const l=rampLim(D.elapsed); D.suddenAt=l?D.elapsed+l*1000:Infinity; } }
+/* Desafio do dia: tempo livre no começo, depois um limite por peça que vai apertando. [a partir de (s), segundos por peça] */
+const RAMP=[[180,8],[360,5],[540,3]];
+function rampLim(el){ let l=0; for(const [t,s] of RAMP) if(el>=t*1000) l=s; return l; }
+function rampTick(){
+  const el=D.elapsed, l=rampLim(el);
+  if(l!==(D.rampL||0)){ D.rampL=l; D.suddenAt=Math.min(D.suddenAt,el+l*1000); praise(`⏱ Agora ${l} s por peça!`); SFX.alert(); }
+  if(!l){ const nx=RAMP[0][0]*1000-el; setStatus(`Tempo livre por mais ${fmtT(nx)} · depois ${RAMP[0][1]} s por peça`,false); return true; }
+  const left=D.suddenAt-el, nxt=RAMP.find(([t])=>t*1000>el);
+  setStatus(`⏱ ${(Math.max(0,left)/1000).toFixed(1).replace('.',',')} s para pôr a peça`+(nxt?` · em ${fmtT(nxt[0]*1000-el)}: ${nxt[1]} s`:''),left<2000);
+  if(left<=0){ duelEnd('sudden'); return false; } return true;
+}
 function duelTick(t){
   if(!D||D.over) return;
   const dt=Math.min(1000,t-D.lastTick); D.lastTick=t;
@@ -214,6 +225,7 @@ function duelTick(t){
       const s=Math.ceil(left/1000); if(s<=5&&s>0&&s!==D.lastBeep){ D.lastBeep=s; SFX.tick(); }
       if(left<=0){ duelEnd('time'); return; } }
     else if(GOALS[D.o.goal]) $('#timebarFill').style.transform=`scaleX(${Math.min(1,D.score/GOALS[D.o.goal])})`;
+    if(D.o.ramp&&!rampTick()) return;
     if(D.o.sudden){ const l=D.suddenAt-D.elapsed; setStatus('Coloque a peça: '+(Math.max(0,l)/1000).toFixed(1).replace('.',',')+' s',l<2000); if(l<=0){ duelEnd('sudden'); return; } }
     if(D.o.play===2&&t-D.lastBlind>250){ D.lastBlind=t; renderBoard(D.animBoard||D.eng.b,D.o,D.pv); }
     if(D.frozenUntil&&D.elapsed>D.frozenUntil){ D.frozenUntil=0; renderDuel(); }

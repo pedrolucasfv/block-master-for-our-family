@@ -45,7 +45,7 @@ function rkCampEnd(info,cfg){
   rkSyncMe();
 }
 /* Desafio do dia: a chave do jogo é "AAAA-MM-DD" (com tempo) ou "AAAA-MM-DD|S" (sem tempo) */
-const rkDayOf=key=>{ const [dia,s]=String(key).split('|'); return {dia,v:s?'s':'t'}; };
+const rkDayOf=key=>({dia:String(key).split('|')[0],v:'t'}); /* um modo só desde a 1.7 (no banco, var 't') */
 /* fim de uma partida do Desafio do dia: manda o resultado (só a partida jogada agora; o que foi jogado antes da versão 1.7 não entra) */
 function rkDailyEnd(d){ if(!rkOn()||!myNick()) return; const k=rkDayOf(d.cfg.key); rkQueue('enviar_diario',{p_nome:myNick(),p_dia:k.dia,p_var:k.v,p_pontos:d.score,p_linhas:d.eng.lines}); }
 const rkDayAdd=(dia,n)=>{ const [y,m,dd]=dia.split('-').map(Number); return todayKey(new Date(y,m-1,dd+n)); };
@@ -54,8 +54,8 @@ const RK_MES=['janeiro','fevereiro','março','abril','maio','junho','julho','ago
 /* ranking do Desafio do dia, na caixa sel: aba "Dia" (pontos, com setas para os dias anteriores) e aba "Vitórias do mês" (quantas vezes ficou em 1º) */
 function rkDailyBox(sel,key){
   const box=$(sel); if(!box) return; if(!rkOn()){ box.hidden=true; return; }
-  const k=rkDayOf(key), hoje=todayKey(), st={modo:'dia',dia:k.dia,mes:rkMonth(k.dia,0)};
-  box.innerHTML=`<p class="muted" style="margin-top:12px">🏆 Ranking do Desafio do dia${k.v==='s'?' (sem tempo)':''}</p><div class="tabs rktabs"><button type="button" data-m="dia" class="sel">📅 Dia</button><button type="button" data-m="mes">🥇 Vitórias do mês</button></div>
+  const k=rkDayOf(key), hoje=diaBR(), st={modo:'dia',dia:k.dia,mes:rkMonth(k.dia,0)};
+  box.innerHTML=`<p class="muted" style="margin-top:12px">🏆 Ranking do Desafio do dia</p><div class="tabs rktabs"><button type="button" data-m="dia" class="sel">📅 Dia</button><button type="button" data-m="mes">🥇 Vitórias do mês</button></div>
     <div class="rknav"><button type="button" class="chip" data-d="-1" aria-label="Anterior">‹</button><b></b><button type="button" class="chip" data-d="1" aria-label="Próximo">›</button></div><div class="rklist"></div>`+rkNoNick();
   const list=box.querySelector('.rklist'), lab=box.querySelector('.rknav b'), next=box.querySelector('[data-d="1"]');
   const load=()=>{

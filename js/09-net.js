@@ -80,7 +80,7 @@ $('#scanCancel').addEventListener('click',stopScan);
    O criador repassa as mensagens entre os convidados. Ids: A (criador), B, C, D, E, F. */
 function myNick(){ return String(store.get('ddb_nick','')||'').trim().slice(0,16); }
 function nm(id,you=true){ if(!id) return 'Alguém'; if(id==='npc') return npcName(); if(!you&&D&&D.cfg.npc&&id===NET.role) return myNick()||'Você'; if(you&&id===NET.role) return 'Você'; const n=NET.names[id]; return n||('Jogador '+(IDS.indexOf(id)+1)); }
-function myDaily(){ const dl=store.get('ddb_daily',{}), tk=todayKey(); return {key:tk,t:dl[tk]?dl[tk].score:null,s:dl[tk+'|S']?dl[tk+'|S'].score:null}; }
+function myDaily(){ const dl=store.get('ddb_daily',{}), tk=diaBR(), r=dl[tk+'|R']; return {key:tk,t:r?r.score:null,s:null}; }
 function rtcOk(){ if(typeof RTCPeerConnection!=='function'){ toast('Este navegador não permite conexão direta.'); return false; } return true; }
 /* onGone: a conexão caiu de vez (falhou, fechou, ou ficou "desconectada" por mais de 15 s) */
 function newPC(onFail,onGone){
@@ -364,8 +364,8 @@ function renderLobby(){
   $('#lobbyAdd').hidden=!host||n>=MAXP; $('#lobbySpec').hidden=!host||!!NET.peers.S;
   $('#lobbySimRow').hidden=!host||!devOn(); $('#lobbySim').hidden=n>=MAXP; $('#lobbySimDel').hidden=!SIMS.length;
   if(NET.specOn||NET.peers.S) $('#lobbyPlayers').insertAdjacentHTML('beforeend','<span>📺 Espectador</span>');
-  const tk=todayKey(), fmtD=v=>v!=null?fmtN(v):'–';
-  $('#lobbyDaily').innerHTML=ids.map(id=>{ const d=id===NET.role?myDaily():(NET.daily[id]&&NET.daily[id].key===tk?NET.daily[id]:{}); return `<div class="kv"><span>${esc(nm(id))}</span><b>${fmtD(d.t)} · ${fmtD(d.s)}</b></div>`; }).join('')+'<p class="muted">Com tempo · sem tempo. Traço quer dizer que ainda não jogou.</p>';
+  const tk=diaBR(), fmtD=v=>v!=null?fmtN(v):'–';
+  $('#lobbyDaily').innerHTML=ids.map(id=>{ const d=id===NET.role?myDaily():(NET.daily[id]&&NET.daily[id].key===tk?NET.daily[id]:{}); return `<div class="kv"><span>${esc(nm(id))}</span><b>${fmtD(d.t)}</b></div>`; }).join('')+'<p class="muted">Pontos no Desafio do dia de hoje. Traço quer dizer que ainda não jogou.</p>';
   $('#lobbyCard').classList.toggle('ro',!host);
   /* estilos de jogo agrupados: individual, em times e em cooperação */
   $('#typeSeg').innerHTML=TYPE_GROUPS.map(([g,ks])=>`<div class="tgroup"><small>${g}</small><div class="seg">${ks.map(k=>`<button type="button" data-k="${k}" class="${L.type===k?'sel':''}">${TYPES[k]}</button>`).join('')}</div></div>`).join('');

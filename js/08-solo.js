@@ -79,11 +79,10 @@ $('#btnJoin').addEventListener('click',join);
 $('#codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
 $('#codeIn').addEventListener('input',()=>$('#joinErr').textContent='');
 function showReady(){
-  $('#readyResult').innerHTML=''; $('#btnStart').hidden=false; $('#dailySeg').hidden=true;
+  $('#readyResult').innerHTML=''; $('#btnStart').hidden=false;
   if(setup.type==='daily'){
     $('#readyTitle').textContent='Desafio do dia'; $('#readyCode').textContent=dailyCode(setup.key);
-    $('#dailySeg').hidden=false; $$('#dailySeg button').forEach(b=>b.classList.toggle('sel',(b.dataset.v==='1')===setup.timed));
-    $('#readyChips').innerHTML=summary(setup.opts,'duel').map(s=>`<span>${s}</span>`).join('');
+    $('#readyChips').innerHTML=['Clássico','⏱ tempo por peça que aperta'].map(s=>`<span>${s}</span>`).join('');
     $('#readySeries').textContent='';
     const done=store.get('ddb_daily',{})[setup.key];
     if(done){
@@ -91,7 +90,7 @@ function showReady(){
       $('#readyResult').innerHTML=`<div class="card"><div class="endscore">${fmtN(done.score)}</div><p class="muted">${done.lines} linhas · combo x${done.combo}</p><button class="btn" id="dailyShare">Compartilhar resultado</button></div>`;
       $('#btnStart').hidden=true;
       $('#dailyShare').addEventListener('click',()=>{ let t=`Duelo de Blocos · Desafio do dia ${dailyCode(setup.key)}\n${fmtN(done.score)} pontos · ${done.lines} linhas · combo x${done.combo}\nConsegue bater?`; const l=gameLink(); if(l) t+='\n'+l; shareText(t); });
-    } else $('#readyHint').textContent='Mesmas peças para todo mundo hoje. Vale uma tentativa com tempo e uma sem tempo: confira se o código é igual no outro celular.';
+    } else $('#readyHint').textContent=`Mesmas peças para todo mundo hoje, uma tentativa por dia. Os primeiros ${RAMP[0][0]/60} minutos são livres; depois você tem ${RAMP.map(([t,x])=>x+' s por peça'+(t>RAMP[0][0]?` (a partir de ${t/60} min)`:'')).join(', ')}.`;
     $('#readyResult').insertAdjacentHTML('beforeend','<div id="rkDaily"></div>'); rkDailyBox('#rkDaily',setup.key);
   } else {
     const n=SERIES_N[setup.opts.series], need=Math.ceil(n/2);
@@ -109,5 +108,4 @@ $('#btnStart').addEventListener('click',()=>{
   if(setup.type==='daily') startDuel({type:'daily',opts:setup.opts,seed:'DAILY|'+setup.key,label:'Desafio '+dailyCode(setup.key),code:dailyCode(setup.key),key:setup.key});
   else startDuel({type:'duel',opts:setup.opts,seed:'D|'+setup.norm+'|'+setup.round,label:setup.code+(setup.round>1?' · R'+setup.round:''),code:setup.code});
 });
-$('#goDaily').addEventListener('click',()=>{ setup={type:'daily',day:todayKey(),round:1,ser:{me:0,other:0}}; setDaily(true); showReady(); });
-$$('#dailySeg button').forEach(b=>b.addEventListener('click',()=>{ setDaily(b.dataset.v==='1'); showReady(); }));
+$('#goDaily').addEventListener('click',()=>{ setup={type:'daily',day:diaBR(),round:1,ser:{me:0,other:0}}; setDaily(); showReady(); });

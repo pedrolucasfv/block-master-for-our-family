@@ -34,6 +34,8 @@ const store={
 const NF=(()=>{ try{ return new Intl.NumberFormat('pt-BR'); }catch(e){ return null; } })();
 const fmtN = n => NF?NF.format(Math.round(n)):String(Math.round(n));
 function fmtT(ms){ const s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+/* dia de hoje no horário de Brasília (o Desafio do dia vira à meia-noite de Brasília, em qualquer celular) */
+function diaBR(){ try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()); }catch(e){ return todayKey(); } }
 function todayKey(d=new Date()){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function show(id){ grC=null; $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id)); $('#app').classList.toggle('wide',id==='game'); $('#app').classList.toggle('tv',id==='spec'); if(id==='spec') requestAnimationFrame(()=>{ specRender(); if(!SP.raf) SP.raf=requestAnimationFrame(specTick); }); if(id==='game') requestAnimationFrame(layout); if(id==='home') renderHome(); if(id==='with') renderWith(); if(id!=='game'&&id!=='spec'){ if(FORCE_SKIN) setForceSkin(null); if(id!=='camp') setWorldLook(null); } if(id!=='game') bossHide(); }
 let toastT=0;
