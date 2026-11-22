@@ -485,11 +485,11 @@ textarea.sgta{font:inherit;font-size:15px;line-height:1.4;word-break:normal;min-
 .tutdots{display:flex;gap:6px}.tutdots i{flex:1;height:6px;border-radius:99px;background:var(--gline)}.tutdots i.ok{background:var(--win)}.tutdots i.on{background:var(--text)}
 .tuttxt p{margin:0;font-size:16px;line-height:1.45}
 .tutsub{font-size:12px;text-align:center;margin:6px 0}
-.tuthud{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0 6px;min-height:44px}
-.tuthud>div:first-child{display:flex;flex-direction:column;align-items:center;line-height:1}.tuthud b{font-family:var(--hfont);font-size:30px;font-variant-numeric:tabular-nums}.tuthud small{font-size:11px;color:var(--muted)}
+.tuthud{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 4px;min-height:44px}.tuthud .chip{border:0;font:inherit;font-size:18px;cursor:pointer;color:var(--text)}.tuthud>span{min-width:40px}
+.tutpts{display:flex;flex-direction:column;align-items:center;line-height:1}.tuthud b{font-family:var(--hfont);font-size:30px;font-variant-numeric:tabular-nums}.tuthud small{font-size:11px;color:var(--muted)}
 .tutcombo{display:flex;flex-direction:column;align-items:center;font-weight:700;color:var(--gold)}.tutcombo:empty{display:none}.tutcombo small{font-weight:500;color:var(--muted);font-size:11px;margin-top:2px}
 .tutwrap{position:relative;display:flex;justify-content:center}
-.tutboard{--cs:var(--tcs,36px);padding:6px;border-radius:18px;background:var(--board);box-shadow:var(--boardFx);border:2px solid var(--frame);touch-action:none;cursor:pointer}
+.tutboard{--cs:var(--tcs,36px);padding:6px;border-radius:18px;background:var(--board);box-shadow:var(--boardFx);border:2px solid var(--frame);touch-action:manipulation;cursor:pointer}
 .tutgrid{display:grid;grid-template-columns:repeat(8,var(--cs));grid-auto-rows:var(--cs)}
 .tutgrid.mini{--cs:16px;padding:4px;border-radius:10px;background:var(--board);box-shadow:var(--boardFx);margin:6px auto 0;width:max-content}
 .tq{position:relative;width:var(--cs);height:var(--cs)}
@@ -498,8 +498,8 @@ textarea.sgta{font:inherit;font-size:15px;line-height:1.4;word-break:normal;min-
 .tq.dica::before{outline:3px dashed var(--gold);outline-offset:-3px;animation:tutPulsa 1s ease-in-out infinite}
 .tq.sai .blk{animation:tutSai .36s ease-in forwards}.tq.bad .blk{outline:3px solid var(--bad)}
 .martelo .tq:not(.vazio){cursor:crosshair}.martelo .tq:not(.vazio) .blk{animation:tutTreme 1.2s ease-in-out infinite}
-.tuttray{display:flex;justify-content:space-around;align-items:center;gap:6px;margin-top:12px;min-height:calc(var(--tcs,36px)*1.9);touch-action:none}
-.tslot{flex:1;display:flex;align-items:center;justify-content:center;min-height:calc(var(--tcs,36px)*1.9);border-radius:16px;cursor:grab}
+.tuttray{display:flex;justify-content:space-around;align-items:center;gap:6px;margin-top:10px;min-height:calc(var(--tcs,36px)*1.9)}
+.tslot{touch-action:none;flex:1;display:flex;align-items:center;justify-content:center;min-height:calc(var(--tcs,36px)*1.9);border-radius:16px;cursor:grab}
 .tslot.sel{background:var(--gline);outline:2px solid var(--text);outline-offset:-2px}
 .tpc{position:relative;--cs:calc(var(--tcs,36px)*.55);transition:opacity .2s}.tpc.nofit{opacity:.3;filter:grayscale(.9)}.tpc.hide{opacity:0}.tpc.pulsa{animation:tutPulsa 1s ease-in-out infinite}
 .tutdrag{position:fixed;left:0;top:0;z-index:60;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.3))}
@@ -522,3 +522,20 @@ textarea.sgta{font:inherit;font-size:15px;line-height:1.4;word-break:normal;min-
 @keyframes tutSai{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15);filter:brightness(1.6)}100%{transform:scale(.2);opacity:0}}
 @keyframes tutTreme{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
 @keyframes tutSobe{0%{transform:translateY(10px) scale(.6);opacity:0}20%{transform:translateY(0) scale(1.15);opacity:1}70%{opacity:1}100%{transform:translateY(-60px) scale(1);opacity:0}}
+/* tutorial: botão Próximo fixo no topo, tela dividida, robô parceiro e adversário */
+#tut .tutnav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;margin:-6px -4px 8px;padding:6px 4px;background:color-mix(in srgb,var(--bg2) 80%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:0 0 16px 16px}
+#tut .tutnav .tutnext{width:auto!important;margin-left:auto;min-width:120px}
+#tut .tutnav .tutnext.pulsa{animation:tutPulsa .9s ease-in-out 3}
+.tuttop{margin-bottom:8px}.tuttxt p{font-size:15px}.tutmsg{margin:10px 0 0}
+.tq.fora.vazio::before{background:color-mix(in srgb,var(--slot) 55%,#000);opacity:.55}
+.tq.fora:not(.vazio) .blk{filter:saturate(.75) brightness(.92)}
+.tq.ghbad .blk{background:var(--bad)!important;opacity:.45}
+.tq.novo .blk{animation:tutNovo 1.1s ease-out}
+.tutleg{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);margin:2px 0}
+.tutleg span{display:inline-block;width:14px;height:14px;border-radius:4px;background:var(--slot);box-shadow:var(--slotFx)}.tutleg .lg2{background:color-mix(in srgb,var(--slot) 55%,#000);opacity:.6;margin-left:10px}
+.tutvez{text-align:center;font-weight:700;font-size:14px;min-height:20px;margin:2px 0 6px}.tutvez:empty{min-height:0;margin:0}.tutvez.dele{color:var(--gold);animation:tutPulsa 1s ease-in-out infinite}
+.tutriv{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 8px}.tutriv>div:first-child{display:flex;flex-direction:column;align-items:flex-end;font-size:14px}.tutriv small{color:var(--muted);font-size:12px}
+.tutriv .tutgrid.mini{--cs:13px;margin:0}
+#tutRivB.pisca{animation:tutPulsa .5s ease-in-out 2}
+.tutdois{flex-direction:row;flex-wrap:wrap;justify-content:center}.tutdois .mpic{width:45%!important}.tutdois>div{flex-basis:100%}
+@keyframes tutNovo{0%{transform:scale(.6);filter:brightness(1.8)}60%{transform:scale(1.08)}100%{transform:none}}

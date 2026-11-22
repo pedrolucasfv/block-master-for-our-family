@@ -3,6 +3,11 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.21 · 22/11/2026
+- 🪟 **Tutorial da tela dividida:** aula nova em que você joga a tela dividida de verdade com um 🤖 Robô parceiro: cada um na sua metade, a regra de que a peça precisa tocar a sua parte (mas pode atravessar o meio), os dois jogando ao mesmo tempo para limpar linhas juntos, os cantos com 3 ou 4 jogadores e os Times no tabuleiro dividido, com ataque no outro time.
+- 👥 **Outros estilos para jogar:** outra aula nova, também com o Robô: duelo ao vivo (com a miniatura do tabuleiro dele), co-op em turnos e versus, em que você escolhe a peça que o outro vai jogar.
+- ⚡ **Tutorial mais leve:** o tabuleiro do tutorial não trava mais ao arrastar, a tela não desce sozinha e o botão "Próximo" fica fixo lá em cima, ao lado do Voltar.
+
 ## 1.20 · 22/11/2026
 - 🎓 **Como jogar:** novo botão no menu com um tutorial que você joga enquanto aprende. São 7 aulas curtinhas, cada uma com um tabuleiro de treino: o básico (encaixar e limpar linhas e colunas), combo e tabuleiro limpo, blocos especiais (bomba, gelo, coringa e bônus de cor), ataques e blocos blindados, blocos de poder (com martelo e bloco dourado), os modos Gravidade e Cego, e onde jogar (o menu, os estilos da sala e todos os modificadores). Tem perguntas rápidas no fim das aulas, dica 💡 quando travar e ✓ nas aulas que você já fez.
 
