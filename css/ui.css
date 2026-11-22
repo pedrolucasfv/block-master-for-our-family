@@ -275,3 +275,9 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 /* Meus desafios: espaço de uns 4 desafios, mesmo com menos */
 .dsmine{min-height:300px}
 #goChal{margin-bottom:12px}
+/* ranking do Desafio do dia: abas e setas de dia/mês */
+.rktabs{margin:6px 0 8px}
+.rknav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.rknav b{flex:1;text-align:center}
+.rknav .chip{min-width:44px;font-size:20px;line-height:1}
+.rknav .chip:disabled{opacity:.35}

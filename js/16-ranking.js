@@ -30,7 +30,6 @@ function rkSyncMe(){
   const bs=store.get('ddb_bests',{}), solo=Math.max(soloStats().bestScore||0,...Object.keys(bs).filter(k=>k.startsWith('sozinho|')).map(k=>bs[k]||0),0);
   const est=campTotal(campLoad('solo')), key=[nome.toLowerCase(),est,solo].join('|');
   if(store.get('ddb_rksync','')!==key){ store.set('ddb_rksync',key); rkQueue('salvar_jogador',{p_nome:nome,p_estrelas:est,p_solo:solo}); } else rkFlush();
-  rkDailySync();
   /* foto do perfil: vai junto uma miniatura (para as listas); a grande só é baixada quando alguém toca para ampliar */
   const ph=store.get('ddb_photo',''), pk=[nome.toLowerCase(),ph.length,ph.slice(-24)].join('|');
   if(store.get('ddb_rkfoto','')!==pk) rkMini(ph).then(mini=>{ store.set('ddb_rkfoto',pk); rkQueue('salvar_foto',{p_nome:nome,p_foto:ph,p_mini:mini}); }).catch(()=>{});
@@ -47,20 +46,33 @@ function rkCampEnd(info,cfg){
 }
 /* Desafio do dia: a chave do jogo é "AAAA-MM-DD" (com tempo) ou "AAAA-MM-DD|S" (sem tempo) */
 const rkDayOf=key=>{ const [dia,s]=String(key).split('|'); return {dia,v:s?'s':'t'}; };
-/* manda o resultado do dia guardado no aparelho (de hoje e de ontem), uma vez só por partida */
-function rkDailySync(){ if(!rkOn()||!myNick()) return; const dl=store.get('ddb_daily',{}), sent=store.get('ddb_rkdia',{}), ok=[todayKey(),todayKey(new Date(Date.now()-864e5))];
-  Object.keys(dl).forEach(key=>{ const k=rkDayOf(key); if(sent[key]||!ok.includes(k.dia)) return; sent[key]=1;
-    rkQueue('enviar_diario',{p_nome:myNick(),p_dia:k.dia,p_var:k.v,p_pontos:dl[key].score||0,p_linhas:dl[key].lines||0}); });
-  store.set('ddb_rkdia',sent); }
-function rkDailyEnd(){ rkDailySync(); }
-/* top 10 do dia, na caixa sel (tela do desafio do dia e fim da partida) */
+/* fim de uma partida do Desafio do dia: manda o resultado (só a partida jogada agora; o que foi jogado antes da versão 1.7 não entra) */
+function rkDailyEnd(d){ if(!rkOn()||!myNick()) return; const k=rkDayOf(d.cfg.key); rkQueue('enviar_diario',{p_nome:myNick(),p_dia:k.dia,p_var:k.v,p_pontos:d.score,p_linhas:d.eng.lines}); }
+const rkDayAdd=(dia,n)=>{ const [y,m,dd]=dia.split('-').map(Number); return todayKey(new Date(y,m-1,dd+n)); };
+const rkMonth=(dia,n)=>{ const [y,m]=dia.split('-').map(Number); return todayKey(new Date(y,m-1+n,1)); };
+const RK_MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+/* ranking do Desafio do dia, na caixa sel: aba "Dia" (pontos, com setas para os dias anteriores) e aba "Vitórias do mês" (quantas vezes ficou em 1º) */
 function rkDailyBox(sel,key){
   const box=$(sel); if(!box) return; if(!rkOn()){ box.hidden=true; return; }
-  const k=rkDayOf(key); box.innerHTML='<p class="muted">🏆 Carregando o ranking de hoje…</p>';
-  setTimeout(()=>rkFetch(`diario?dia=eq.${k.dia}&var=eq.${k.v}&select=pontos,linhas,jogadores(nome)&order=pontos.desc,quando.asc&limit=10`)
-    .then(rows=>{ if(!box.isConnected) return; const list=rows.map(r=>({nome:(r.jogadores&&r.jogadores.nome)||'?',pontos:r.pontos,linhas:r.linhas}));
-      box.innerHTML=`<p class="muted" style="margin-top:12px">🏆 Ranking de hoje${k.v==='s'?' (sem tempo)':''}</p>`+(list.length?rkRows(list,r=>`${fmtN(r.pontos)} pts`):'<p class="muted">Ninguém jogou ainda hoje. Seja o primeiro!</p>')+rkNoNick(); })
-    .catch(()=>{ if(box.isConnected) box.innerHTML='<p class="muted">🏆 Ranking indisponível sem internet.</p>'; }),store.get('ddb_rkq',[]).length?1500:0);
+  const k=rkDayOf(key), hoje=todayKey(), st={modo:'dia',dia:k.dia,mes:rkMonth(k.dia,0)};
+  box.innerHTML=`<p class="muted" style="margin-top:12px">🏆 Ranking do Desafio do dia${k.v==='s'?' (sem tempo)':''}</p><div class="tabs rktabs"><button type="button" data-m="dia" class="sel">📅 Dia</button><button type="button" data-m="mes">🥇 Vitórias do mês</button></div>
+    <div class="rknav"><button type="button" class="chip" data-d="-1" aria-label="Anterior">‹</button><b></b><button type="button" class="chip" data-d="1" aria-label="Próximo">›</button></div><div class="rklist"></div>`+rkNoNick();
+  const list=box.querySelector('.rklist'), lab=box.querySelector('.rknav b'), next=box.querySelector('[data-d="1"]');
+  const load=()=>{
+    const dia=st.modo==='dia'; let [y,m,dd]=(dia?st.dia:st.mes).split('-').map(Number);
+    lab.textContent=dia?(st.dia===hoje?'Hoje':st.dia===rkDayAdd(hoje,-1)?'Ontem':`${dd}/${String(m).padStart(2,'0')}`):`${RK_MES[m-1][0].toUpperCase()+RK_MES[m-1].slice(1)} de ${y}`;
+    next.disabled=dia?st.dia>=hoje:st.mes>=rkMonth(hoje,0);
+    list.innerHTML='<p class="muted">Carregando…</p>';
+    const q=dia?rkFetch(`diario?dia=eq.${st.dia}&var=eq.${k.v}&select=pontos,linhas,jogadores(nome)&order=pontos.desc,quando.asc&limit=10`).then(r=>r.map(x=>({nome:(x.jogadores&&x.jogadores.nome)||'?',txt:`${fmtN(x.pontos)} pts`})))
+      :rkFetch('rpc/vitorias_mes',{body:{p_mes:st.mes,p_var:k.v}}).then(r=>(r||[]).map(x=>({nome:x.nome,txt:`${x.vitorias} ${x.vitorias==1?'vitória':'vitórias'}`})));
+    q.then(rows=>{ if(!box.isConnected) return;
+      list.innerHTML=rows.length?rkRows(rows,r=>r.txt)+(dia?'':'<p class="muted" style="font-size:12px">Conta quem terminou o dia em 1º. O dia de hoje entra quando acabar.</p>')
+        :`<p class="muted">${dia?(st.dia===hoje?'Ninguém jogou ainda hoje. Seja o primeiro!':'Ninguém jogou nesse dia.'):'Ninguém venceu um dia neste mês ainda.'}</p>`; })
+     .catch(()=>{ if(box.isConnected) list.innerHTML='<p class="muted">Ranking indisponível sem internet.</p>'; });
+  };
+  box.querySelectorAll('.rktabs button').forEach(b=>b.addEventListener('click',()=>{ st.modo=b.dataset.m; box.querySelectorAll('.rktabs button').forEach(x=>x.classList.toggle('sel',x===b)); load(); }));
+  box.querySelectorAll('.rknav button').forEach(b=>b.addEventListener('click',()=>{ const n=+b.dataset.d; if(st.modo==='dia') st.dia=rkDayAdd(st.dia,n); else st.mes=rkMonth(st.mes,n); load(); }));
+  setTimeout(load,store.get('ddb_rkq',[]).length?1500:0);
 }
 function rkRows(list,fmt){
   const me=myNick().toLowerCase();

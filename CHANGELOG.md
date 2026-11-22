@@ -4,7 +4,7 @@ A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
 ## 1.7 · 22/11/2026
-- ☀️ **Ranking do Desafio do dia:** quem jogou hoje aparece num ranking da família (com tempo e sem tempo), na tela do desafio e no fim da partida.
+- ☀️ **Ranking do Desafio do dia:** ranking de cada dia (com setas para ver os dias anteriores) e **vitórias do mês** (quantas vezes cada um terminou o dia em 1º), com tempo e sem tempo. Começa a contar a partir desta versão.
 - 🔔 **Aviso de manhã** (8h): "O Desafio do dia saiu!", contando quem venceu ontem.
 - 👑 **"Tomou o 1º lugar!"**: aviso para quem estava em 1º no Desafio do dia e foi passado.
 - 🏆 **"Passou você!"**: aviso quando alguém bate o seu recorde numa fase da campanha. Tocar no aviso abre a fase.

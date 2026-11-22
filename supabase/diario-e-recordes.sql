@@ -55,6 +55,8 @@ revoke all on function enviar_recorde(text,text,int,numeric,boolean) from public
 grant execute on function enviar_recorde(text,text,int,numeric,boolean) to anon, authenticated;
 
 -- ===== Ranking do Desafio do dia =====
+/* "hoje" no horário de Brasília (o servidor usa o horário de Londres) */
+create or replace function hoje_br() returns date language sql stable as $$ select (now() at time zone 'America/Sao_Paulo')::date $$;
 create table if not exists diario (
   chave text not null references jogadores(chave) on delete cascade,
   dia date not null,
@@ -73,7 +75,7 @@ create or replace function enviar_diario(p_nome text, p_dia date, p_var text, p_
 language plpgsql security definer set search_path = public as $$
 declare k text := rk_chave(p_nome); lider record;
 begin
-  if p_var not in ('t','s') or p_dia not between current_date - 1 and current_date + 1 or p_pontos not between 0 and 10000000 or p_linhas not between 0 and 100000 then raise exception 'valor inválido'; end if;
+  if p_var not in ('t','s') or p_dia not between hoje_br() - 1 and hoje_br() + 1 or p_pontos not between 0 and 10000000 or p_linhas not between 0 and 100000 then raise exception 'valor inválido'; end if;
   perform salvar_jogador(p_nome, 0, 0);
   select d.chave, d.pontos into lider from diario d where d.dia = p_dia and d.var = p_var order by d.pontos desc, d.quando asc limit 1;
   insert into diario(chave, dia, var, pontos, linhas) values (k, p_dia, p_var, p_pontos, p_linhas) on conflict do nothing;
@@ -89,13 +91,25 @@ revoke all on function enviar_diario(text,date,text,int,int) from public;
 grant execute on function enviar_diario(text,date,text,int,int) to anon, authenticated;
 grant select on diario to anon, authenticated;
 
+/* vitórias do mês: quantos dias cada um terminou em 1º (empate de pontos: vale quem jogou primeiro). O dia de hoje só conta quando acabar. */
+create or replace function vitorias_mes(p_mes date, p_var text) returns table(nome text, chave text, vitorias bigint)
+language sql stable security definer set search_path = public as $$
+  select j.nome, j.chave, count(*) from (
+    select distinct on (d.dia) d.dia, d.chave from diario d
+    where d.var = p_var and d.dia >= date_trunc('month', p_mes)::date and d.dia < (date_trunc('month', p_mes) + interval '1 month')::date and d.dia < hoje_br()
+    order by d.dia, d.pontos desc, d.quando asc) w
+  join jogadores j on j.chave = w.chave group by j.nome, j.chave order by count(*) desc, j.nome
+$$;
+revoke all on function vitorias_mes(date,text) from public;
+grant execute on function vitorias_mes(date,text) to anon, authenticated;
+
 -- ===== Aviso de manhã: "o Desafio do dia saiu" (todo dia às 8h de Brasília = 11h UTC) =====
 create or replace function avisar_diario() returns void
 language plpgsql security definer set search_path = public as $$
 declare v record; corpo text;
 begin
   select j.nome, d.pontos into v from diario d join jogadores j on j.chave = d.chave
-  where d.dia = current_date - 1 and d.var = 't' order by d.pontos desc, d.quando asc limit 1;
+  where d.dia = hoje_br() - 1 and d.var = 't' order by d.pontos desc, d.quando asc limit 1;
   corpo := case when v.nome is not null then 'Ontem quem venceu foi ' || v.nome || ' com ' || v.pontos || ' pontos. Consegue passar hoje?'
                 else 'Mesmas peças para toda a família. Quem faz mais pontos hoje?' end;
   perform mandar_avisos(jsonb_build_array(jsonb_build_object('title', '☀️ O Desafio do dia saiu!', 'body', corpo, 'url', '?dia=1', 'tag', 'diario',
