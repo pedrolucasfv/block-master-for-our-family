@@ -29,7 +29,6 @@
       <button class="btn big" id="goWith">Jogar com alguém<small>por código ou conectado</small></button>
       <button class="btn big" id="goCamp">🧸 Campanha<small>mundos, fases e chefões</small></button>
       <button class="btn" id="goDaily">Desafio do dia</button>
-      <button class="btn" id="goChal" hidden>⚔️ Desafios a distância</button>
       <div class="row"><button class="btn" id="goHistory">Histórico</button><button class="btn" id="goSettings">Configurações</button></div>
     </div>
     <p class="muted ver" id="verTxt"></p>
@@ -39,7 +38,7 @@
 <!-- DESAFIOS A DISTÂNCIA -->
 <section id="chal" class="screen">
   <div class="pad">
-    <div class="topnav"><button class="back" data-go="home">← Voltar</button></div>
+    <div class="topnav"><button class="back" data-go="with">← Voltar</button></div>
     <h1>⚔️ Desafios</h1>
     <p class="muted">Melhor de 5: cada um joga a rodada quando puder, com as mesmas peças. Quem fizer mais pontos leva a rodada.</p>
     <div id="chalMine"></div>
@@ -79,6 +78,7 @@
   <div class="pad">
     <div class="topnav"><button class="back" data-go="home">← Voltar</button></div>
     <h1>Jogar com alguém</h1>
+    <button class="btn primary big" id="goChal" hidden>⚔️ Meus desafios<small id="goChalSub">desafie alguém a distância: cada um joga quando puder</small></button>
     <div class="card night">
       <div><div class="muted">Placar da noite</div><b id="nightTxt">Você 0 × 0 Outro</b></div>
       <button class="btn small" id="nightReset" style="width:auto">Zerar</button>

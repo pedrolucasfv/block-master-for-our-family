@@ -260,9 +260,8 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 .recbar i{display:block;height:100%;width:0;background:#c62828;border-radius:inherit;animation:recfill linear forwards}
 @keyframes recfill{from{width:0}to{width:100%}}
 /* desafios: área "Meus desafios" sempre visível, fotos e foto ampliada */
-.dsmine{min-height:150px}
 .dssec{margin:12px 0 2px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.dsempty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:96px;color:var(--muted)}
+.dsempty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:220px;color:var(--muted)}
 .dsempty span{font-size:30px;opacity:.6}.dsempty p{margin:6px 0 0}
 .dswho{display:flex;align-items:center;gap:10px;min-width:0}
 .dsrow{align-items:center}
@@ -273,3 +272,6 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 .zoomov img{width:min(80vw,320px);height:min(80vw,320px);border-radius:24px;object-fit:cover;background:#333;box-shadow:0 10px 40px rgba(0,0,0,.5)}
 .zoomov b{font-size:20px}
 .dsvs{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:4px}.dsvs div{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}.dsvs>span{font-size:22px;font-weight:700;color:var(--muted)}
+/* Meus desafios: espaço de uns 4 desafios, mesmo com menos */
+.dsmine{min-height:300px}
+#goChal{margin-bottom:12px}

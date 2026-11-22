@@ -128,7 +128,10 @@ function dsRenderPeople(){
 }
 $('#chalFind').addEventListener('input',dsRenderPeople);
 $('#chalInvite').addEventListener('click',()=>dsNew(null,null));
-function dsBadge(n){ const b=$('#goChal'); if(b) b.textContent=n?`⚔️ Desafios · ${n} na sua vez`:'⚔️ Desafios a distância'; }
+/* aviso de "sua vez": no botão de Meus desafios e no "Jogar com alguém" do menu */
+function dsBadge(n){ const s=$('#goChalSub'), w=$('#goWith small'), t=n?`▶ ${n} ${n>1?'desafios':'desafio'} na sua vez`:'';
+  if(s) s.textContent=t||'desafie alguém a distância: cada um joga quando puder';
+  if(w){ if(!w.dataset.orig) w.dataset.orig=w.textContent; w.textContent=n?'⚔️ '+t.slice(2):w.dataset.orig; } }
 /* abriu o jogo por um link de desafio (?d=...) */
 function dsFromLink(){
   let id=null; try{ id=new URLSearchParams(location.search).get('d'); }catch(e){}
