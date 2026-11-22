@@ -26,8 +26,13 @@ function stepParts(){
 
 /* ===================== opções e códigos ===================== */
 /* 10 e 15 min ficam no fim da lista (o código do desafio só guarda 0 a 3) e só aparecem nos modos conectados */
-const TIMES=[120,180,300,0,600,900], TIME_L=['2 min','3 min','5 min','Sem limite','10 min','15 min'];
-const TIME_ORDER_NET=[0,1,2,4,5,3], TIME_ORDER_LOCAL=[0,1,2,3];
+const TIMES=[120,180,300,0,600,900,0], TIME_L=['2 min','3 min','5 min','Sem limite','10 min','15 min','Sem limite com progressão'];
+const TIME_ORDER_NET=[0,1,2,4,5,3,6], TIME_ORDER_LOCAL=[0,1,2,3,6];
+/* "Sem limite com progressão" (tempo 6): sem relógio geral, mas o tempo para pôr cada peça vai apertando (RAMP, no 07-duel).
+   Só nos modos em que cada um joga no seu tabuleiro (o relógio dos modos de tabuleiro único é outro). */
+const RAMP_TYPES=['solo','duel','live','tlive'];
+const rampOn=o=>!!o.ramp||o.time===6;
+const timeName=t=>TIMES[t]?TIME_L[t]:t===6?TIME_L[6]:'Sem limite';
 const PLAYS=['Clássico','Gravidade','Cego','Sem combo'];
 const GOALS=[0,500,1000,2000], GOAL_L=['Sem meta','500','1.000','2.000'];
 const SERIES_L=['Avulsa','Melhor de 3','Melhor de 5'], SERIES_N=[1,3,5];
@@ -68,11 +73,11 @@ function applies(type,k){
 }
 function buildOpts(el,o,type,cfg={}){
   const seg=(key,label,labels,order)=>applies(type,key)?`<div class="optrow"><label>${label}</label><div class="seg" data-k="${key}">${(order||labels.map((_,i)=>i)).map(i=>`<button type="button" data-v="${i}" class="${o[key]===i?'sel':''}">${labels[i]}</button>`).join('')}</div></div>`:'';
-  const local=type==='solo'||type==='duel'; if(local&&o.time>3) o.time=1;
+  const local=type==='solo'||type==='duel'; if(local&&o.time>3&&o.time!==6) o.time=1; if(o.time===6&&!RAMP_TYPES.includes(type)) o.time=3;
   const togs=(keys,label)=>{ const ks=keys.filter(k=>applies(type,k)); if(!ks.length) return '';
     return `<div class="optrow"><label>${label}</label><div class="toggles">${ks.map(k=>`<button type="button" class="tog ${o[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div></div>`; };
   const pane=(k,h)=>h?`<div class="opane" data-pane="${k}">${h}</div>`:'';
-  el.innerHTML=pane('regras',seg('time','Tempo',TIME_L,local?TIME_ORDER_LOCAL:TIME_ORDER_NET)+seg('play','Modo de jogo',PLAYS)+seg('goal','Meta de pontos',GOAL_L)+seg('series','Série',SERIES_L))
+  el.innerHTML=pane('regras',seg('time','Tempo',TIME_L,(local?TIME_ORDER_LOCAL:TIME_ORDER_NET).filter(t=>t!==6||RAMP_TYPES.includes(type)))+seg('play','Modo de jogo',PLAYS)+seg('goal','Meta de pontos',GOAL_L)+seg('series','Série',SERIES_L))
     +pane('mods',togs(['obstacles','heavy','sudden','color','final','undo','hold'],'Modificadores')+togs(['bomb','ice','wild'],'Blocos especiais'))+pane('net',togs(NETF,'Conectados'));
   if(cfg.ro) return; /* só leitura: quem entrou na sala vê, mas não muda */
   const ch=()=>{ if(cfg.onChange) cfg.onChange(); };
@@ -80,7 +85,7 @@ function buildOpts(el,o,type,cfg={}){
   el.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.t; o[k]=!o[k]; b.classList.toggle('on',o[k]); ch(); }));
 }
 function summary(o,type){
-  const a=[TIMES[o.time]?TIME_L[o.time]:'Sem limite de tempo', PLAYS[o.play]];
+  const a=[TIMES[o.time]?TIME_L[o.time]:o.time===6?TIME_L[6]:'Sem limite de tempo', PLAYS[o.play]];
   if(o.goal&&applies(type,'goal')) a.push('Meta '+GOAL_L[o.goal]);
   if(o.series&&applies(type,'series')) a.push(SERIES_L[o.series]);
   [...FLAGS,...NETF].forEach(k=>{ if(o[k]&&applies(type,k)) a.push(LABEL[k]); });
@@ -88,8 +93,8 @@ function summary(o,type){
 }
 const B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const WORDS=['SOL','LUA','MAR','GATO','PATO','BOLO','FLOR','MEL','RIO','URSO','SAPO','PIPA','UVA','KIWI','CAFE','PERA','MANGA','TIGRE','PANDA','COCO','FOCA','ONDA','DOCE','LOBO','NEVE','CAJU','BOTO','RAIO','VENTO','ILHA','ZEBRA','MILHO'];
-function optsToBits(o){ let v=o.time|(o.play<<2)|(o.goal<<4)|(o.series<<6); FLAGS.forEach((k,i)=>{ if(o[k]) v|=1<<(8+i); }); return v; }
-function bitsToOpts(v){ const o=defOpts(); o.time=v&3; o.play=(v>>2)&3; o.goal=(v>>4)&3; o.series=(v>>6)&3; if(o.series>2) o.series=0; FLAGS.forEach((k,i)=>o[k]=!!(v&(1<<(8+i)))); return o; }
+function optsToBits(o){ let v=(o.time===6?3:o.time)|(o.time===6?1<<18:0)|(o.play<<2)|(o.goal<<4)|(o.series<<6); FLAGS.forEach((k,i)=>{ if(o[k]) v|=1<<(8+i); }); return v; }
+function bitsToOpts(v){ const o=defOpts(); o.time=v&3; o.play=(v>>2)&3; o.goal=(v>>4)&3; o.series=(v>>6)&3; if(o.series>2) o.series=0; FLAGS.forEach((k,i)=>o[k]=!!(v&(1<<(8+i)))); if(v&(1<<18)) o.time=6; return o; }
 function enc4(v){ let s=''; for(let i=3;i>=0;i--) s+=B32[(v>>(5*i))&31]; return s; }
 function dec4(s){ let v=0; for(const ch of s){ const k=B32.indexOf(ch); if(k<0) return null; v=v*32+k; } return v; }
 function normCode(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
@@ -98,7 +103,7 @@ function parseCode(n){
   const rnd=n.slice(-2), w=n.slice(0,-6);
   const oc=n.slice(-6,-2).replace(/O/g,'0').replace(/[IL]/g,'1').replace(/U/g,'V');
   if(!/^\d\d$/.test(rnd)||!/^[A-Z]+$/.test(w)) return null;
-  const v=dec4(oc); if(v===null||v>=(1<<18)) return null;
+  const v=dec4(oc); if(v===null||v>=(1<<19)) return null;
   return {norm:w+oc+rnd, pretty:`${w}-${oc}-${rnd}`, opts:bitsToOpts(v)};
 }
 function makeCode(o){
@@ -122,7 +127,7 @@ function renderNight(){ $('#nightTxt').textContent=nightTxt(); $('#lobbyNight').
 $('#nightReset').addEventListener('click',()=>{ store.set('ddb_night',{me:0,other:0,tie:0,at:Date.now()}); renderNight(); });
 function addHist(rec){ const h=store.get('ddb_hist',[]); h.unshift(rec); store.set('ddb_hist',h.slice(0,150)); }
 function bestKey(kind,o){ if(kind==='solo') return 'sozinho|'+o.time+'|'+o.play; return kind==='coop'||kind==='halves' ? kind+'|'+PLAYS[o.play] : 'solo|'+PLAYS[o.play]; }
-function bestName(k){ const [kind,a,b]=k.split('|'); if(kind==='sozinho') return `Sozinho · ${TIME_L[+a]} · ${PLAYS[+b]}`; return ({solo:'Código e desafio',coop:'Dupla (co-op)',halves:'Dupla (metades)'}[kind]||kind)+' · '+a; }
+function bestName(k){ const [kind,a,b]=k.split('|'); if(kind==='sozinho') return `Sozinho · ${timeName(+a)} · ${PLAYS[+b]}`; return ({solo:'Código e desafio',coop:'Dupla (co-op)',halves:'Dupla (metades)'}[kind]||kind)+' · '+a; }
 function checkBest(kind,o,score){ const b=store.get('ddb_bests',{}); const k=bestKey(kind,o); const old=b[k]||0; if(score>old){ b[k]=score; store.set('ddb_bests',b); return old>0||score>0; } return false; }
 function getBest(kind,o){ return (store.get('ddb_bests',{})[bestKey(kind,o)])||0; }
 

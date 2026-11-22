@@ -5,7 +5,7 @@ create table if not exists desafios (
   id text primary key,
   a text not null, a_nome text not null,   -- quem criou
   b text, b_nome text,                     -- quem aceitou (vazio até alguém abrir o link)
-  tempo int not null,                      -- opção de tempo do jogo (0 = 2 min, 1 = 3 min, 2 = 5 min, 3 = sem limite)
+  tempo int not null,                      -- opção de tempo do jogo (0 = 2 min, 1 = 3 min, 2 = 5 min, 3 = sem limite, 6 = sem limite com progressão)
   rodadas jsonb not null default '[[null,null]]',  -- [[pontos de a, pontos de b], ...]
   vez text not null default 'a',           -- 'a', 'b' ou 'fim'
   vencedor text,                           -- 'a', 'b' ou 'empate'
@@ -24,7 +24,7 @@ create or replace function criar_desafio(p_nome text, p_tempo int, p_rival text 
 language plpgsql security definer set search_path = public as $$
 declare v_id text; v_b text; v_bn text;
 begin
-  if p_tempo not between 0 and 3 then raise exception 'tempo inválido'; end if;
+  if p_tempo not in (0, 1, 2, 3, 6) then raise exception 'tempo inválido'; end if;  -- 6 = sem limite com progressão
   perform salvar_jogador(p_nome, 0, 0);
   if coalesce(btrim(p_rival),'') <> '' then
     select chave, nome into v_b, v_bn from jogadores where chave = rk_chave(p_rival);

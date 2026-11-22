@@ -27,27 +27,27 @@ function soloRecord(d){
   store.set('ddb_solo',st); d.broke=broke; d.unlocked=un;
 }
 let soloOpts=Object.assign(defOpts(),{time:3,npc:0,attacks:true,pblocks:true,powers:true},store.get('ddb_soloOpts',{}));
-function soloSeg(el,key,labels){
-  el.innerHTML=labels.map((l,i)=>`<button type="button" data-v="${i}" class="${soloOpts[key]===i?'sel':''}">${l}</button>`).join('');
+function soloSeg(el,key,labels,order){
+  el.innerHTML=(order||labels.map((_,i)=>i)).map(i=>`<button type="button" data-v="${i}" class="${soloOpts[key]===i?'sel':''}">${labels[i]}</button>`).join('');
   el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ soloOpts[key]=+b.dataset.v; store.set('ddb_soloOpts',soloOpts); renderSolo(); }));
 }
 function renderSolo(){
-  soloSeg($('#soloTime'),'time',TIME_L.slice(0,4)); soloSeg($('#soloPlay'),'play',PLAYS); soloSeg($('#soloNpc'),'npc',NPC_L); renderNpcBox();
+  soloSeg($('#soloTime'),'time',TIME_L,TIME_ORDER_LOCAL); soloSeg($('#soloPlay'),'play',PLAYS); soloSeg($('#soloNpc'),'npc',NPC_L); renderNpcBox();
   const b=getBest('solo',soloOpts);
-  $('#soloBestLine').textContent=(b?`Seu recorde neste modo: ${fmtN(b)}.`:'Nenhuma partida neste modo ainda.')+(soloOpts.time===3?' Sem relógio: joga até não caber mais peça.':' Faça o máximo de pontos antes do tempo acabar.');
+  $('#soloBestLine').textContent=(b?`Seu recorde neste modo: ${fmtN(b)}.`:'Nenhuma partida neste modo ainda.')+(soloOpts.time===6?` Sem relógio no começo; depois de ${RAMP[0][0]/60} min o tempo para pôr cada peça vai apertando (${RAMP.map(r=>r[1]+' s').join(', ')}).`:soloOpts.time===3?' Sem relógio: joga até não caber mais peça.':' Faça o máximo de pontos antes do tempo acabar.');
   if(!$('#soloMods').dataset.built){ buildOpts($('#soloMods'),soloOpts,'solo'); $('#soloMods').dataset.built=1;
     $('#soloMods').addEventListener('click',()=>setTimeout(()=>store.set('ddb_soloOpts',soloOpts),0)); }
   const st=soloStats();
   $('#soloStats').innerHTML=[[st.games,'partidas'],[fmtN(st.bestScore),'melhor pontuação'],[st.bestCombo?'x'+st.bestCombo:'0','maior combo'],[st.bestLines,'linhas numa partida'],[fmtN(st.lines),'linhas no total'],[st.perfects,'tabuleiros limpos']].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('');
   const bs=store.get('ddb_bests',{}), ks=Object.keys(bs).filter(k=>k.startsWith('sozinho|')).sort((x,y)=>bs[y]-bs[x]);
-  $('#soloBests').innerHTML=ks.map(k=>`<div class="kv"><span>${TIME_L[+k.split('|')[1]]} · ${PLAYS[+k.split('|')[2]]}</span><b>${fmtN(bs[k])}</b></div>`).join('');
+  $('#soloBests').innerHTML=ks.map(k=>`<div class="kv"><span>${timeName(+k.split('|')[1])} · ${PLAYS[+k.split('|')[2]]}</span><b>${fmtN(bs[k])}</b></div>`).join('');
   $('#achCount').textContent=`${st.ach.length}/${ACH.length}`;
   $('#achList').innerHTML=ACH.map(achHTML).join('');
 }
 function openSolo(){ renderSolo(); show('solo'); }
 function startSolo(o){
   ac(); const opts={...o,npc:0,attacks:false,pblocks:false,powers:false};
-  startDuel({type:'solo',opts,seed:'S|'+Date.now()+'|'+Math.random().toString(36).slice(2),label:'Sozinho · '+(TIMES[opts.time]?TIME_L[opts.time]:'Sem limite')+(opts.play?' · '+PLAYS[opts.play]:'')});
+  startDuel({type:'solo',opts,seed:'S|'+Date.now()+'|'+Math.random().toString(36).slice(2),label:'Sozinho · '+timeName(opts.time)+(opts.play?' · '+PLAYS[opts.play]:'')});
 }
 function renderHome(){
   const st=soloStats(), el=$('#homeBest'); if(!el) return;

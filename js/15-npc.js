@@ -14,7 +14,7 @@ function startNpc(o){
   if(NET.open){ toast('Saia da sala de jogo conectado para jogar contra o robô'); return; }
   ac(); npcStop(); NET.role='A';
   const lv=Math.min(4,Math.max(1,o.npc|0)), opts={...o,npc:lv}, seed='N|'+Date.now()+'|'+Math.random().toString(36).slice(2);
-  startDuel({type:'live',opts,seed,players:['A','npc'],npc:lv,label:'Contra o '+NPC_N[lv]+' · '+(TIMES[opts.time]?TIME_L[opts.time]:'Sem limite')+(opts.play?' · '+PLAYS[opts.play]:'')});
+  startDuel({type:'live',opts,seed,players:['A','npc'],npc:lv,label:'Contra o '+NPC_N[lv]+' · '+timeName(opts.time)+(opts.play?' · '+PLAYS[opts.play]:'')});
   const eng=new Engine(opts); if(opts.obstacles) eng.addStones(makeRng(seed+'|obs'),6);
   NPC={d:D,lv,cfg:NPC_LV[lv],eng,rng:makeRng(seed),tray:null,score:0,placed:0,t:0,next:0,last:performance.now(),timeline:[[0,0]],over:false,shield:0,frozen:0,slow:0,hurry:false,timer:0};
   NPC.tray=gen3(NPC.rng,opts); NPC.next=npcDelay(); npcState(); npcLoop();

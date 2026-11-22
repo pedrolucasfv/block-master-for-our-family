@@ -2,7 +2,8 @@
 /* DESAFIO A DISTÂNCIA (Supabase): melhor de 5 entre duas pessoas, cada uma joga a rodada quando puder; aviso pelo WhatsApp */
 /* Cada rodada usa as mesmas peças para os dois (semente do desafio + número da rodada). Quem criou joga primeiro;
    os pontos do outro na rodada só aparecem depois que você joga a sua. Banco: supabase/desafios.sql */
-const DS_TIMES=[0,1,2,3]; /* opções de tempo (TIMES/TIME_L): 2 min, 3 min, 5 min, sem limite */
+const DS_TIMES=[0,1,2,3,6]; /* opções de tempo (TIMES/TIME_L): 2 min, 3 min, 5 min, sem limite, sem limite com progressão */
+const dsTempoTxt=t=>t===6?'sem limite com progressão':t===3?'sem limite de tempo':TIME_L[t]+' por rodada';
 const dsKey=()=>myNick().toLowerCase();
 function dsLink(id){ return /^https?:/.test(location.href)?location.origin+location.pathname+'?d='+id:''; }
 function dsSide(d){ const k=dsKey(); return d.a===k?'a':d.b===k?'b':null; }
@@ -22,9 +23,9 @@ function dsNeedNick(cb){
 function dsShare(d,kind){
   const side=dsSide(d), [wa,wb]=dsWins(d), me=side==='b'?d.b_nome:d.a_nome, my=side==='b'?wb:wa, ot=side==='b'?wa:wb, l=dsLink(d.id), r=d.rodadas.length;
   let t;
-  if(kind==='convite') t=`⚔️ ${me} te desafiou no Duelo de Blocos! Melhor de 5, ${TIME_L[d.tempo]} por rodada. Toque para jogar:`;
+  if(kind==='convite') t=`⚔️ ${me} te desafiou no Duelo de Blocos! Melhor de 5, ${dsTempoTxt(d.tempo)}. Toque para jogar:`;
   else if(d.vez==='fim') t=d.vencedor==='empate'?`⚔️ Nosso desafio no Duelo de Blocos terminou empatado: ${my} × ${ot}!`:`⚔️ Desafio no Duelo de Blocos: ${d.vencedor===side?'eu venci':'você venceu'} por ${Math.max(wa,wb)} × ${Math.min(wa,wb)}! Revanche?`;
-  else if(d.rodadas.length===1&&side==='a') t=`⚔️ ${me} te desafiou no Duelo de Blocos! Melhor de 5, ${TIME_L[d.tempo]} por rodada. Já joguei a rodada 1, sua vez:`;
+  else if(d.rodadas.length===1&&side==='a') t=`⚔️ ${me} te desafiou no Duelo de Blocos! Melhor de 5, ${dsTempoTxt(d.tempo)}. Já joguei a rodada 1, sua vez:`;
   else t=`⚔️ Joguei minha parte no nosso desafio do Duelo de Blocos. Sua vez (rodada ${r})! Placar: ${me} ${my} × ${ot} ${dsOther(d,side)}.`;
   shareText(t+(l?'\n'+l:''));
 }
@@ -34,7 +35,7 @@ function dsOpen(id,delay){
   setTimeout(()=>dsGet(id).then(d=>{
     if(!d){ openEnd('<h2>⚔️ Desafio</h2><p class="reason">Esse desafio não existe mais.</p>',[{t:'Fechar',cls:'ghost',on:closeEnd}]); return; }
     const side=dsSide(d), [wa,wb]=dsWins(d), my=side==='b'?wb:wa, ot=side==='b'?wa:wb, mi=side==='b'?1:0, last=d.rodadas.length-1;
-    let body=`<div class="dsvs"><div>${dsAv(d.a,d.a_nome,52)}<b>${esc(d.a_nome)}</b></div><span>×</span><div>${d.b?dsAv(d.b,d.b_nome,52):'<span class="av dsq" style="width:52px;height:52px;line-height:52px">?</span>'}<b>${esc(d.b_nome||'?')}</b></div></div><p class="muted">Melhor de 5 · ${TIME_L[d.tempo]} por rodada</p>`;
+    let body=`<div class="dsvs"><div>${dsAv(d.a,d.a_nome,52)}<b>${esc(d.a_nome)}</b></div><span>×</span><div>${d.b?dsAv(d.b,d.b_nome,52):'<span class="av dsq" style="width:52px;height:52px;line-height:52px">?</span>'}<b>${esc(d.b_nome||'?')}</b></div></div><p class="muted">Melhor de 5 · ${dsTempoTxt(d.tempo)}</p>`;
     body+=`<div class="endscore">${wa} × ${wb}</div>`;
     if(d.vez==='fim') body+=`<div class="winner ${d.vencedor===side?'win':d.vencedor==='empate'?'':'lose'}">${d.vencedor==='empate'?'Empate!':d.vencedor===side?'Você venceu! 🏆':`${esc(d.vencedor==='a'?d.a_nome:d.b_nome)} venceu`}</div>`;
     body+='<div class="rank">'+d.rodadas.map((r,i)=>{ const open=i===last&&d.vez!=='fim';
