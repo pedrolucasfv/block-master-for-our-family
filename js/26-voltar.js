@@ -11,6 +11,7 @@ function voltarAcao(){
   const zoom=document.querySelector('.zoomov'); if(zoom){ zoom.remove(); return true; }
   if(aberto('#chatOv')){ chatFechar(); return true; }
   if(aberto('#quitOv')){ $('#qNo').click(); return true; }
+  if(aberto('#slOv')){ $('#slNao').click(); return true; }
   if(aberto('#count')) return true;
   if(aberto('#end')){
     /* nas janelas, o botão claro do fim é sempre o de fechar/voltar (Fechar, Voltar, Menu, Agora não…); sem ele, o "Entendi" (ou o único botão) */

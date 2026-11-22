@@ -5,17 +5,16 @@
 let slPoll=0;
 const SL={id:null,chave:null,pend:null,n:0,visto:0,busy:false,abrindo:false,tv:false}; /* tv: a tela aberta é a de conectar o espectador */
 const slFail='Não conectou. Algumas redes de celular (4G/5G) bloqueiam a conexão direta: tentem com os dois no Wi-Fi, ou usem o QR estando juntos.';
-/* com tv, quem abrir entra como espectador (o mesmo link da sala; quem criou troca para espectador quando ele diz "hello" com spec) */
-function slLink(id,tv){ return /^https?:/.test(location.href)?location.origin+location.pathname+'?s='+id+(tv?'&tv':''):''; }
+function slLink(id){ return /^https?:/.test(location.href)?location.origin+location.pathname+'?s='+id:''; }
 const slDorme=ms=>new Promise(r=>setTimeout(r,ms));
 const slSemFuncao=e=>/PGRST202|404|Could not find the function/.test(String(e&&e.message));
 function slMata(p){ if(p){ try{ p.dc&&p.dc.close(); }catch(e){} try{ p.pc.close(); }catch(e){} } }
 function slStat(){
   const st=$('#pLinkStat'), b=$('#pLinkSend'); if(!st) return;
-  if(SL.tv){ $('#pLinkStep').textContent='🔗 Ou abra o link do espectador no computador';
-    b.textContent='Mandar link do espectador';
-    $('#pLinkObs').textContent='Mande para você mesmo (no WhatsApp Web, por exemplo) e abra no computador ligado na TV. Também dá para digitar o link no navegador.';
-    st.innerHTML=''; if(SL.id){ st.textContent='✅ Link do espectador: '; const l=document.createElement('b'); l.setAttribute('data-notr',''); l.style.userSelect='all'; l.style.wordBreak='break-all'; l.textContent=slLink(SL.id,true); st.appendChild(l); }
+  if(SL.tv){ $('#pLinkStep').textContent='🔗 Ou abra o link da sala no computador';
+    b.textContent='Mandar link da sala';
+    $('#pLinkObs').textContent='Mande para você mesmo (no WhatsApp Web, por exemplo), abra no computador ligado na TV e escolha "📺 Assistir". Também dá para digitar o link no navegador.';
+    st.innerHTML=''; if(SL.id){ st.textContent='✅ Link da sala: '; const l=document.createElement('b'); l.setAttribute('data-notr',''); l.style.userSelect='all'; l.style.wordBreak='break-all'; l.textContent=slLink(SL.id); st.appendChild(l); }
     return; }
   $('#pLinkStep').textContent='🌍 Alguém está longe? Mande o link da sala';
   $('#pLinkObs').textContent='O mesmo link serve para todo mundo (até 6 na sala) enquanto ela estiver aberta. Estão juntos? Use o QR abaixo.';
@@ -67,8 +66,7 @@ async function slSend(){
   if(!SL.id){ SL.abrindo=true; st.textContent='Preparando o link da sala…';
     try{ await slAbrir(); }catch(e){ SL.abrindo=false; if(slSemFuncao(e)&&!SL.tv){ slSendUma(); return; } st.textContent=e.message==='saiu'?'':'Sem internet agora. Tente de novo.'; return; }
     SL.abrindo=false; }
-  if(SL.tv) shareText(`📺 Link do espectador do Duelo de Blocos (abra no computador ligado na TV):\n${slLink(SL.id,true)}`); else
-  shareText(`🎮 Entre na minha sala do Duelo de Blocos! Toque no link (serve para todo mundo enquanto a sala estiver aberta):\n${slLink(SL.id)}`);
+  shareText(`🎮 Entre na minha sala do Duelo de Blocos! Toque no link para jogar ou para assistir na TV (serve para todo mundo enquanto a sala estiver aberta):\n${slLink(SL.id)}`);
   slStat();
 }
 /* convite antigo, de uma pessoa só (enquanto o banco não tem o link da sala) */
@@ -87,12 +85,20 @@ async function slSendUma(){
       setTimeout(()=>{ if(NET.pend===pend) st.textContent=slFail; },25000); }).catch(()=>{});
   },2000);
 }
-/* quem abriu o link: pega o código da vez, gera a resposta e devolve pelo Supabase. Se outra pessoa respondeu no mesmo instante, espera o código seguinte */
-async function slFromLink(){
+/* quem abriu o link: primeiro escolhe se vai jogar ou assistir (espectador: entra como jogador e, no "hello" com spec, quem criou troca para espectador).
+   Link com &tv (de antes) vai direto para assistir */
+function slFromLink(){
   let id=null, tv=false; try{ const q=new URLSearchParams(location.search); id=q.get('s'); tv=q.has('tv'); }catch(e){}
   if(!id||!/^[0-9a-f]{8}$/.test(id)) return;
   try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
   if(!rtcOk()) return;
+  if(tv){ slEntrar(id,true); return; }
+  const ov=$('#slOv'), vai=v=>{ ov.classList.remove('show'); if(v!=null) slEntrar(id,v); };
+  $('#slJogar').onclick=()=>vai(false); $('#slAssistir').onclick=()=>vai(true); $('#slNao').onclick=()=>vai(null);
+  ov.classList.add('show');
+}
+/* pega o código da vez, gera a resposta e devolve pelo Supabase. Se outra pessoa respondeu no mesmo instante, espera o código seguinte */
+async function slEntrar(id,tv){
   guestStart(tv); const st=()=>$('#pGuestStatus'), semNet='Sem internet agora. Abra o link de novo daqui a pouco.';
   st().textContent='Abrindo o convite…';
   for(let vez=0;vez<30;vez++){
