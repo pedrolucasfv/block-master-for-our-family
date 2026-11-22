@@ -3,13 +3,18 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
-## 1.15 · 22/11/2026
+## 1.16 · 22/11/2026
 - 🎨 **Visual novo:** cores mais alegres, cantos mais redondos e uma letra mais "de jogo" nos títulos e nos pontos. Três temas novos: 🧸 **Brinquedos** (o novo padrão, creme e coral), 🕹️ **Fliperama** (roxo com botões coloridos) e 🌌 **Noite estrelada** (escuro com brilho azul). Nas Configurações, cada tema aparece numa miniatura do menu, para ver antes de escolher. Os temas antigos continuam lá.
-- 🏠 **Menu novo:** o Desafio do dia fica numa faixa no topo (com "jogado hoje" e 🔥 dias seguidos), "Jogar sozinho" é o botão grande, "Jogar com alguém" e "Campanha" ficam lado a lado, e Histórico, Novidades e Ajustes viraram ícones embaixo.
+- 🏠 **Menu novo:** o Desafio do dia fica numa faixa no topo (com "jogado hoje" e 🔥 dias seguidos), "Jogar sozinho" é o botão grande, "Jogar com alguém" e "Campanha" ficam lado a lado, o "📲 Instalar o jogo" aparece logo abaixo (quando dá para instalar) e Histórico, Novidades e Ajustes viraram ícones embaixo.
 - 🎮 **Partida:** os pontos e as peças da bandeja ficam em cartões próprios, mais fáceis de ver.
 - 📅 **Desafio do dia com calendário:** no lugar das setinhas, um calendário do mês. Toque num dia para ver o ranking dele; um pontinho marca os dias em que você jogou e 🥇 os dias em que você ficou em 1º. Os 3 primeiros aparecem num pódio, e se você ficou fora do top 10 a sua posição aparece embaixo. A tela mostra a data por extenso e as regras do tempo em etiquetas.
 - 👥 **Sala conectada:** cada jogador ganhou uma "cadeira" com a foto grande (👑 em quem criou) e os lugares vazios mostram "+ Convidar". O chat ficou menor quando está vazio, o modo teste ficou discreto, "Regras e modificadores" estão numa aba só (os modificadores em grupos que abrem e fecham, com ✓ no que está ligado), o placar da noite ficou grande e o "Começar para todos" fica sempre à vista.
 - 🐻 **Chefões:** a vida do chefão virou uma barra larga embaixo dos pontos, a dica da pausa some sozinha depois de uns segundos e as ajudas (🔨 🔀 💥) viraram botões redondos com o número de usos. Antes da fase, a janela mostra o chefão grande e as estrelas em três cartões. No mapa, uma trilha liga as fases e a fase do chefão é maior.
+
+## 1.15 · 22/11/2026
+- 📲 **Instale o jogo:** no menu, o botão "📲 Instalar o jogo" coloca o Duelo de Blocos na tela do celular ou do computador, com ícone próprio e em tela cheia, sem a barra do navegador. No iPhone ele mostra o passo a passo, e só com o jogo instalado o iPhone recebe os avisos 🔔.
+- 📴 **Joga sem internet:** depois de aberto uma vez, o jogo fica guardado no aparelho e abre mesmo sem internet (Sozinho, Campanha, Desafio do dia, duelo no mesmo aparelho). Com internet, sempre abre a versão mais nova.
+- ☁️ **Qual progresso usar:** se você jogou sem internet ou em outro aparelho e o progresso ficou diferente do que está na nuvem, o jogo pergunta qual fica: o deste aparelho ou o da nuvem, mostrando a data da última atualização, as estrelas e o recorde de cada um. Também dá para juntar o melhor dos dois.
 
 ## 1.14 · 22/11/2026
 - ❄️ **Congelado não faz mais perder:** no duelo com tempo por peça (morte súbita ou "Sem limite com progressão"), se alguém congelar suas peças, o tempo para pôr a peça fica parado até descongelar.

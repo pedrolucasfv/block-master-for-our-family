@@ -442,3 +442,8 @@ input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:non
 .campmap::before{content:"";position:absolute;left:50%;top:24px;bottom:24px;border-left:5px dotted rgba(90,69,96,.28);transform:translateX(-50%);z-index:0}
 .campmap .cnode{position:relative;z-index:1}
 .cnode.plush.boss{min-height:86px}.cnode.plush.boss .cic{font-size:40px;width:54px;height:54px}.cnode.plush.boss .cnm{font-size:18px}
+/* qual progresso usar: este aparelho ou a nuvem (js/20-pin.js) */
+.pgop{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;background:color-mix(in srgb,currentColor 5%,transparent);border:2px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}
+.pgop b{font-size:15px}.pgop span{opacity:.85}
+.pgop.novo{border-color:#f3c22f}
+.pgop em{position:absolute;top:8px;right:10px;font-style:normal;font-size:11px;font-weight:700;background:#f3c22f;color:#3a2a00;border-radius:8px;padding:1px 7px}

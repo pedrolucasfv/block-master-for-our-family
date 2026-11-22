@@ -1,7 +1,7 @@
 'use strict';
 /* utilidades, store (localStorage/SIM), SET (configurações salvas), temas ganhos e dourados */
 /* versão do jogo: aparece no rodapé do menu. A cada mudança publicada, suba o número e anote em CHANGELOG.md */
-const VERSAO='1.15', VERSAO_DATA='22/11/2026';
+const VERSAO='1.16', VERSAO_DATA='22/11/2026';
 /* ===================== utilidades ===================== */
 const PALETTE=['#e5483f','#f08c25','#f3c22f','#4cbb47','#2cb4d6','#3e6fe0','#8a52d8'];
 const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#eab526', RIPEC='#ff4b3e', ROTC='#8d5a2b', STALKC='#8fcf5a', PETALC='#ffb3cc', COINC='#e0a83a', NUTC='#9aa6b8';
@@ -31,7 +31,8 @@ let SIMCTL=false;
 const PG_KEYS=['ddb_camp_solo','ddb_camp_group','ddb_won','ddb_bear','ddb_gold','ddb_solo','ddb_bests','ddb_rkbest','ddb_daily','ddb_npc'];
 const store={
   get(k,d){ if(SIM) return k in SIMMEM?JSON.parse(SIMMEM[k]):d; try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return d; } },
-  set(k,v){ if(SIM){ SIMMEM[k]=JSON.stringify(v); return; } try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} if(PG_KEYS.includes(k)&&typeof pgAgendar==='function') pgAgendar(); }
+  set(k,v){ if(SIM){ SIMMEM[k]=JSON.stringify(v); return; } const j=JSON.stringify(v), pg=PG_KEYS.includes(k); let antes=null; try{ if(pg) antes=localStorage.getItem(k); localStorage.setItem(k,j); }catch(e){} if(pg&&antes!==j&&typeof pgAgendar==='function') pgAgendar(); },
+  del(k){ if(SIM){ delete SIMMEM[k]; return; } try{ localStorage.removeItem(k); }catch(e){} }
 };
 const NF=(()=>{ try{ return new Intl.NumberFormat('pt-BR'); }catch(e){ return null; } })();
 const fmtN = n => NF?NF.format(Math.round(n)):String(Math.round(n));
