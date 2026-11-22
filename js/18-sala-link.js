@@ -3,14 +3,22 @@
 /* A conexão em si continua direta entre os aparelhos (a mesma do QR). Quem criou a sala deixa sempre um código esperando o próximo que abrir o link (SL.pend);
    quando alguém responde, conecta essa pessoa e põe um código novo (nova_vaga). Se o banco ainda não tem o link da sala, cai no convite antigo de uma pessoa (slSendUma). */
 let slPoll=0;
-const SL={id:null,chave:null,pend:null,n:0,visto:0,busy:false,abrindo:false};
+const SL={id:null,chave:null,pend:null,n:0,visto:0,busy:false,abrindo:false,tv:false}; /* tv: a tela aberta é a de conectar o espectador */
 const slFail='Não conectou. Algumas redes de celular (4G/5G) bloqueiam a conexão direta: tentem com os dois no Wi-Fi, ou usem o QR estando juntos.';
-function slLink(id){ return /^https?:/.test(location.href)?location.origin+location.pathname+'?s='+id:''; }
+/* com tv, quem abrir entra como espectador (o mesmo link da sala; quem criou troca para espectador quando ele diz "hello" com spec) */
+function slLink(id,tv){ return /^https?:/.test(location.href)?location.origin+location.pathname+'?s='+id+(tv?'&tv':''):''; }
 const slDorme=ms=>new Promise(r=>setTimeout(r,ms));
 const slSemFuncao=e=>/PGRST202|404|Could not find the function/.test(String(e&&e.message));
 function slMata(p){ if(p){ try{ p.dc&&p.dc.close(); }catch(e){} try{ p.pc.close(); }catch(e){} } }
 function slStat(){
   const st=$('#pLinkStat'), b=$('#pLinkSend'); if(!st) return;
+  if(SL.tv){ $('#pLinkStep').textContent='🔗 Ou abra o link do espectador no computador';
+    b.textContent='Mandar link do espectador';
+    $('#pLinkObs').textContent='Mande para você mesmo (no WhatsApp Web, por exemplo) e abra no computador ligado na TV. Também dá para digitar o link no navegador.';
+    st.innerHTML=''; if(SL.id){ st.textContent='✅ Link do espectador: '; const l=document.createElement('b'); l.setAttribute('data-notr',''); l.style.userSelect='all'; l.style.wordBreak='break-all'; l.textContent=slLink(SL.id,true); st.appendChild(l); }
+    return; }
+  $('#pLinkStep').textContent='🌍 Alguém está longe? Mande o link da sala';
+  $('#pLinkObs').textContent='O mesmo link serve para todo mundo (até 6 na sala) enquanto ela estiver aberta. Estão juntos? Use o QR abaixo.';
   b.textContent=SL.id?'Mandar o link da sala de novo':'Mandar link da sala no WhatsApp';
   st.textContent=SL.id?'✅ Link da sala ligado: quem abrir entra sozinho. Pode voltar para a sala e esperar lá.':'';
 }
@@ -57,8 +65,9 @@ async function slSend(){
   const st=$('#pLinkStat'); if(!slNaSala()){ st.textContent='Volte e crie a sala de novo.'; return; }
   if(SL.abrindo) return;
   if(!SL.id){ SL.abrindo=true; st.textContent='Preparando o link da sala…';
-    try{ await slAbrir(); }catch(e){ SL.abrindo=false; if(slSemFuncao(e)){ slSendUma(); return; } st.textContent=e.message==='saiu'?'':'Sem internet agora. Tente de novo.'; return; }
+    try{ await slAbrir(); }catch(e){ SL.abrindo=false; if(slSemFuncao(e)&&!SL.tv){ slSendUma(); return; } st.textContent=e.message==='saiu'?'':'Sem internet agora. Tente de novo.'; return; }
     SL.abrindo=false; }
+  if(SL.tv) shareText(`📺 Link do espectador do Duelo de Blocos (abra no computador ligado na TV):\n${slLink(SL.id,true)}`); else
   shareText(`🎮 Entre na minha sala do Duelo de Blocos! Toque no link (serve para todo mundo enquanto a sala estiver aberta):\n${slLink(SL.id)}`);
   slStat();
 }
@@ -80,11 +89,11 @@ async function slSendUma(){
 }
 /* quem abriu o link: pega o código da vez, gera a resposta e devolve pelo Supabase. Se outra pessoa respondeu no mesmo instante, espera o código seguinte */
 async function slFromLink(){
-  let id=null; try{ id=new URLSearchParams(location.search).get('s'); }catch(e){}
+  let id=null, tv=false; try{ const q=new URLSearchParams(location.search); id=q.get('s'); tv=q.has('tv'); }catch(e){}
   if(!id||!/^[0-9a-f]{8}$/.test(id)) return;
   try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
   if(!rtcOk()) return;
-  guestStart(false); const st=()=>$('#pGuestStatus'), semNet='Sem internet agora. Abra o link de novo daqui a pouco.';
+  guestStart(tv); const st=()=>$('#pGuestStatus'), semNet='Sem internet agora. Abra o link de novo daqui a pouco.';
   st().textContent='Abrindo o convite…';
   for(let vez=0;vez<30;vez++){
     if(!$('#connect').classList.contains('active')||NET.open) return; /* desistiu ou já entrou */

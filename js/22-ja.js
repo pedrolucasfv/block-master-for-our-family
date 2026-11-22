@@ -1624,4 +1624,9 @@ const JA={
 "✅ Link da sala ligado: quem abrir entra sozinho. Pode voltar para a sala e esperar lá.":"✅ ルームのリンクがオン：開いた人は自動で入れます。ルームにもどって待っていてね。",
 "🌍 Alguém está longe? Mande o link da sala":"🌍 遠くにいる人がいる？ルームのリンクを送ろう",
 "🎮 Entre na minha sala do Duelo de Blocos! Toque no link (serve para todo mundo enquanto a sala estiver aberta): {}":"🎮 ブロック対決のルームに来てね！リンクをタップ（ルームが開いているあいだ、だれでも使えます）：{}",
+"Mandar link do espectador":"観戦用リンクを送る",
+"Mande para você mesmo (no WhatsApp Web, por exemplo) e abra no computador ligado na TV. Também dá para digitar o link no navegador.":"自分あてに送って（たとえばWhatsApp Web）、テレビにつないだパソコンで開いてください。ブラウザにリンクを入力してもOKです。",
+"✅ Link do espectador:":"✅ 観戦用リンク：",
+"📺 Link do espectador do Duelo de Blocos (abra no computador ligado na TV): {}":"📺 ブロック対決の観戦用リンク（テレビにつないだパソコンで開いてね）：{}",
+"🔗 Ou abra o link do espectador no computador":"🔗 またはパソコンで観戦用リンクを開く",
 };
