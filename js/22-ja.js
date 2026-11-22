@@ -1419,4 +1419,11 @@ const JA={
 "Não deu para abrir as novidades agora (sem internet?). Tente de novo daqui a pouco.":"いまは変更点を開けませんでした（インターネットなし？）。少ししてからもう一度試してください。",
 "- 💬 **Título:** texto":null,
 "nvcard${fix?' fix':''}":null,
+"Seu time (toque no outro para trocar)":"あなたのチーム（もう一方をタップで変更）",
+"Você está neste time":"このチームにいます",
+"✓ Você está neste time":"✓ このチームにいます",
+"↔ Trocar para este time":"↔ このチームに移る",
+"➕ Entrar no time":"➕ このチームに入る",
+"Entrar no time":"このチームに入る",
+"👇 Escolha seu time: toque em \"Entrar no time\"":"👇 チームを選んでください：「このチームに入る」をタップ",
 };

@@ -5,7 +5,7 @@ Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = corre
 
 ## 1.13 · 22/11/2026
 - ✨ **Novidades:** no menu, ao lado das Configurações, o botão "✨ Novidades" mostra o que mudou em cada versão, em cartões (novidade ou correção). Um pontinho vermelho avisa quando sai versão nova.
-- 👥 **Times na aba Sala:** a aba "Sala" mostra o estilo de jogo que quem criou escolheu, com o desenho e a explicação, e nos modos de times os botões para entrar no time.
+- 👥 **Times na aba Sala:** a aba "Sala" mostra o estilo de jogo que quem criou escolheu, com o desenho e a explicação, e nos modos de times um botão bem visível "➕ Entrar no time" em cada time (no seu time aparece "✓ Você está neste time", e no outro "↔ Trocar para este time").
 - 🏁 **Onde você parou:** depois de perder, os seus pontos aparecem grandes embaixo do tabuleiro, no lugar das peças, com a sua posição agora.
 - 🏠 **Criar sala:** agora vai direto para a sala. O QR e o convite por link só aparecem quando você toca em "+ Adicionar jogador".
 

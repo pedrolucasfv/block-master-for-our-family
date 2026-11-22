@@ -352,7 +352,8 @@ function teamsFinal(){ const T={}, c={az:0,la:0}; NET.players.forEach(id=>{ cons
 function renderTeamBox(){
   const box=$('#teamBox'), on=isTeamType(NET.lobby.type); box.hidden=!on; if(!on) return;
   const T=NET.teams||{}, me=NET.role, free=NET.players.filter(id=>!T[id]);
-  box.innerHTML=`<label class="muted" style="font-size:13px">Escolha seu time</label><div class="teams">${['az','la'].map(k=>`<button type="button" class="teamBtn ${T[me]===k?'sel':''}" data-t="${k}" style="--tc:${TEAM[k].c}"><b>${TEAM[k].e} ${TEAM[k].n}</b>${NET.players.filter(id=>T[id]===k).map(id=>`<span>${avatarHTML(id,18)}${esc(nm(id))}</span>`).join('')||'<span class="muted">ninguém ainda</span>'}</button>`).join('')}</div>`+(free.length?`<p class="muted">Sem time: ${free.map(id=>esc(nm(id))).join(', ')}. Vão para o time menor ao começar.</p>`:'');
+  /* cada time com um botão bem claro "Entrar no time" (ou "Você está neste time") embaixo dos nomes */
+  box.innerHTML=`<label class="muted" style="font-size:13px">${T[me]?'Seu time (toque no outro para trocar)':'👇 Escolha seu time: toque em "Entrar no time"'}</label><div class="teams${T[me]?'':' pick'}">${['az','la'].map(k=>`<button type="button" class="teamBtn ${T[me]===k?'sel':''}" data-t="${k}" style="--tc:${TEAM[k].c}"><b>${TEAM[k].e} ${TEAM[k].n}</b>${NET.players.filter(id=>T[id]===k).map(id=>`<span>${avatarHTML(id,18)}${esc(nm(id))}</span>`).join('')||'<span class="muted">ninguém ainda</span>'}<i class="tjoin">${T[me]===k?'✓ Você está neste time':T[me]?'↔ Trocar para este time':'➕ Entrar no time'}</i></button>`).join('')}</div>`+(free.length?`<p class="muted">Sem time: ${free.map(id=>esc(nm(id))).join(', ')}. Vão para o time menor ao começar.</p>`:'');
   box.querySelectorAll('.teamBtn').forEach(b=>b.addEventListener('click',()=>pickTeam(b.dataset.t)));
 }
 function pickTeam(k){ NET.teams=NET.teams||{}; NET.teams[NET.role]=k; if(NET.role==='A') sendRoster(); else { send({t:'team',v:k}); renderLobby(); } }

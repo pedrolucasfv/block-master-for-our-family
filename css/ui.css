@@ -347,3 +347,8 @@ input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:non
 .nvic{flex:none;width:30px;height:30px;border-radius:9px;background:var(--input);display:flex;align-items:center;justify-content:center;font-size:16px}
 .nvcard code{font-size:12px;background:var(--input);padding:1px 4px;border-radius:4px}
 .menu .row .btn{min-width:0;padding:12px 4px;font-size:15px}
+/* botão "Entrar no time" dentro de cada time */
+.teamBtn .tjoin{margin-top:auto;align-self:stretch;text-align:center;font-style:normal;font-weight:700;font-size:13px;padding:8px 6px;border-radius:10px;background:var(--tc);color:#fff}
+.teamBtn.sel .tjoin{background:transparent;color:var(--tc);border:2px solid var(--tc);padding:6px}
+.teams.pick .tjoin{animation:tjoinPulse 1.6s ease-in-out infinite}
+@keyframes tjoinPulse{0%,100%{transform:none}50%{transform:scale(1.05)}}
