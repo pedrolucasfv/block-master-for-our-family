@@ -1633,4 +1633,7 @@ const JA={
 "📺 Assistir":"📺 観戦する",
 "🔗 Entrar na sala":"🔗 ルームに入る",
 "🔗 Ou abra o link da sala no computador":"🔗 またはパソコンでルームのリンクを開く",
+"computador da TV lendo o QR (com o link, não precisa)":"テレビのパソコンでQRを読む（リンクなら不要）",
+"📺 Colocar na TV":"📺 テレビに映す",
+"pelo QR ou pelo link da sala":"QRかルームのリンクで",
 };

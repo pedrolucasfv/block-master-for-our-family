@@ -4,7 +4,7 @@ A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
 ## 1.19 · 22/11/2026
-- 📺 **Espectador pelo mesmo link:** o link da sala agora serve também para a TV. Quem abre o link escolhe "🎮 Jogar" ou "📺 Assistir". Para a TV, mande o link para você mesmo (no WhatsApp Web, por exemplo) e abra no computador ligado nela, sem precisar ler o QR pela webcam. Em "📺 Conectar espectador (TV)" o link também aparece escrito na tela, para digitar no navegador se preferir.
+- 📺 **Espectador pelo mesmo link:** o link da sala agora serve também para a TV. Quem abre o link escolhe "🎮 Jogar" ou "📺 Assistir". Para a TV, mande o link para você mesmo (no WhatsApp Web, por exemplo) e abra no computador ligado nela, sem precisar ler o QR pela webcam. Na sala, o botão virou "📺 Colocar na TV" e mostra o QR e o link, que aparece escrito na tela, para digitar no navegador se preferir.
 
 ## 1.18 · 22/11/2026
 - 🔗 **Link da sala:** agora a sala tem um link só, que serve para todo mundo que está longe (até 6 na sala). Quem criou manda o link uma vez no grupo da família, e cada um que abrir entra sozinho, sem precisar de um convite para cada pessoa. O link vale enquanto a sala estiver aberta; quando ela fecha, ele para de funcionar.
