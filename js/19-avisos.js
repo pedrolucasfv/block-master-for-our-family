@@ -41,13 +41,43 @@ async function avRender(){
 /* aviso tocado: ?dia=1 abre o Desafio do dia; ?fase=3-8 abre a fase da campanha */
 function avFromLink(){
   let q=null; try{ q=new URLSearchParams(location.search); }catch(e){ return; }
-  const dia=q.get('dia'), fase=q.get('fase'); if(!dia&&!fase) return;
+  if(!q.get('dia')&&!q.get('fase')) return;
   try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
-  if(dia){ $('#goDaily').click(); return; }
+  avGo('?'+q.toString());
+}
+/* abre o que o aviso fala: ?d=id (desafio), ?dia=1 (Desafio do dia), ?fase=3-8 (fase da campanha) */
+function avGo(url){
+  let q; try{ q=new URLSearchParams(String(url||'').split('?')[1]||''); }catch(e){ return; }
+  const d=q.get('d'), fase=q.get('fase');
+  if(d&&/^[0-9a-f]{8}$/.test(d)){ dsList(); dsOpen(d); return; }
+  if(q.get('dia')){ closeEnd(); $('#goDaily').click(); return; }
   const m=/^(\d{1,2})-(\d{1,2})$/.exec(fase||''); if(!m) return; const w=+m[1], ph=+m[2];
-  if(!CWORLDS[w-1]||!CWORLDS[w-1].phases[ph-1]) return; openCamp(w); if(campOpen(campLoad('solo'),w,ph)) campIntro(w,ph);
+  if(!CWORLDS[w-1]||!CWORLDS[w-1].phases[ph-1]) return; closeEnd(); openCamp(w); if(campOpen(campLoad('solo'),w,ph)) campIntro(w,ph);
 }
 setTimeout(avFromLink,700);
+/* ===== histórico de avisos: sino 🔔 no menu, com quantos avisos novos chegaram desde a última vez que abriu ===== */
+let AV_LIST=[];
+const avAgo=iso=>{ const s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+  return s<60?'agora':s<3600?`há ${Math.floor(s/60)} min`:s<86400?`há ${Math.floor(s/3600)} h`:s<172800?'ontem':`há ${Math.floor(s/86400)} dias`; };
+function avBellLoad(){
+  if(!rkOn()||!myNick()) return;
+  rkFetch(`avisos_log?chave=eq.${encodeURIComponent(myNick().toLowerCase())}&select=titulo,corpo,url,quando&order=quando.desc&limit=50`)
+    .then(r=>{ AV_LIST=r||[]; avBellRender(); }).catch(()=>{});
+}
+function avBellRender(){
+  const b=$('#avBell'), n=$('#avBellN'); if(!b) return; b.hidden=!rkOn()||!myNick();
+  const lido=store.get('ddb_avlido',''), novos=AV_LIST.filter(a=>a.quando>lido).length;
+  n.hidden=!novos; n.textContent=novos>9?'9+':novos; b.classList.toggle('tem',!!novos);
+}
+function avBellOpen(){
+  if(AV_LIST.length) store.set('ddb_avlido',AV_LIST[0].quando); avBellRender();
+  const body='<h2>🔔 Avisos</h2>'+(AV_LIST.length?'<div class="avhist">'+AV_LIST.map((a,i)=>`<button type="button" class="avitem" data-i="${i}"><b>${esc(a.titulo)}</b><span>${esc(a.corpo)}</span><small>${avAgo(a.quando)}</small></button>`).join('')+'</div><p class="muted" style="font-size:12px">Os avisos ficam aqui por 30 dias. Toque num aviso para abrir.</p>'
+    :'<p class="muted">Nenhum aviso ainda. Aqui aparecem os desafios, os recordes batidos e o Desafio do dia.</p>');
+  openEnd(body,[{t:'Fechar',cls:'ghost',on:closeEnd}]);
+  $$('#endBody .avitem').forEach(x=>x.addEventListener('click',()=>{ const a=AV_LIST[+x.dataset.i]; if(a&&a.url) avGo(a.url); else closeEnd(); }));
+}
+$('#avBell').addEventListener('click',avBellOpen);
+if(rkOn()){ setTimeout(avBellLoad,2000); if('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.t==='aviso') setTimeout(avBellLoad,1500); }); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) avBellLoad(); }); setInterval(()=>{ if(!document.hidden&&$('#home').classList.contains('active')) avBellLoad(); },60000); }
 if(rkOn()&&avOk()){
   /* quem já ligou os avisos: mantém o aparelho registrado (e com o nome atual, se mudou no Perfil) */
   navigator.serviceWorker.getRegistration().then(async r=>{ avReg=r||null; if(!avReg||Notification.permission!=='granted') return;

@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.8 · 22/11/2026
+- 🔔 **Histórico de avisos:** sino no canto do menu, com o número de avisos novos. Tocando, aparecem os avisos dos últimos 30 dias (desafios, recordes batidos, Desafio do dia), mesmo os que sumiram do celular e mesmo para quem não ligou as notificações. Tocar num aviso abre o desafio, o Desafio do dia ou a fase.
+
 ## 1.7 · 22/11/2026
 - ☀️ **Desafio do dia com um modo só:** sem relógio geral, mas o tempo para pôr cada peça vai apertando: 3 minutos livres, depois 8 s por peça, 5 s a partir de 6 min e 3 s a partir de 9 min. O dia vira à meia-noite de Brasília.
 - ⏱ **Nova opção de tempo "Sem limite com progressão"** no Sozinho (e contra o robô), no duelo por código, na sala (individual e times ao vivo) e nos desafios a distância: igual ao Desafio do dia, 3 minutos livres e depois 8 s, 5 s e 3 s por peça.
