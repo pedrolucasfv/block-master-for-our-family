@@ -32,6 +32,8 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/19-avisos.js` | Avisos no celular (Web Push, sem instalar): `sw.js` na raiz recebe e mostra; `avAtivar` inscreve o aparelho (`salvar_inscricao`), `PUSH_KEY` é a chave pública. Os avisos são montados no banco (`mandar_avisos`, que também guarda o histórico em `avisos_log`) e enviados pela função `supabase/functions/avisar` (publicada como `swift-endpoint`). Sino 🔔 do menu com o histórico: `avBellLoad`, `avBellOpen`; `avGo(url)` abre o que o aviso fala. Banco: `supabase/avisos.sql` e `supabase/historico-avisos.sql` |
 | `js/20-pin.js` | PIN do nome e progresso na nuvem: janela do PIN (`pinAbrir`, `pinEnviar`), `pinGarantir(cb)` antes de gravar com o nome, quadro no Perfil (`pinRender`), sincronização (`pgSync`, junta pelo melhor em `pgMerge`; chaves em `PG_KEYS` no `02-core.js`, e o `store.set` delas chama `pgAgendar`). O token fica em `ddb_pins` e vai no cabeçalho `x-pin` em `rkFetch` (`pinTok`); pedidos recusados por falta de PIN ficam em `ddb_rkpin` até entrar. Banco: `supabase/pin-e-progresso.sql` (`salvar_jogador` e `jogar_rodada` conferem o PIN com `rk_dono`) |
 | `js/21-chat.js` | Chat temporário da sala conectada (`CHAT`, só na memória): mensagem `{t:'chat',x}` pela conexão da sala (quem criou carimba `from` e repassa em `hostMsg`; chega em `common` → `chatRecv`), painel `#chatOv` (`chatAbrir`, `chatEnviar`), botão `.chatb` na sala e na barra de emojis (`chatBtn` em `emoBtns`), número de novas (`chatBadge`). `closeNet` apaga tudo (`chatLimpar`) |
+| `js/22-ja.js` | Dicionário português → japonês (`JA`): chave = texto como aparece na tela, com `{}` no lugar do que muda (e `{v}`, `{limit}`… das metas da campanha); na tradução `{}` segue a ordem e `{1}`, `{2}`… escolhem a lacuna; `null` = não traduzir |
+| `js/23-idioma.js` | Idioma (`SET.lang`, `LANG`): com japonês, traduz na tela tudo que aparece (`trTxt`; observa a página com `MutationObserver`, inclusive `placeholder`/`title`/`aria-label`, `confirm`/`alert`). Texto montado aos pedaços é traduzido por partes (" · ", ", ", frases, emoji na frente, número no fim). `data-notr` = não traduzir. Escolha nas Configurações (`renderIdioma`, recarrega a página) |
 | `css/base.css` | Variáveis de tema em `:root[data-app=…]`, layout, blocos, jogo |
 | `css/worlds.css` | Visual de cada mundo (`:root[data-world=…]`) e animações de limpeza por skin |
 | `css/ui.css` | Efeitos, sobreposições, histórico, conexão, abas da sala, estrelinha dourada |
@@ -49,6 +51,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 ## Convenções
 - Código denso, de propósito: funções curtas numa linha só quando cabem. Não minifique nem encurte nomes; não reformate trechos que não está mudando.
 - Comentários e textos para o jogador em português, sem jargão.
+- O jogo tem japonês (`js/22-ja.js`). Depois de criar ou mudar texto para o jogador, rode `python3 ferramentas/textos-sem-traducao.py` e acrescente a tradução do que ele listar.
 - Tudo funciona offline e no celular (toque). Canvas usa `dpr`; respeite `SET.lite` (aparelhos fracos).
 
 ## Como testar
