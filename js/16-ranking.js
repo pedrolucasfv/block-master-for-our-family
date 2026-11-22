@@ -4,10 +4,14 @@
 const SUPA_URL='https://udduiuoausbswczewcng.supabase.co';
 const SUPA_KEY='sb_publishable_mSdw3fWJ7a6qJGC7XW2slg_HrE8anNh';
 const rkOn=()=>!!(SUPA_URL&&SUPA_KEY)&&!SIM;
+/* token do PIN do nome atual (js/20-pin.js); vazio se este aparelho não entrou com o PIN */
+function pinTok(){ return store.get('ddb_pins',{})[myNick().toLowerCase()]||''; }
 function rkFetch(path,opt){
   opt=opt||{}; const h={apikey:SUPA_KEY,'Content-Type':'application/json'}; if(/^eyJ/.test(SUPA_KEY)) h.Authorization='Bearer '+SUPA_KEY; /* chave antiga (anon) também vai no Authorization; a nova (sb_publishable_) só no apikey */
+  const tk=pinTok(); if(tk) h['x-pin']=tk; /* o banco confere se este aparelho pode gravar com o nome (supabase/pin-e-progresso.sql) */
   return fetch(SUPA_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method:opt.body?'POST':'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined})
-    .then(r=>{ if(!r.ok) throw new Error('ranking '+r.status); return r.text().then(t=>t?JSON.parse(t):null); });
+    /* erro: a mensagem do banco vai junto ("pin: ..." quando falta o PIN) */
+    .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error('ranking '+r.status+' '+t); }); return r.text().then(t=>t?JSON.parse(t):null); });
 }
 /* fila de envios: fica no aparelho até conseguir mandar (jogou sem internet, manda quando voltar) */
 let rkBusy=false;
@@ -17,8 +21,9 @@ function rkFlush(){
   if(!rkOn()||rkBusy||!navigator.onLine) return; const q=store.get('ddb_rkq',[]); if(!q.length) return;
   rkBusy=true;
   rkFetch('rpc/'+q[0].fn,{body:q[0].args}).then(()=>{ rkShift(); rkBusy=false; rkFlush(); })
-    /* recusado pelo servidor (nome ou valor inválido): descarta para não travar a fila; falha de rede: tenta depois */
-    .catch(e=>{ rkBusy=false; if(/ranking 4/.test(e.message)){ rkShift(); rkFlush(); } });
+    /* recusado pelo servidor (nome ou valor inválido): descarta para não travar a fila; falha de rede: tenta depois.
+       Recusado por falta de PIN: guarda à parte (ddb_rkpin) e manda de novo quando entrar com o PIN */
+    .catch(e=>{ rkBusy=false; if(/ranking 4/.test(e.message)){ if(/pin:/.test(e.message)){ const p=store.get('ddb_rkpin',[]); p.push(q[0]); store.set('ddb_rkpin',p.slice(-100)); if(pinTok()) pinPerdeu(); } rkShift(); rkFlush(); } });
 }
 window.addEventListener('online',rkFlush);
 /* o valor que conta em cada fase é o mesmo das estrelas: peças, tempo, linhas ou tentativas */

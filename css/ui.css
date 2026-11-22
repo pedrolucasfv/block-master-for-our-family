@@ -290,3 +290,8 @@ input.code.nick{width:100%;text-transform:none;letter-spacing:0;font-size:16px;p
 .avhist{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto;margin:6px 0 8px;text-align:left}
 .avitem{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;border:0;border-radius:12px;background:var(--chip);color:var(--text);font:inherit;padding:10px 12px;cursor:pointer}
 .avitem b{font-size:14px}.avitem span{font-size:13px;color:var(--muted)}.avitem small{font-size:11px;color:var(--muted);opacity:.8}
+/* PIN do nome e progresso na nuvem (Perfil) */
+.pinbox{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.pinbox .pinh{font-size:15px;margin:0 0 6px}
+input.code.pin{display:block;width:100%;margin-top:10px;font-size:26px;letter-spacing:12px;padding:10px}
+input.code.pin::placeholder{letter-spacing:1px;font-size:16px;text-transform:none}

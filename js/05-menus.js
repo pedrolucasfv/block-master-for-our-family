@@ -293,10 +293,12 @@ function renderProfile(){
   box.querySelectorAll('[data-prec]').forEach(b=>b.addEventListener('click',()=>recordBordao(b.dataset.prec)));
   box.querySelectorAll('[data-pplay]').forEach(b=>b.addEventListener('click',()=>{ ac(); playClip(store.get(b.dataset.pplay,'')); }));
   box.querySelectorAll('[data-pdel]').forEach(b=>b.addEventListener('click',()=>{ store.set(b.dataset.pdel,''); renderProfile(); profileChanged(); }));
+  pinRender();
 }
 /* mudou o perfil: avisa a sala (o apelido vai junto) */
 function profileChanged(nickOnly){
   rkSyncMe(); /* nome e foto no ranking e nos desafios */
+  if(nickOnly) pinRender(); /* o PIN é de cada nome */
   if(typeof NET==='undefined'||!NET.open) return;
   const v=myNick(); NET.names[NET.role]=v; const ni=$('#nickIn'); if(ni&&document.activeElement!==ni) ni.value=v;
   if(NET.role==='A') sendRoster(); else send({t:'nick',name:v});

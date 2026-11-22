@@ -15,9 +15,9 @@ function dsMine(){ const k=encodeURIComponent(dsKey()); return Promise.all([rkFe
   .then(([x,y])=>x.concat(y).sort((p,q)=>q.atualizado.localeCompare(p.atualizado))); }
 /* sem nome não dá para desafiar: pede um nome (o mesmo do Perfil) */
 function dsNeedNick(cb){
-  if(myNick()){ cb(); return; }
+  if(myNick()){ pinGarantir(cb); return; }
   openEnd('<h2>Qual é o seu nome?</h2><p class="muted">É assim que os outros vão ver você nos desafios e no ranking.</p><input class="code nick" id="dsNick" maxlength="16" autocomplete="nickname" style="width:100%;margin-top:10px">',
-    [{t:'Continuar',cls:'primary',on:()=>{ const v=$('#dsNick').value.trim().slice(0,16); if(!v){ toast('Escreva um nome'); return; } store.set('ddb_nick',v); closeEnd(); cb(); }},{t:'Voltar',cls:'ghost',on:closeEnd}]);
+    [{t:'Continuar',cls:'primary',on:()=>{ const v=$('#dsNick').value.trim().slice(0,16); if(!v){ toast('Escreva um nome'); return; } store.set('ddb_nick',v); closeEnd(); pinGarantir(cb); }},{t:'Voltar',cls:'ghost',on:closeEnd}]);
   setTimeout(()=>{ const i=$('#dsNick'); if(i) i.focus(); },100);
 }
 function dsShare(d,kind){
