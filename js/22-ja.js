@@ -1432,4 +1432,6 @@ const JA={
 "❄️ Congelado":"❄️ 凍結中",
 "❄️ Congelado: o tempo para pôr a peça está parado ({} s)":"❄️ 凍結中：ピースを置く時間は止まっています（{}秒）",
 "bold {}px system-ui,sans-serif":null,
+"Peças que faltam: {} · ⭐⭐⭐ em até {} s":"残りのピース：{} · ⭐⭐⭐ は{}秒以内",
+"em até {} segundos":"{}秒以内",
 };

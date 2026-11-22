@@ -12,7 +12,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Caça às estrelas',icon:'⭐',goal:'golds',setup:'golds',k:4,limit:27,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:15,three:9}},
   {name:'Pegando fogo',icon:'🔥',goal:'combo',v:3,limit:23,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:11,three:8}},
   {name:'Chuva de pedras',icon:'🌧️',goal:'survive',time:120,rain:15,mt:8,desc:'Aguente 2 minutos. Cai um bloco cinza a cada {rain} segundos, e você tem 8 segundos por jogada.',st:{by:'lines',two:17,three:22}},
-  {name:'Quebra-cabeça',icon:'🧩',goal:'empty',setup:'puzzle',desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
+  {name:'Quebra-cabeça',icon:'🧩',goal:'empty',setup:'puzzle',desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'time',two:15,three:8}},
   {name:'Inverno',icon:'❄️',goal:'clear',setup:'ice',k:6,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:39,three:29}},
   {name:'Arco-íris',icon:'🌈',goal:'colorLines',v:2,limit:44,colors:[0,3,5],desc:'Só 3 cores. Faça {v} linhas de uma cor só em até {limit} peças.',st:{by:'pieces',two:14,three:8}},
   {name:'Chefão: Ursão',icon:'🐻',goal:'boss',hp:30,time:180,desc:'Cada linha tira vida do Ursão; o combo multiplica o dano. Bravo, ele congela uma peça por 4 s.',st:{by:'time',two:65,three:50}}
@@ -23,7 +23,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Granulado',icon:'✨',goal:'golds',setup:'golds',k:6,limit:31,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:18,three:12}},
   {name:'Açúcar no talo',icon:'🍫',goal:'combo',v:4,limit:28,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:12,three:10}},
   {name:'Chuva de confeitos',icon:'🌧️',goal:'survive',time:120,rain:12,mt:7,desc:'Aguente 2 minutos. Cai um bloco cinza a cada {rain} segundos, e você tem 7 segundos por jogada.',st:{by:'lines',two:17,three:23}},
-  {name:'Bolo em camadas',icon:'🎂',goal:'empty',setup:'puzzle',bands:[2,2,2,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
+  {name:'Bolo em camadas',icon:'🎂',goal:'empty',setup:'puzzle',bands:[2,2,2,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'time',two:15,three:8}},
   {name:'Pudim gelado',icon:'🍮',goal:'clear',setup:'ice',k:8,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:47,three:32}},
   {name:'Chiclete grudento',icon:'🍬',goal:'lines',v:10,setup:'gum',k:2,gum:2,desc:'Limpe {v} linhas. Começa com {k} chicletes, e a cada {gum} jogadas um gruda numa casa vizinha.',st:{by:'pieces',two:23,three:20}},
   {name:'Chefona: Rainha Jujuba',icon:'👑',goal:'boss',hp:40,time:200,gum:4,desc:'Cada linha tira vida da Rainha; o combo multiplica o dano. Ela joga chicletes que se espalham e, brava, gruda uma peça por 4 s.',st:{by:'time',two:80,three:55}}
@@ -34,7 +34,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Joaninhas douradas',icon:'🐞',goal:'golds',setup:'golds',k:7,limit:34,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:17,three:12}},
   {name:'Suco duplo',icon:'🥤',goal:'combo',v:4,limit:25,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:13,three:10}},
   {name:'Ventania',icon:'🍃',goal:'survive',time:150,rain:12,mt:7,desc:'Aguente 2 minutos e meio. Cai um bloco cinza a cada {rain} segundos, e você tem 7 segundos por jogada.',st:{by:'lines',two:22,three:28}},
-  {name:'Cesta cheia',icon:'🧺',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
+  {name:'Cesta cheia',icon:'🧺',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'time',two:18,three:10}},
   {name:'Geada no pomar',icon:'❄️',goal:'clear',setup:'ice',k:10,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:47,three:36}},
   {name:'Fruta passada',icon:'🍐',goal:'clear',setup:'stones',k:8,ripe:{k:1,life:5,every:4},desc:'Limpe os {k} blocos cinza. Cuidado: fruta madura que apodrece vira mais um bloco cinza!',st:{by:'pieces',two:33,three:23}},
   {name:'Chefão: Lagartão Guloso',icon:'🦎',goal:'boss',hp:50,time:220,ripe:{k:1,life:6,every:5},desc:'Cada linha tira vida do Lagartão; o combo multiplica o dano, e fruta madura colhida tira 3 a mais. Ele joga maçãs bichadas e, bravo, morde uma peça por 4 s.',st:{by:'time',two:75,three:55}}
@@ -45,7 +45,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Entulho',icon:'🪨',goal:'clear',setup:'stones',k:14,desc:'O tabuleiro começa com {k} blocos cinza. Limpe todos.',st:{by:'pieces',two:24,three:20}},
   {name:'Guindaste',icon:'🏗️',goal:'combo',v:5,limit:31,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:14,three:12}},
   {name:'Turno da noite',icon:'🌙',goal:'survive',time:150,rain:10,mt:6,desc:'Aguente 2 minutos e meio. Cai um bloco cinza a cada {rain} segundos, e você tem 6 segundos por jogada.',st:{by:'lines',two:22,three:29}},
-  {name:'Planta baixa',icon:'📐',goal:'empty',setup:'puzzle',bands:[2,2,2,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
+  {name:'Planta baixa',icon:'📐',goal:'empty',setup:'puzzle',bands:[2,2,2,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'time',two:15,three:8}},
   {name:'Duas esteiras',icon:'🏭',goal:'clear',setup:'stones',k:10,belt:{rows:[2,5],every:3},desc:'Limpe os {k} blocos cinza. Duas esteiras andam uma casa a cada 3 jogadas.',st:{by:'pieces',two:22,three:16}},
   {name:'Parafusos dourados',icon:'🔩',goal:'golds',setup:'golds',k:8,limit:33,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:16,three:13}},
   {name:'Chefão: Robozão',icon:'🤖',goal:'boss',hp:52,time:240,belt:{rows:[4],every:4},desc:'Cada linha tira vida do Robozão; o combo multiplica o dano. Uma esteira anda a cada 4 jogadas. Ele joga porcas de aço e, bravo, trava uma peça por 4 s.',st:{by:'time',two:95,three:75}}
@@ -56,7 +56,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Lanternas',icon:'🏮',goal:'golds',setup:'golds',k:8,limit:32,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:18,three:14}},
   {name:'Dança do panda',icon:'🐼',goal:'combo',v:5,limit:30,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:14,three:11}},
   {name:'Chuva na floresta',icon:'🌧️',goal:'survive',time:160,rain:10,mt:6,desc:'Aguente 2 minutos e 40 segundos. Cai um bloco cinza a cada {rain} segundos, e você tem 6 segundos por jogada.',st:{by:'lines',two:24,three:31}},
-  {name:'Cesto de bambu',icon:'🧺',goal:'empty',setup:'puzzle',bands:[2,2,2,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
+  {name:'Cesto de bambu',icon:'🧺',goal:'empty',setup:'puzzle',bands:[2,2,2,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'time',two:15,three:8}},
   {name:'Neblina',icon:'🌫️',goal:'clear',setup:'ice',k:10,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:48,three:36}},
   {name:'Bambuzal fechado',icon:'🎍',goal:'lines',v:12,setup:'bamboo',k:3,bamboo:{every:2},desc:'Limpe {v} linhas. Começa com {k} pés de bambu, e eles crescem uma casa a cada 2 jogadas.',st:{by:'pieces',two:27,three:23}},
   {name:'Chefão: Pandão',icon:'🐼',goal:'boss',hp:70,time:250,bamboo:{every:4},desc:'Cada linha tira vida do Pandão; o combo multiplica o dano. Ele planta bambu que cresce a cada 4 jogadas e, bravo, abraça uma peça por 4 s.',st:{by:'time',two:95,three:65}}
@@ -67,7 +67,7 @@ const CWORLDS=[{w:1,name:'Pelúcia',icon:'🧸',skin:'velvet',boss:'bear',reward
   {name:'Moedas da sorte',icon:'🪙',goal:'golds',setup:'golds',k:9,limit:33,desc:'Pegue os {k} blocos dourados em até {limit} peças.',st:{by:'pieces',two:19,three:14}},
   {name:'Taiko',icon:'🥁',goal:'combo',v:6,limit:33,desc:'Faça um combo x{v} em até {limit} peças.',st:{by:'pieces',two:17,three:14}},
   {name:'Tufão',icon:'🌀',goal:'survive',time:180,rain:9,mt:6,desc:'Aguente 3 minutos. Cai um bloco cinza a cada {rain} segundos, e você tem 6 segundos por jogada.',st:{by:'lines',two:27,three:36}},
-  {name:'Tsuru de papel',icon:'🦢',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'attempts',two:3,three:1}},
+  {name:'Tsuru de papel',icon:'🦢',goal:'empty',setup:'puzzle',bands:[2,2,1,1,1],desc:'As peças são contadas: encaixe todas e deixe o tabuleiro vazio.',st:{by:'time',two:18,three:10}},
   {name:'Monte Fuji',icon:'🗻',goal:'clear',setup:'ice',k:12,desc:'Limpe os {k} blocos de gelo. Cada um precisa ser limpo 2 vezes.',st:{by:'pieces',two:50,three:40}},
   {name:'Jardim zen',icon:'🪨',goal:'clear',setup:'stones',k:12,belt:{rows:[4],every:3},petal:{k:1,life:5,every:4},desc:'Limpe os {k} blocos cinza. Uma esteira anda a cada 3 jogadas e flores de sakura aparecem pelo caminho.',st:{by:'pieces',two:25,three:19}},
   {name:'Chefão: Gatão da Sorte',icon:'🐱',goal:'boss',hp:70,time:260,petal:{k:2,life:5,every:4},desc:'Cada linha tira vida do Gatão; o combo multiplica o dano, e cada flor de sakura pega tira 3 a mais. Ele joga moedas e, bravo, prende uma peça por 4 s.',st:{by:'time',two:105,three:70}}
@@ -121,7 +121,7 @@ function campDesc(def,sc,w){ const t=def.desc.replace('{v}',fmtN(sc.v||def.v||0)
 function campStarTxt(def,sc){
   const by=def.st.by;
   if(by==='pieces') return [`em até ${sc.st2} peças`,`em até ${sc.st3} peças`];
-  if(by==='time') return [`em até ${fmtT(sc.st2*1000)}`,`em até ${fmtT(sc.st3*1000)}`];
+  if(by==='time') return def.setup==='puzzle'?[`em até ${sc.st2} segundos`,`em até ${sc.st3} segundos`]:[`em até ${fmtT(sc.st2*1000)}`,`em até ${fmtT(sc.st3*1000)}`];
   if(by==='lines') return [`limpando ${sc.st2} linhas`,`limpando ${sc.st3} linhas`];
   return ['em até 3 tentativas','na primeira tentativa'];
 }
@@ -165,7 +165,7 @@ function campHook(cfg){
     if(def.setup==='ice'){ const idx=e.addStones(rnd,def.k,0); idx.forEach(i=>{ e.b[(i/N)|0][i%N]={c:Math.floor(rnd()*NCOL),s:'ice',t:0,ic:1}; }); }
     if(def.setup==='puzzle'){ const pz=makePuzzle(w===1?'W1P7':'W'+w+'P'+ph,def.bands); e.b=pz.board; const q={}; SH.ids.forEach(id=>q[id]=[]); pz.pieces.forEach((p,i)=>q[SH.ids[i%SH.ids.length]].push(p));
       SH.ids.forEach(id=>{ H.trays[id]=[null,null,null]; for(let s=0;s<3&&q[id].length;s++) H.trays[id][s]=q[id].shift(); }); H.campQ=q; }
-    H.cp={wait:!!(def.mt||def.rain||(def.time&&cfg.solo)),w,gumN:0,gum:0,ripe:0,ripeN:0,petal:0,petalN:0,beltN:0,bambN:0,bamb:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
+    H.cp={wait:!!(def.mt||def.rain||((def.time||def.setup==='puzzle')&&cfg.solo)),w,gumN:0,gum:0,ripe:0,ripeN:0,petal:0,petalN:0,beltN:0,bambN:0,bamb:0,ph,P,placed:0,lines:0,score:0,combo:0,colorLines:0,left:0,hp:sc.hp,hpMax:sc.hp,el:0,tl:def.time||0,helps:cfg.camp.helps||[],used:[],frz:null,bossN:0,rage:0,rainAt:sc.rain,txt:'',att:cfg.camp.att||1,mt:def.mt?def.mt*1000:0,moveAt:def.mt?def.mt*1000:0};
     hk.progress(H);
   };
   hk.progress=H=>{
@@ -188,7 +188,7 @@ function campHook(cfg){
       case 'combo': win=cp.combo>=def.v; cp.txt=`Maior combo: x${cp.combo} de x${def.v} · peças ${cp.placed}/${sc.limit}`; break;
       case 'colorLines': win=cp.colorLines>=def.v; cp.txt=`Linhas de uma cor: ${cp.colorLines}/${def.v} · peças ${cp.placed}/${sc.limit}`; break;
       case 'survive': cp.txt=`Aguente firme! ${cp.lines} linhas limpas`; break;
-      case 'empty': win=b.every(row=>row.every(v=>!v)); cp.txt=`Peças que faltam: ${cp.left} · tentativa ${cp.att}`; break;
+      case 'empty': win=b.every(row=>row.every(v=>!v)); cp.txt=`Peças que faltam: ${cp.left} · ⭐⭐⭐ em até ${sc.st3} s`; break;
       case 'boss': win=cp.hp<=0; cp.txt=cp.rage?'😡 Bravo(a)! Cuidado':'⚔️ Limpe linhas para atacar'; break;
     }
     return win;
@@ -244,6 +244,8 @@ function campHook(cfg){
       const el=SH.host?SH.elapsed:cp.el+(SH.remAt?t-SH.remAt.at:0), sec=Math.ceil((cp.moveAt-el)/1000); if(sec<=3&&sec>0&&sec!==hk.beep){ hk.beep=sec; SFX.tick(); } }
     if(!SH.host){ if(cp.tl&&SH.remAt&&SH.playing&&!(v&&v.paused)){ const el=cp.el+(t-SH.remAt.at); setTimer(cp.tl*1000-el,cp.tl*1000,false); } return; }
     const H=SH.H; if(!SH.playing||H.paused||H.over) return; cp.el=SH.elapsed;
+    /* quebra-cabeça: as estrelas são pelo tempo, então o relógio corre à vista (em décimos) */
+    if(hk.noRegen){ const tx=cp.wait?'⏱ 0,0 s':`⏱ ${(SH.elapsed/1000).toFixed(1).replace('.',',')} s`, te=$('#timer'); if(te.textContent!==tx) te.textContent=tx; te.classList.toggle('hurry',!cp.wait&&SH.elapsed>sc.st3*1000); }
     if(cp.mt&&SH.elapsed>=cp.moveAt){ hk.finish(false,'O tempo da jogada acabou'); return; }
     if(cp.tl){ const left=cp.tl*1000-SH.elapsed; setTimer(left,cp.tl*1000,false);
       if(left<=0){ if(def.goal==='survive'){ hk.progress(H); hk.finish(true); } else hk.finish(false,'O tempo acabou'); return; } }
@@ -275,7 +277,7 @@ function campHook(cfg){
       if(st._h!==html){ st._h=html; st.innerHTML=html; } const m=$('#mission'); if(m.hidden){ m.hidden=false; layout(); } }
     const tb=$('#timebar'); tb.classList.remove('hp');
     if(def.goal==='boss') bossHP(cp.hp,cp.hpMax);
-    if(cp.tl){ tb.style.visibility='visible'; } else { tb.style.visibility='hidden'; $('#timer').textContent=''; }
+    if(cp.tl){ tb.style.visibility='visible'; } else { tb.style.visibility='hidden'; if(!hk.noRegen) $('#timer').textContent=''; }
     $$('#actions [data-help]').forEach(b=>{ const k=b.dataset.help; b.disabled=!cp.helps.includes(k)||cp.used.includes(k)||(k==='swap'&&hk.noRegen)||!SH.playing; });
   };
   hk.ev=(ev,mine)=>{
@@ -347,7 +349,7 @@ function campEnd(info,cfg){
     if(info.won&&def.goal==='boss') body+=`<p class="newbest">🏆 Você derrotou ${esc(bossArt(BOSSES[W.boss]))}! Novo tema de peças liberado: ${SKIN_L[W.reward]} (nas Configurações).${CWORLDS[w]?` O Mundo ${w+1} · ${CWORLDS[w].icon} ${esc(CWORLDS[w].name)} foi aberto!`:''}</p>`;
     if(info.goldNew) body+=`<p class="newbest">✨ 3 estrelas em todas as fases do Mundo ${w}! ${SKIN_L[W.reward]} dourado liberado: nas Configurações, toque de novo no tema ${SKIN_L[W.reward]} para trocar.</p>`; }
   else body+=`<div class="winner lose">${esc(info.msg||'Não foi dessa vez')}</div><p class="muted">Tente de novo: as tentativas são ilimitadas.</p>`;
-  body+=statsHTML([[cp.placed||0,'peças'],[cp.lines||0,'linhas'],[fmtT(cp.el||0),'tempo']]);
+  body+=statsHTML([[cp.placed||0,'peças'],[cp.lines||0,'linhas'],[def.setup==='puzzle'?`${((cp.el||0)/1000).toFixed(1).replace('.',',')} s`:fmtT(cp.el||0),'tempo']]);
   if(solo) body+='<div id="rkPhase"></div>';
   const btns=[];
   if(host){

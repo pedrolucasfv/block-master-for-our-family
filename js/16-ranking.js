@@ -31,7 +31,7 @@ function rkFlush(){
 window.addEventListener('online',rkFlush);
 /* o valor que conta em cada fase é o mesmo das estrelas: peças, tempo, linhas ou tentativas */
 function rkMetric(def,cp,att){ const by=def.st.by; return by==='pieces'?{v:cp.placed,menor:true}:by==='time'?{v:Math.round(cp.el/100)/10,menor:true}:by==='lines'?{v:cp.lines,menor:false}:{v:att||1,menor:true}; }
-function rkFmt(def,v){ const by=def.st.by; return by==='pieces'?`${v} peças`:by==='time'?fmtT(v*1000):by==='lines'?`${v} linhas`:`${v} ${v==1?'tentativa':'tentativas'}`; }
+function rkFmt(def,v){ const by=def.st.by; return by==='pieces'?`${v} peças`:by==='time'?(def.setup==='puzzle'?`${String(v).replace('.',',')} s`:fmtT(v*1000)):by==='lines'?`${v} linhas`:`${v} ${v==1?'tentativa':'tentativas'}`; }
 /* total de estrelas e recorde do Sozinho; manda só quando muda */
 function rkSyncMe(){
   if(!rkOn()) return; const nome=myNick(); if(!nome) return;
@@ -48,8 +48,9 @@ function rkMini(url){ return new Promise((res,rej)=>{ if(!url){ res(''); return;
 function rkCampEnd(info,cfg){
   if(!rkOn()||!cfg.solo) return; const nome=myNick();
   if(info.win&&nome){ const w=cfg.camp.w||1, ph=cfg.camp.ph, def=CWD(w).phases[ph-1], m=rkMetric(def,info.cp||{},cfg.camp.att);
-    const k=w+'-'+ph, mine=store.get('ddb_rkbest',{}), old=mine[k], s=info.stars||1;
-    if(!old||s>old.s||(s===old.s&&(m.menor?m.v<old.v:m.v>old.v))){ mine[k]={s,v:m.v}; store.set('ddb_rkbest',mine); rkQueue('enviar_recorde',{p_nome:nome,p_fase:k,p_estrelas:s,p_valor:m.v,p_menor:m.menor}); } }
+    /* quebra-cabeça: desde a 1.14 vale o tempo (antes eram tentativas); o recorde guardado aqui ganha outra chave (lk) para não misturar */
+    const k=w+'-'+ph, lk=def.setup==='puzzle'?k+'t':k, mine=store.get('ddb_rkbest',{}), old=mine[lk], s=info.stars||1;
+    if(!old||s>old.s||(s===old.s&&(m.menor?m.v<old.v:m.v>old.v))){ mine[lk]={s,v:m.v}; store.set('ddb_rkbest',mine); rkQueue('enviar_recorde',{p_nome:nome,p_fase:k,p_estrelas:s,p_valor:m.v,p_menor:m.menor}); } }
   rkSyncMe();
 }
 /* Desafio do dia: a chave do jogo é "AAAA-MM-DD" (com tempo) ou "AAAA-MM-DD|S" (sem tempo) */

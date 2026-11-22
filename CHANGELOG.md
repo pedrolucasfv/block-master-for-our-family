@@ -6,6 +6,7 @@ Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = corre
 ## 1.14 · 22/11/2026
 - ❄️ **Congelado não faz mais perder:** no duelo com tempo por peça (morte súbita ou "Sem limite com progressão"), se alguém congelar suas peças, o tempo para pôr a peça fica parado até descongelar.
 - 🧊 **Gelo bem visível:** os blocos de gelo ganharam moldura azul, reflexo e um floco de neve ❄ no meio, em todos os temas das peças.
+- 🧩 **Quebra-cabeça pelo tempo:** nas fases 7 de cada mundo, as estrelas agora são pela rapidez: 3 ⭐ resolvendo em até 8 segundos (10 nas fases com 5 peças), 2 ⭐ em até 15 (18). O relógio só começa no primeiro toque e corre à vista. Errou uma peça? É só tentar de novo, sem perder a chance das 3 estrelas.
 - 🐻 **Mais espaço para o chefão:** o chefão ficou maior e o cartão do lado dos pontos saiu. O que fazer agora ("⚔️ Limpe linhas para atacar") aparece embaixo dos pontos, e as regras do chefão ficam na pausa (⏸).
 
 ## 1.13 · 22/11/2026
