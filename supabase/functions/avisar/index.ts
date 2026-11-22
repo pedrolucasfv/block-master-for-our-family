@@ -33,9 +33,25 @@ export function avisos(d: Desafio) {
   return out;
 }
 
+/* manda um aviso para um aparelho; se o aparelho desligou os avisos, apaga a inscrição velha */
+async function enviar(s: Sub, msg: { title: string; body: string; url?: string; tag?: string }) {
+  try { await webpush.sendNotification(s, JSON.stringify(msg)); return true; }
+  catch (e) {
+    const code = (e as { statusCode?: number }).statusCode;
+    if (code === 404 || code === 410) await fetch(SUPA_URL + "/rest/v1/rpc/remover_inscricao", { method: "POST", headers: { apikey: SUPA_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_endpoint: s.endpoint }) }).catch(() => {});
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.headers.get("x-segredo") !== Deno.env.get("AVISO_SEGREDO")) return new Response("não autorizado", { status: 401 });
   const p = await req.json().catch(() => null);
+  /* lista pronta, montada pelo banco (recorde batido, Desafio do dia, aviso de manhã): só envia */
+  if (p?.tipo === "lista") {
+    let enviados = 0;
+    for (const a of p.avisos ?? []) for (const s of (a.subs ?? []) as Sub[]) if (await enviar(s, { title: a.title, body: a.body, url: a.url, tag: a.tag })) enviados++;
+    return new Response(JSON.stringify({ enviados }), { headers: { "Content-Type": "application/json" } });
+  }
   const d: Desafio = p?.record, old = p?.old_record;
   if (p?.table !== "desafios" || !d?.id) return new Response("ignorado");
   if (p.type === "UPDATE" && old && old.vez === d.vez) return new Response("a vez não mudou");

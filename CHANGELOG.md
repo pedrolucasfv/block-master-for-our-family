@@ -3,6 +3,12 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.7 · 22/11/2026
+- ☀️ **Ranking do Desafio do dia:** quem jogou hoje aparece num ranking da família (com tempo e sem tempo), na tela do desafio e no fim da partida.
+- 🔔 **Aviso de manhã** (8h): "O Desafio do dia saiu!", contando quem venceu ontem.
+- 👑 **"Tomou o 1º lugar!"**: aviso para quem estava em 1º no Desafio do dia e foi passado.
+- 🏆 **"Passou você!"**: aviso quando alguém bate o seu recorde numa fase da campanha. Tocar no aviso abre a fase.
+
 ## 1.6 · 22/11/2026
 - ⚔️ **Meus desafios** mudou para o topo de "Jogar com alguém" (o menu avisa quando é sua vez) e ganhou destaque: área grande que sempre aparece (mesmo vazia), com a foto de cada pessoa e sem o "vs" antes do nome.
 - 🖼️ Tocar na foto de alguém (nos desafios) amplia a foto. As fotos do perfil agora sobem para o servidor e ficam com mais qualidade.

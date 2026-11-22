@@ -36,8 +36,18 @@ async function avRender(){
   const on=Notification.permission==='granted'&&!!(await avSub())&&!!store.get('ddb_avnome','');
   b.hidden=false; b.textContent=on?'🔕 Desligar avisos':'🔔 Me avisar quando for a minha vez';
   b.classList.toggle('primary',!on); b.onclick=on?avDesativar:avAtivar;
-  t.textContent=on?'Avisos ligados neste aparelho: quando for sua vez num desafio, chega uma notificação.':Notification.permission==='denied'?'Os avisos estão bloqueados neste navegador. Para ligar, toque no cadeado ao lado do endereço do site e permita as notificações.':'Chega uma notificação quando for sua vez num desafio, mesmo com o jogo fechado.';
+  t.textContent=on?'Avisos ligados neste aparelho: sua vez nos desafios, recordes batidos e o Desafio do dia de manhã.':Notification.permission==='denied'?'Os avisos estão bloqueados neste navegador. Para ligar, toque no cadeado ao lado do endereço do site e permita as notificações.':'Chega uma notificação quando for sua vez num desafio, quando alguém passar seu recorde, e de manhã quando sair o Desafio do dia. Funciona mesmo com o jogo fechado.';
 }
+/* aviso tocado: ?dia=1 abre o Desafio do dia; ?fase=3-8 abre a fase da campanha */
+function avFromLink(){
+  let q=null; try{ q=new URLSearchParams(location.search); }catch(e){ return; }
+  const dia=q.get('dia'), fase=q.get('fase'); if(!dia&&!fase) return;
+  try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
+  if(dia){ $('#goDaily').click(); return; }
+  const m=/^(\d{1,2})-(\d{1,2})$/.exec(fase||''); if(!m) return; const w=+m[1], ph=+m[2];
+  if(!CWORLDS[w-1]||!CWORLDS[w-1].phases[ph-1]) return; openCamp(w); if(campOpen(campLoad('solo'),w,ph)) campIntro(w,ph);
+}
+setTimeout(avFromLink,700);
 if(rkOn()&&avOk()){
   /* quem já ligou os avisos: mantém o aparelho registrado (e com o nome atual, se mudou no Perfil) */
   navigator.serviceWorker.getRegistration().then(async r=>{ avReg=r||null; if(!avReg||Notification.permission!=='granted') return;

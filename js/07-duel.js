@@ -338,6 +338,7 @@ function duelEnd(reason){
   if(d.live){ send({t:'end',seed:d.cfg.seed,info:d.info}); noteEnd(NET.role,d.info,d.cfg.seed); saveLastOnline(); }
   if(d.cfg.type==='daily'){ const dl=store.get('ddb_daily',{}); dl[d.cfg.key]={score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo}; store.set('ddb_daily',dl); }
   if(d.cfg.type==='chal') dsRoundEnd(d);
+  if(d.cfg.type==='daily') rkDailyEnd(d);
   d.newBest=d.cfg.type!=='chal'&&checkBest(d.cfg.type,d.o,d.score)&&d.score>0;
   if(d.cfg.type==='solo') soloRecord(d);
   if(!d.live) addHist({date:Date.now(),kind:d.cfg.type,label:d.cfg.type==='daily'?'Desafio do dia':d.cfg.type==='chal'?d.cfg.label:d.cfg.type==='solo'?'Sozinho · '+TIME_L[d.o.time]+' · '+PLAYS[d.o.play]:'Duelo · '+PLAYS[d.o.play],code:d.cfg.code||'',score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo,result:null});
@@ -416,7 +417,9 @@ function showDuelEnd(){
     else { btns.push({t:'Compartilhar',on:()=>shareText(shareMsg())});
       btns.push({t:'Menu',cls:'ghost',on:d.cfg.type==='solo'?()=>{ closeEnd(); D=null; IN=null; openSolo(); }:goHome}); }
   }
+  if(!d.live&&d.cfg.type==='daily') body+='<div id="rkDaily"></div>';
   openEnd(body,btns);
+  if(!d.live&&d.cfg.type==='daily') rkDailyBox('#rkDaily',d.cfg.key);
   $$('#whoBox .btn').forEach(b=>b.addEventListener('click',()=>{
     if(d.whoDone) return; d.whoDone=true; const r=b.dataset.r;
     addNight(r); const h=store.get('ddb_hist',[]); if(h[0]) { h[0].result=r; store.set('ddb_hist',h); }

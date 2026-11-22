@@ -92,6 +92,7 @@ function showReady(){
       $('#btnStart').hidden=true;
       $('#dailyShare').addEventListener('click',()=>{ let t=`Duelo de Blocos · Desafio do dia ${dailyCode(setup.key)}\n${fmtN(done.score)} pontos · ${done.lines} linhas · combo x${done.combo}\nConsegue bater?`; const l=gameLink(); if(l) t+='\n'+l; shareText(t); });
     } else $('#readyHint').textContent='Mesmas peças para todo mundo hoje. Vale uma tentativa com tempo e uma sem tempo: confira se o código é igual no outro celular.';
+    $('#readyResult').insertAdjacentHTML('beforeend','<div id="rkDaily"></div>'); rkDailyBox('#rkDaily',setup.key);
   } else {
     const n=SERIES_N[setup.opts.series], need=Math.ceil(n/2);
     if(n>1&&(setup.ser.me>=need||setup.ser.other>=need)) setup.ser={me:0,other:0};

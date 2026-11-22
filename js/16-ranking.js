@@ -30,6 +30,7 @@ function rkSyncMe(){
   const bs=store.get('ddb_bests',{}), solo=Math.max(soloStats().bestScore||0,...Object.keys(bs).filter(k=>k.startsWith('sozinho|')).map(k=>bs[k]||0),0);
   const est=campTotal(campLoad('solo')), key=[nome.toLowerCase(),est,solo].join('|');
   if(store.get('ddb_rksync','')!==key){ store.set('ddb_rksync',key); rkQueue('salvar_jogador',{p_nome:nome,p_estrelas:est,p_solo:solo}); } else rkFlush();
+  rkDailySync();
   /* foto do perfil: vai junto uma miniatura (para as listas); a grande só é baixada quando alguém toca para ampliar */
   const ph=store.get('ddb_photo',''), pk=[nome.toLowerCase(),ph.length,ph.slice(-24)].join('|');
   if(store.get('ddb_rkfoto','')!==pk) rkMini(ph).then(mini=>{ store.set('ddb_rkfoto',pk); rkQueue('salvar_foto',{p_nome:nome,p_foto:ph,p_mini:mini}); }).catch(()=>{});
@@ -43,6 +44,23 @@ function rkCampEnd(info,cfg){
     const k=w+'-'+ph, mine=store.get('ddb_rkbest',{}), old=mine[k], s=info.stars||1;
     if(!old||s>old.s||(s===old.s&&(m.menor?m.v<old.v:m.v>old.v))){ mine[k]={s,v:m.v}; store.set('ddb_rkbest',mine); rkQueue('enviar_recorde',{p_nome:nome,p_fase:k,p_estrelas:s,p_valor:m.v,p_menor:m.menor}); } }
   rkSyncMe();
+}
+/* Desafio do dia: a chave do jogo é "AAAA-MM-DD" (com tempo) ou "AAAA-MM-DD|S" (sem tempo) */
+const rkDayOf=key=>{ const [dia,s]=String(key).split('|'); return {dia,v:s?'s':'t'}; };
+/* manda o resultado do dia guardado no aparelho (de hoje e de ontem), uma vez só por partida */
+function rkDailySync(){ if(!rkOn()||!myNick()) return; const dl=store.get('ddb_daily',{}), sent=store.get('ddb_rkdia',{}), ok=[todayKey(),todayKey(new Date(Date.now()-864e5))];
+  Object.keys(dl).forEach(key=>{ const k=rkDayOf(key); if(sent[key]||!ok.includes(k.dia)) return; sent[key]=1;
+    rkQueue('enviar_diario',{p_nome:myNick(),p_dia:k.dia,p_var:k.v,p_pontos:dl[key].score||0,p_linhas:dl[key].lines||0}); });
+  store.set('ddb_rkdia',sent); }
+function rkDailyEnd(){ rkDailySync(); }
+/* top 10 do dia, na caixa sel (tela do desafio do dia e fim da partida) */
+function rkDailyBox(sel,key){
+  const box=$(sel); if(!box) return; if(!rkOn()){ box.hidden=true; return; }
+  const k=rkDayOf(key); box.innerHTML='<p class="muted">🏆 Carregando o ranking de hoje…</p>';
+  setTimeout(()=>rkFetch(`diario?dia=eq.${k.dia}&var=eq.${k.v}&select=pontos,linhas,jogadores(nome)&order=pontos.desc,quando.asc&limit=10`)
+    .then(rows=>{ if(!box.isConnected) return; const list=rows.map(r=>({nome:(r.jogadores&&r.jogadores.nome)||'?',pontos:r.pontos,linhas:r.linhas}));
+      box.innerHTML=`<p class="muted" style="margin-top:12px">🏆 Ranking de hoje${k.v==='s'?' (sem tempo)':''}</p>`+(list.length?rkRows(list,r=>`${fmtN(r.pontos)} pts`):'<p class="muted">Ninguém jogou ainda hoje. Seja o primeiro!</p>')+rkNoNick(); })
+    .catch(()=>{ if(box.isConnected) box.innerHTML='<p class="muted">🏆 Ranking indisponível sem internet.</p>'; }),store.get('ddb_rkq',[]).length?1500:0);
 }
 function rkRows(list,fmt){
   const me=myNick().toLowerCase();

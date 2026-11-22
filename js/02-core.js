@@ -1,7 +1,7 @@
 'use strict';
 /* utilidades, store (localStorage/SIM), SET (configurações salvas), temas ganhos e dourados */
 /* versão do jogo: aparece no rodapé do menu. A cada mudança publicada, suba o número e anote em CHANGELOG.md */
-const VERSAO='1.6', VERSAO_DATA='21/11/2026';
+const VERSAO='1.7', VERSAO_DATA='22/11/2026';
 /* ===================== utilidades ===================== */
 const PALETTE=['#e5483f','#f08c25','#f3c22f','#4cbb47','#2cb4d6','#3e6fe0','#8a52d8'];
 const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#eab526', RIPEC='#ff4b3e', ROTC='#8d5a2b', STALKC='#8fcf5a', PETALC='#ffb3cc', COINC='#e0a83a', NUTC='#9aa6b8';
