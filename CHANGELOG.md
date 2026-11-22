@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.16.1 · 22/11/2026
+- ↩️ **Botão voltar do celular:** com o jogo instalado (ou no navegador), o voltar do celular não fecha mais o jogo. Ele faz o mesmo que o "← Voltar" da tela: fecha a janela aberta, volta do mapa da campanha para o menu, pausa a partida (e, pausado, continua). Na sala conectada, pergunta antes de sair. No menu inicial, é preciso tocar em voltar duas vezes para sair.
+
 ## 1.16 · 22/11/2026
 - 🎨 **Visual novo:** cores mais alegres, cantos mais redondos e uma letra mais "de jogo" nos títulos e nos pontos. Três temas novos: 🧸 **Brinquedos** (o novo padrão, creme e coral), 🕹️ **Fliperama** (roxo com botões coloridos) e 🌌 **Noite estrelada** (escuro com brilho azul). Nas Configurações, cada tema aparece numa miniatura do menu, para ver antes de escolher. Os temas antigos continuam lá.
 - 🏠 **Menu novo:** o Desafio do dia fica numa faixa no topo (com "jogado hoje" e 🔥 dias seguidos), "Jogar sozinho" é o botão grande, "Jogar com alguém" e "Campanha" ficam lado a lado, o "📲 Instalar o jogo" aparece logo abaixo (quando dá para instalar) e Histórico, Novidades e Ajustes viraram ícones embaixo.

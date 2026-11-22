@@ -1513,4 +1513,7 @@ const JA={
 "📲 Jogo instalado! Procure o ícone na tela.":"📲 インストールしました！画面のアイコンをさがしてね。",
 "📴 Sem internet. Dá para continuar jogando; o progresso vai para a nuvem quando voltar.":"📴 インターネットがありません。このまま遊べます。進行状況はつながったらクラウドに送られます。",
 "🔀 Juntar o melhor dos dois":"🔀 両方のいいところをまとめる",
+"Parar de assistir?":"観戦をやめますか？",
+"Sair da sala? Todos serão desconectados.":"ルームを出ますか？全員の接続が切れます。",
+"Toque em voltar de novo para sair":"もう一度「戻る」を押すと終了します",
 };
