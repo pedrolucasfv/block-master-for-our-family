@@ -85,7 +85,33 @@ Natal, Ano-Novo, Carnaval, Páscoa, Dia das Mães/Pais, festa junina, Dia das Cr
 
 ---
 
-## 6. 💭 Outras ideias já levantadas (ainda não comentadas)
+## 6. 👀 Assistir quem está jogando agora ⭐🧪
+Ver ao vivo a partida de alguém da família, **só se a pessoa deixar**.
+- **Permissão no Perfil:** "Deixar a família me assistir": nunca · perguntar a cada vez · sempre.
+- **"Jogando agora"** no menu: bolinha verde em quem está online e em que está jogando (Sozinho, Desafio do dia, Campanha fase 3…).
+- **Quem joga vê** "👀 Vovó está assistindo" e pode recusar ou fechar a qualquer hora.
+- **Torcida:** quem assiste manda emojis/aplausos que aparecem na tela de quem joga (dá para desligar).
+- Combina com o aviso "a Lúcia está quase batendo o recorde, venha assistir".
+
+**Como daria para fazer (do mais simples ao mais fino):**
+1. Quem joga manda um "retrato" pequeno da partida (tabuleiro, peças, pontos; já existe algo assim no `npcState`/`boardStr`) para o Supabase a cada 1–2 s; quem assiste lê no mesmo ritmo e o jogo anima. Reaproveita a tela do espectador (`specRender`). Atraso de 1–2 s.
+2. Mais tarde, trocar por tempo real (Supabase Realtime ou WebRTC como a sala), sem atraso.
+- "Online agora": o jogo avisa o banco a cada ~30 s que está aberto.
+- Precisa de tabela nova no banco (presença + retrato) e respeitar o PIN do nome.
+
+---
+
+## 7. 🗺️ Campanha: mundos novos (para bem depois)
+Cada mundo apresenta um modo/modificador que já existe:
+- **Fundo do mar:** bolhas que sobem (gravidade ao contrário).
+- **Espaço:** modo Gravidade + meteoros que viram pedra.
+- **Mundo do modo Cego** (caverna / casa mal-assombrada): só uma lanterna mostra parte do tabuleiro.
+- **Festa junina:** fogueira que queima uma linha; bandeirinhas = bônus de cor.
+- Outros encaixes possíveis: Vulcão (bombas), Corrida/estrada (morte súbita), Montanha (peças pesadas), mundo "Sem combo".
+
+---
+
+## 8. 💭 Outras ideias já levantadas (ainda não comentadas)
 - Missões da semana · Liga da família (campeão da semana) · Desafio do dia em dupla
 - Chefão em grupo (sala inteira contra um chefão com muita vida)
 - Quebra-cabeça feito pela família (editor + link)
@@ -96,9 +122,9 @@ Natal, Ano-Novo, Carnaval, Páscoa, Dia das Mães/Pais, festa junina, Dia das Cr
 - Retrospectiva do ano · Placar de rivalidade (você × vovô) · Cápsula do tempo do recorde
 - Blocos com fotos da família · Cenário pelo horário/estação · Comemoração personalizada
 
-## 7. 💭 Ideias novas (rodada 4)
+## 9. 💭 Ideias novas (rodada 4)
 - **Fantasma de ontem:** jogar com a miniatura da sua melhor partida rodando ao lado (com as mesmas peças).
-- **Ajuste justo (handicap):** cada pessoa tem um nível de ajuda calculado pelo histórico (peças um pouco mais fáceis, um "salva-vidas"), para avô × neto ser parelho.
+- **Ajuste justo (handicap):** (já existe o modificador "Handicap": quem venceu começa com obstáculos; isto seria a versão automática) cada pessoa tem um nível de ajuda calculado pelo histórico (peças um pouco mais fáceis, um "salva-vidas"), para avô × neto ser parelho.
 - **Peça da família:** cada um desenha a sua peça (até 5 casas) no perfil; ela aparece nas partidas da sala quando essa pessoa joga.
 - **Peça rara:** peça brilhante rara (1 em 500); colocar dá bônus e entra numa coleção.
 - **Peça misteriosa:** de vez em quando uma peça vem coberta "?" e só aparece quando você a pega.
@@ -106,5 +132,15 @@ Natal, Ano-Novo, Carnaval, Páscoa, Dia das Mães/Pais, festa junina, Dia das Cr
 - **Espelho:** na sala, cada linha que você limpa aparece espelhada como pedra no tabuleiro do vizinho.
 - **Ajude alguém:** missão coletiva ("família, juntem 500 linhas esta semana para liberar o tema X").
 - **Ao vivo no aviso:** "a Lúcia está quase batendo o recorde, venha assistir 📺" (abre o espectador).
-- **Novos mundos:** Fundo do mar (bolhas que sobem, gravidade ao contrário), Espaço (meteoros que viram pedra), Festa junina (fogueira que queima uma linha).
 - **Modo acessível:** cores com símbolos (daltônico), letras e peças maiores, menos animação.
+
+## 10. 💭 Ideias novas (rodada 5)
+- **Calendário do Advento 🎄:** de 1 a 24 de dezembro, uma caixinha por dia que abre ao jogar o Desafio do dia (figurinha, bloco, tema; dia 24 = prêmio maior). Liga com as datas especiais.
+- **Partida por correspondência:** um tabuleiro da família que cada um joga uma bandeja por dia, na sua vez, com aviso no celular ("sua vez!"). Batata quente sem pressa.
+- **Quebra-cabeça do dia:** rapidinho, uma jogada só ("limpe 3 linhas com essas peças"). Bom para quem não tem paciência para partida longa.
+- **Bolão do dia:** de manhã, cada um aposta quem vai ganhar o Desafio do dia; quem acertar ganha estrelinha.
+- **Roleta da noite:** na sala, uma roleta sorteia o estilo e os modificadores da próxima partida.
+- **Mural da família:** foto do tabuleiro final das melhores partidas (recorde, combo gigante), com curtidas.
+- **Evento relâmpago:** aviso "desafio de 1 minuto, vale até as 21 h"; quem fizer mais leva a coroa da noite.
+- **Modo "na cama":** depois das 22 h, menos brilho, sem vibração e som baixinho (automático, dá para desligar).
+- **Blocos que ensinam (crianças):** modo opcional com continhas ou letras nos blocos; limpar a linha certa dá bônus.
