@@ -2,7 +2,7 @@
 
 Plano vivo do brainstorm. **Nada aqui está implementado.** Quando o brainstorm terminar, juntamos tudo num plano de execução (ordem, tamanho, dependências).
 
-Legenda: ⭐ escolhida pelo Pedro · 🧪 precisa refinar · 💭 só ideia (ainda não comentada)
+Legenda: ⭐ escolhida pelo Pedro · 🧪 precisa refinar · 💭 só ideia (ainda não comentada) · ❌ descartada
 
 ---
 
@@ -134,7 +134,7 @@ Cada mundo apresenta um modo/modificador que já existe:
 - **Ao vivo no aviso:** "a Lúcia está quase batendo o recorde, venha assistir 📺" (abre o espectador).
 - **Modo acessível:** cores com símbolos (daltônico), letras e peças maiores, menos animação.
 
-## 10. 💭 Ideias novas (rodada 5)
+## 10. ❌ Rodada 5: o Pedro não gostou de nenhuma (guardado só para não repetir)
 - **Calendário do Advento 🎄:** de 1 a 24 de dezembro, uma caixinha por dia que abre ao jogar o Desafio do dia (figurinha, bloco, tema; dia 24 = prêmio maior). Liga com as datas especiais.
 - **Partida por correspondência:** um tabuleiro da família que cada um joga uma bandeja por dia, na sua vez, com aviso no celular ("sua vez!"). Batata quente sem pressa.
 - **Quebra-cabeça do dia:** rapidinho, uma jogada só ("limpe 3 linhas com essas peças"). Bom para quem não tem paciência para partida longa.
