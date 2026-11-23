@@ -7,7 +7,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 
 | # | Ideia | Tamanho | Por que nessa ordem | Falta decidir |
 |---|---|---|---|---|
-| 0 | 👤 Página de perfil (com estante de troféus) | M/G | **Estudar melhor antes** (decisão do Pedro). Pré-requisito do troféu das datas especiais | Ver o perfil dos outros?; foto na nuvem? |
+| 0 | 👤 Página de perfil (com estante de troféus) | M/G | **Estudar melhor antes**. Pré-requisito do troféu das datas especiais | Ver o perfil dos outros?; foto na nuvem? |
 | 1 | 🎉 Datas especiais no Desafio do dia (Natal primeiro) | M | Natal está perto; usa o Desafio do dia e os avisos que já existem. Recompensa: **troféu no perfil**, então só depois do perfil (o Natal de 2026 pode ficar sem troféu) | Onde cadastrar aniversários |
 | 2 | 🤖 Supere o robô | P | Reaproveita o robô do duelo; é a base do robô treinador | Nível do robô; robô joga no aparelho ou no banco |
 | 3 | 🎓 Robô treinador | G | Melhorar o cérebro do robô (3 peças em todas as ordens), depois: aviso na hora → revisão no fim → erros mais comuns | Quando falar; quantas dicas 💡 |
@@ -25,7 +25,7 @@ Cada item vira uma versão própria (1.x) com linha no `CHANGELOG.md` e traduç�
 
 ---
 
-Legenda: ⭐ escolhida pelo Pedro · 🧪 precisa refinar · 💭 só ideia (ainda não comentada) · ❌ descartada
+Legenda: ⭐ escolhida · 🧪 precisa refinar · 💭 só ideia (ainda não comentada) · ❌ descartada
 
 ---
 
@@ -57,7 +57,7 @@ Base no código: times (`tlive`/`tsplit`), versus (escolher a peça do outro), `
 ---
 
 ## 2. 🎓 Robô treinador ⭐🧪
-Objetivo do Pedro: algo **robusto, que ajude a pessoa a melhorar de verdade**, mesmo o jogo sendo aleatório.
+Objetivo: algo **robusto, que ajude a pessoa a melhorar de verdade**, mesmo o jogo sendo aleatório.
 
 Base existente: o robô do duelo (`js/15-npc.js`): `npcEval` (nota do tabuleiro), `npcMoves` (testa cada peça em cada lugar), `npcPick` (olha uma jogada à frente).
 
@@ -133,9 +133,9 @@ Hoje o "perfil" é só um quadro dentro das Configurações (apelido, foto, bord
 Ver ao vivo a partida de alguém da família, **só se a pessoa deixar**.
 - **Permissão no Perfil:** "Deixar a família me assistir": nunca · perguntar a cada vez · sempre.
 - **"Jogando agora"** no menu: bolinha verde em quem está online e em que está jogando (Sozinho, Desafio do dia, Campanha fase 3…).
-- **Quem joga vê** "👀 Vovó está assistindo" e pode recusar ou fechar a qualquer hora.
+- **Quem joga vê** "👀 Fulano está assistindo" e pode recusar ou fechar a qualquer hora.
 - **Torcida:** quem assiste manda emojis/aplausos que aparecem na tela de quem joga (dá para desligar).
-- Combina com o aviso "a Lúcia está quase batendo o recorde, venha assistir".
+- Combina com o aviso "Fulano está quase batendo o recorde, venha assistir".
 
 **Como daria para fazer (do mais simples ao mais fino):**
 1. Quem joga manda um "retrato" pequeno da partida (tabuleiro, peças, pontos; já existe algo assim no `npcState`/`boardStr`) para o Supabase a cada 1–2 s; quem assiste lê no mesmo ritmo e o jogo anima. Reaproveita a tela do espectador (`specRender`). Atraso de 1–2 s.
@@ -153,7 +153,7 @@ Cada um joga no **seu tabuleiro**, mas existe um **mapa de território igual em 
 - 2 contra 2, cada um no seu tabuleiro.
 - Dupla com tela dividida contra dupla com tela dividida (um tabuleiro por dupla).
 
-**Regras (definidas pelo Pedro):**
+**Regras (já definidas):**
 - Limpou uma linha ou coluna → as casas dela no mapa mudam:
   - neutra → fica da sua cor;
   - da cor do adversário → volta a ser **neutra**;
@@ -201,7 +201,7 @@ Cada mundo apresenta um modo/modificador que já existe:
 - Álbum de figurinhas dos mundos · Mascote que cresce
 - Replay da melhor jogada · Torneio da noite (chave na TV) · Reações de voz
 - Pega-pega de linhas · Mestre da sala (inspirou o técnico) · Revezamento · Aposta antes da partida
-- Retrospectiva do ano · Placar de rivalidade (você × vovô) · Cápsula do tempo do recorde
+- Retrospectiva do ano · Placar de rivalidade (você × outra pessoa) · Cápsula do tempo do recorde
 - Blocos com fotos da família · Cenário pelo horário/estação · Comemoração personalizada
 
 ## 10. 💭 Ideias novas (rodada 4)
@@ -213,10 +213,10 @@ Cada mundo apresenta um modo/modificador que já existe:
 - **Corrida:** sala inteira, o primeiro a limpar 20 linhas ganha.
 - **Espelho:** na sala, cada linha que você limpa aparece espelhada como pedra no tabuleiro do vizinho.
 - **Ajude alguém:** missão coletiva ("família, juntem 500 linhas esta semana para liberar o tema X").
-- **Ao vivo no aviso:** "a Lúcia está quase batendo o recorde, venha assistir 📺" (abre o espectador).
+- **Ao vivo no aviso:** "Fulano está quase batendo o recorde, venha assistir 📺" (abre o espectador).
 - **Modo acessível:** cores com símbolos (daltônico), letras e peças maiores, menos animação.
 
-## 11. ❌ Rodada 5: o Pedro não gostou de nenhuma (guardado só para não repetir)
+## 11. ❌ Rodada 5: nenhuma escolhida (guardado só para não repetir)
 - **Calendário do Advento 🎄:** de 1 a 24 de dezembro, uma caixinha por dia que abre ao jogar o Desafio do dia (figurinha, bloco, tema; dia 24 = prêmio maior). Liga com as datas especiais.
 - **Partida por correspondência:** um tabuleiro da família que cada um joga uma bandeja por dia, na sua vez, com aviso no celular ("sua vez!"). Batata quente sem pressa.
 - **Quebra-cabeça do dia:** rapidinho, uma jogada só ("limpe 3 linhas com essas peças"). Bom para quem não tem paciência para partida longa.
@@ -231,7 +231,7 @@ Cada mundo apresenta um modo/modificador que já existe:
 Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga com subida e descida.
 
 ## 13. 💭 Rodada 7
-- 🧪 **Impostor** (Pedro achou interessante, mas precisa de muito refino; não sabe se é legal ainda): co-op de 4 no tabuleiro único; um, em segredo, tenta fazer o time falhar sem ser descoberto. No fim, todos votam em quem era.
+- 🧪 **Impostor** (achamos interessante, mas precisa de muito refino; não sabemos se é legal ainda): co-op de 4 no tabuleiro único; um, em segredo, tenta fazer o time falhar sem ser descoberto. No fim, todos votam em quem era.
 - **Tabuleiro que encolhe:** sala com vários jogadores; a cada minuto a borda vira pedra em todos os tabuleiros. Vence o último que não travar.
 - **Escolher o alvo:** com 3+ jogadores, quem limpa escolhe para quem vai o ataque (dá para se vingar, fazer aliança...).
 - **Cabo de guerra:** duelo com uma corda no meio da tela; cada linha puxa para o seu lado; ganha quem puxar até o fim.

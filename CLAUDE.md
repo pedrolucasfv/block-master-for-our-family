@@ -50,6 +50,9 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 - Fase da campanha (`def`): `goal` (`lines`, `score`, `clear`, `golds`, `combo`, `empty`, `survive`, `harvest`, `petals`, `boss`), `setup` (`stones`, `golds`, `gum`, `ice`, `bamboo`, `puzzle`), `st` = regra das estrelas (`by`, `two`, `three`).
 - Valores especiais de cor no tabuleiro (`v.c` negativo) = pedras, ouro, chiclete etc.; veja `cellColor`.
 
+## Ideias e plano
+`IDEIAS.md` (raiz) guarda o brainstorm de novidades: o plano consolidado no topo (ordem, tamanho, o que falta decidir) e o detalhe de cada ideia, inclusive as regras já combinadas e as ideias descartadas (para não sugerir de novo). Antes de começar uma novidade do plano, leia a seção dela; ao implementar ou decidir algo, atualize o arquivo. Ele não é carregado pelo jogo e mudar só ele não sobe a versão.
+
 ## Versões
 - `VERSAO` e `VERSAO_DATA` ficam no topo de `js/02-core.js` e aparecem no rodapé do menu. Toda mudança que vai para a `main` sobe a versão (1.x para novidade, 1.x.y para correção) e ganha uma linha em `CHANGELOG.md` — que o jogo mostra na tela "✨ Novidades": mantenha o formato (`## 1.x · data` e itens `- emoji **Título:** texto`, escritos para o jogador).
 
