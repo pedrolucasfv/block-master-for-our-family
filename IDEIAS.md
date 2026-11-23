@@ -7,7 +7,8 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 
 | # | Ideia | Tamanho | Por que nessa ordem | Falta decidir |
 |---|---|---|---|---|
-| 1 | 🎉 Datas especiais no Desafio do dia (Natal primeiro) | M | Natal está perto; usa o Desafio do dia e os avisos que já existem | Qual recompensa; onde cadastrar aniversários |
+| 0 | 👤 Página de perfil (com estante de troféus) | M/G | Pré-requisito do troféu das datas especiais; hoje o perfil é só um quadro nas Configurações | Ver o perfil dos outros?; foto na nuvem? |
+| 1 | 🎉 Datas especiais no Desafio do dia (Natal primeiro) | M | Natal está perto; usa o Desafio do dia e os avisos que já existem. Recompensa: **troféu no perfil** | Onde cadastrar aniversários |
 | 2 | 🤖 Supere o robô | P | Reaproveita o robô do duelo; é a base do robô treinador | Nível do robô; robô joga no aparelho ou no banco |
 | 3 | 🎓 Robô treinador | G | Melhorar o cérebro do robô (3 peças em todas as ordens), depois: aviso na hora → revisão no fim → erros mais comuns | Quando falar; quantas dicas 💡 |
 | 4 | 🪢 Cabo de guerra | P/M | Só uma regra nova em cima do duelo ao vivo; aquece para o Território | Quanto puxa cada linha; times |
@@ -101,7 +102,28 @@ Natal, Ano-Novo, Carnaval, Páscoa, Dia das Mães/Pais, festa junina, Dia das Cr
 
 **Aniversário:** bônus de presente para o aniversariante, ou todo mundo joga para somar pontos para ele.
 
-**Em aberto:** qual recompensa (ou combinação); onde cadastrar os aniversários (perfil?).
+**Decidido:** recompensa = **troféu no perfil** (para sempre, na estante de troféus). Depende da página de perfil (seção 5b).
+**Em aberto:** onde cadastrar os aniversários (na página de perfil?); quem jogou mas não ganhou leva algo?
+
+---
+
+## 5b. 👤 Página de perfil ⭐🧪
+Hoje o "perfil" é só um quadro dentro das Configurações (apelido, foto, bordões, PIN), e a foto fica só no aparelho. Para ter troféu, precisa de uma **tela de perfil de verdade**.
+
+**O que teria:**
+- **Topo:** foto grande, nome, desde quando joga, 🔥 dias seguidos no Desafio do dia.
+- **Estante de troféus 🏆:** troféus das datas especiais, 1º lugares no Desafio do dia, vitórias do mês; troféu que ainda não tem aparece apagado (dá vontade de ganhar).
+- **Números:** recorde, maior combo, estrelas da campanha, conquistas (x/y), desafios a distância ganhos.
+- **Rivalidade:** placar contra cada pessoa da família (dos desafios a distância e duelos).
+- **Editar:** apelido, foto, bordões e PIN saem das Configurações e vêm para cá.
+
+**Como abrir:** sua foto no topo do menu abre o seu; tocar no nome de alguém no ranking, na sala ou nos desafios abre o perfil dela (só para ver).
+
+**Por baixo:**
+- Troféus das datas e 1º lugares podem sair do ranking do Desafio do dia que já está no banco (não precisa guardar à parte), mas um troféu "oficial" gravado no banco evita discussão se o ranking mudar.
+- Para os outros verem a sua foto e os números, a foto e um resumo precisam ir para a nuvem (junto com o progresso do PIN).
+
+**Em aberto:** ver o perfil dos outros (sim/não); subir a foto para a nuvem; o que mais entra (conquistas detalhadas? histórico de partidas?).
 
 ---
 
