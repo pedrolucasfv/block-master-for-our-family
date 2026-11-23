@@ -2,6 +2,26 @@
 
 Plano vivo do brainstorm. **Nada aqui está implementado.** Quando o brainstorm terminar, juntamos tudo num plano de execução (ordem, tamanho, dependências).
 
+## ✅ Plano consolidado (fim do brainstorm, 23/11/2026)
+Ordem sugerida, pensando no que já existe no código e no que depende do quê. Tamanho: P (pequeno), M (médio), G (grande).
+
+| # | Ideia | Tamanho | Por que nessa ordem | Falta decidir |
+|---|---|---|---|---|
+| 1 | 🎉 Datas especiais no Desafio do dia (Natal primeiro) | M | Natal está perto; usa o Desafio do dia e os avisos que já existem | Qual recompensa; onde cadastrar aniversários |
+| 2 | 🤖 Supere o robô | P | Reaproveita o robô do duelo; é a base do robô treinador | Nível do robô; robô joga no aparelho ou no banco |
+| 3 | 🎓 Robô treinador | G | Melhorar o cérebro do robô (3 peças em todas as ordens), depois: aviso na hora → revisão no fim → erros mais comuns | Quando falar; quantas dicas 💡 |
+| 4 | 🪢 Cabo de guerra | P/M | Só uma regra nova em cima do duelo ao vivo; aquece para o Território | Quanto puxa cada linha; times |
+| 5 | 🏰 Território | G | Duelo/tela dividida + mapa igual para todos + bloco de tinta | Detalhes do bloco de tinta |
+| 6 | 🥔 Batata quente na sala | M | Em cima do co-op em turnos do tabuleiro único | 1 ou 3 peças por vez; vidas |
+| 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
+| 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
+| — | 🗺️ Mundos novos da campanha | G | Para bem depois | Quais mundos primeiro |
+| — | 🕵️ Impostor | ? | Só se ficar legal depois de refinar | Quase tudo |
+
+Cada item vira uma versão própria (1.x) com linha no `CHANGELOG.md` e tradução em japonês.
+
+---
+
 Legenda: ⭐ escolhida pelo Pedro · 🧪 precisa refinar · 💭 só ideia (ainda não comentada) · ❌ descartada
 
 ---
@@ -119,14 +139,23 @@ Cada um joga no **seu tabuleiro**, mas existe um **mapa de território igual em 
 - **Fim:** quando o tempo acaba ou o tabuleiro fica todo pintado. Ganha quem tiver mais casas.
 - **Travou, perdeu:** se o jogador trava, perde, não importa quantas casas tem. Em dupla, o time só perde quando **os dois** travarem.
 
+**Decidido depois:**
+- **Fim por pintura:** só quando o tabuleiro inteiro fica **de uma cor só**.
+- **Dupla:** quando um trava, o parceiro **continua sozinho** até o fim.
+- **Barra ao vivo** com as cores de cada lado mostrando quem tem mais casas.
+- **Bloco de tinta 🎨** (só com a opção Ataques ligada): limpar 3+ linhas de uma vez manda um bloco de tinta para o tabuleiro do adversário. Se ele não limpar a linha/coluna do bloco a tempo, o bloco **explode e pinta as casas em volta no mapa** com a cor de quem mandou.
+
 **Ainda em aberto:**
-- "Todo pintado" = nenhuma casa neutra (aí ganha quem tem mais), ou todas de uma cor só?
-- Em dupla, quando um trava, o parceiro continua sozinho até o fim?
-- Se os dois limparem a mesma linha quase juntos, quem vale primeiro? (quem criou a sala decide, como já é hoje.)
+- Bloco de tinta: quanto tempo (ou quantas jogadas) até explodir? Pinta 3×3 em volta? Vira casa da sua cor mesmo se era do rival, ou segue a regra rival → neutra?
 - Combo ou tabuleiro limpo pintam algo a mais?
-- Mostrar o placar de casas ao vivo (barra com as duas cores).
 
 Base no código: duelo ao vivo (cada um no seu tabuleiro), tela dividida e times (`tlive`/`tsplit`), desenho do chão no `renderBoard`, quem criou a sala é o dono da verdade (`relay`).
+
+---
+
+## 7b. 🪢 Cabo de guerra ⭐🧪
+Duelo com uma corda no meio da tela. Cada linha limpa puxa a corda para o seu lado (combo puxa mais); ganha quem puxar até o fim, ou quem estiver mais perto quando o tempo acabar. Travou, perdeu (igual ao Território).
+**Em aberto:** quanto cada linha puxa; funciona em times (soma do time)?; com Ataques ligado, um ataque dá um "tranco" na corda?
 
 ---
 
@@ -178,7 +207,7 @@ Cada mundo apresenta um modo/modificador que já existe:
 Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga com subida e descida.
 
 ## 13. 💭 Rodada 7
-- **Impostor:** co-op de 4 no tabuleiro único; um, em segredo, tenta fazer o time falhar sem ser descoberto. No fim, todos votam em quem era.
+- 🧪 **Impostor** (Pedro achou interessante, mas precisa de muito refino; não sabe se é legal ainda): co-op de 4 no tabuleiro único; um, em segredo, tenta fazer o time falhar sem ser descoberto. No fim, todos votam em quem era.
 - **Tabuleiro que encolhe:** sala com vários jogadores; a cada minuto a borda vira pedra em todos os tabuleiros. Vence o último que não travar.
 - **Escolher o alvo:** com 3+ jogadores, quem limpa escolhe para quem vai o ataque (dá para se vingar, fazer aliança...).
 - **Cabo de guerra:** duelo com uma corda no meio da tela; cada linha puxa para o seu lado; ganha quem puxar até o fim.
