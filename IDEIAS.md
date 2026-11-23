@@ -2,13 +2,13 @@
 
 Plano vivo do brainstorm. **Nada aqui está implementado.** Quando o brainstorm terminar, juntamos tudo num plano de execução (ordem, tamanho, dependências).
 
-## ✅ Plano consolidado (fim do brainstorm, 23/11/2026)
+## ✅ Plano consolidado (brainstorm encerrado em 23/11/2026)
 Ordem sugerida, pensando no que já existe no código e no que depende do quê. Tamanho: P (pequeno), M (médio), G (grande).
 
 | # | Ideia | Tamanho | Por que nessa ordem | Falta decidir |
 |---|---|---|---|---|
-| 0 | 👤 Página de perfil (com estante de troféus) | M/G | Pré-requisito do troféu das datas especiais; hoje o perfil é só um quadro nas Configurações | Ver o perfil dos outros?; foto na nuvem? |
-| 1 | 🎉 Datas especiais no Desafio do dia (Natal primeiro) | M | Natal está perto; usa o Desafio do dia e os avisos que já existem. Recompensa: **troféu no perfil** | Onde cadastrar aniversários |
+| 0 | 👤 Página de perfil (com estante de troféus) | M/G | **Estudar melhor antes** (decisão do Pedro). Pré-requisito do troféu das datas especiais | Ver o perfil dos outros?; foto na nuvem? |
+| 1 | 🎉 Datas especiais no Desafio do dia (Natal primeiro) | M | Natal está perto; usa o Desafio do dia e os avisos que já existem. Recompensa: **troféu no perfil**, então só depois do perfil (o Natal de 2026 pode ficar sem troféu) | Onde cadastrar aniversários |
 | 2 | 🤖 Supere o robô | P | Reaproveita o robô do duelo; é a base do robô treinador | Nível do robô; robô joga no aparelho ou no banco |
 | 3 | 🎓 Robô treinador | G | Melhorar o cérebro do robô (3 peças em todas as ordens), depois: aviso na hora → revisão no fim → erros mais comuns | Quando falar; quantas dicas 💡 |
 | 4 | 🪢 Cabo de guerra | P/M | Só uma regra nova em cima do duelo ao vivo; aquece para o Território | Quanto puxa cada linha; times |
@@ -18,6 +18,8 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
 | — | 🗺️ Mundos novos da campanha | G | Para bem depois | Quais mundos primeiro |
 | — | 🕵️ Impostor | ? | Só se ficar legal depois de refinar | Quase tudo |
+
+Itens 2 a 7 não dependem do perfil e podem começar a qualquer hora.
 
 Cada item vira uma versão própria (1.x) com linha no `CHANGELOG.md` e tradução em japonês.
 
@@ -107,7 +109,7 @@ Natal, Ano-Novo, Carnaval, Páscoa, Dia das Mães/Pais, festa junina, Dia das Cr
 
 ---
 
-## 5b. 👤 Página de perfil ⭐🧪
+## 5b. 👤 Página de perfil ⭐🧪 (estudar melhor depois)
 Hoje o "perfil" é só um quadro dentro das Configurações (apelido, foto, bordões, PIN), e a foto fica só no aparelho. Para ter troféu, precisa de uma **tela de perfil de verdade**.
 
 **O que teria:**
