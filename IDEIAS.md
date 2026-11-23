@@ -101,7 +101,22 @@ Ver ao vivo a partida de alguém da família, **só se a pessoa deixar**.
 
 ---
 
-## 7. 🗺️ Campanha: mundos novos (para bem depois)
+## 7. 🏰 Território ⭐🧪
+Tabuleiro único (maior), cada jogador com uma cor. Quando você limpa uma linha/coluna, as casas dela ficam **pintadas da sua cor** (o chão do tabuleiro, por baixo das peças). No fim, ganha quem tiver mais território.
+
+**Para refinar:**
+- Pintar por cima da cor de outro jogador vale (rouba território) ou casa pintada fica travada?
+- Combo pinta mais (a linha + vizinhas)? Tabuleiro limpo pinta tudo que estava vazio?
+- Como termina: tempo, número de rodadas, ou quando alguém trava?
+- Cada um no seu celular jogando ao mesmo tempo (tabuleiro único, como o co-op) ou em turnos?
+- Tamanho do tabuleiro conforme o número de jogadores (10×10 para 4?).
+- Times: cada time uma cor. Combina com o técnico (técnico escolhe peças do rival) e com a TV (mapa colorido ao vivo).
+
+Base no código: tabuleiro único (`SH`, `10-shared.js`), `setN` para outro tamanho, desenho do chão no `renderBoard`.
+
+---
+
+## 8. 🗺️ Campanha: mundos novos (para bem depois)
 Cada mundo apresenta um modo/modificador que já existe:
 - **Fundo do mar:** bolhas que sobem (gravidade ao contrário).
 - **Espaço:** modo Gravidade + meteoros que viram pedra.
@@ -111,7 +126,7 @@ Cada mundo apresenta um modo/modificador que já existe:
 
 ---
 
-## 8. 💭 Outras ideias já levantadas (ainda não comentadas)
+## 9. 💭 Outras ideias já levantadas (ainda não comentadas)
 - Missões da semana · Liga da família (campeão da semana) · Desafio do dia em dupla
 - Chefão em grupo (sala inteira contra um chefão com muita vida)
 - Quebra-cabeça feito pela família (editor + link)
@@ -122,7 +137,7 @@ Cada mundo apresenta um modo/modificador que já existe:
 - Retrospectiva do ano · Placar de rivalidade (você × vovô) · Cápsula do tempo do recorde
 - Blocos com fotos da família · Cenário pelo horário/estação · Comemoração personalizada
 
-## 9. 💭 Ideias novas (rodada 4)
+## 10. 💭 Ideias novas (rodada 4)
 - **Fantasma de ontem:** jogar com a miniatura da sua melhor partida rodando ao lado (com as mesmas peças).
 - **Ajuste justo (handicap):** (já existe o modificador "Handicap": quem venceu começa com obstáculos; isto seria a versão automática) cada pessoa tem um nível de ajuda calculado pelo histórico (peças um pouco mais fáceis, um "salva-vidas"), para avô × neto ser parelho.
 - **Peça da família:** cada um desenha a sua peça (até 5 casas) no perfil; ela aparece nas partidas da sala quando essa pessoa joga.
@@ -134,7 +149,7 @@ Cada mundo apresenta um modo/modificador que já existe:
 - **Ao vivo no aviso:** "a Lúcia está quase batendo o recorde, venha assistir 📺" (abre o espectador).
 - **Modo acessível:** cores com símbolos (daltônico), letras e peças maiores, menos animação.
 
-## 10. ❌ Rodada 5: o Pedro não gostou de nenhuma (guardado só para não repetir)
+## 11. ❌ Rodada 5: o Pedro não gostou de nenhuma (guardado só para não repetir)
 - **Calendário do Advento 🎄:** de 1 a 24 de dezembro, uma caixinha por dia que abre ao jogar o Desafio do dia (figurinha, bloco, tema; dia 24 = prêmio maior). Liga com as datas especiais.
 - **Partida por correspondência:** um tabuleiro da família que cada um joga uma bandeja por dia, na sua vez, com aviso no celular ("sua vez!"). Batata quente sem pressa.
 - **Quebra-cabeça do dia:** rapidinho, uma jogada só ("limpe 3 linhas com essas peças"). Bom para quem não tem paciência para partida longa.
@@ -144,3 +159,6 @@ Cada mundo apresenta um modo/modificador que já existe:
 - **Evento relâmpago:** aviso "desafio de 1 minuto, vale até as 21 h"; quem fizer mais leva a coroa da noite.
 - **Modo "na cama":** depois das 22 h, menos brilho, sem vibração e som baixinho (automático, dá para desligar).
 - **Blocos que ensinam (crianças):** modo opcional com continhas ou letras nos blocos; limpar a linha certa dá bônus.
+
+## 12. ❌ Rodada 6 descartada (guardado só para não repetir)
+Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga com subida e descida.
