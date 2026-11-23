@@ -102,17 +102,31 @@ Ver ao vivo a partida de alguém da família, **só se a pessoa deixar**.
 ---
 
 ## 7. 🏰 Território ⭐🧪
-Tabuleiro único (maior), cada jogador com uma cor. Quando você limpa uma linha/coluna, as casas dela ficam **pintadas da sua cor** (o chão do tabuleiro, por baixo das peças). No fim, ganha quem tiver mais território.
+Cada um joga no **seu tabuleiro**, mas existe um **mapa de território igual em todos os tabuleiros** (o chão por baixo das peças, com as mesmas marcações em todos).
 
-**Para refinar:**
-- Pintar por cima da cor de outro jogador vale (rouba território) ou casa pintada fica travada?
-- Combo pinta mais (a linha + vizinhas)? Tabuleiro limpo pinta tudo que estava vazio?
-- Como termina: tempo, número de rodadas, ou quando alguém trava?
-- Cada um no seu celular jogando ao mesmo tempo (tabuleiro único, como o co-op) ou em turnos?
-- Tamanho do tabuleiro conforme o número de jogadores (10×10 para 4?).
-- Times: cada time uma cor. Combina com o técnico (técnico escolhe peças do rival) e com a TV (mapa colorido ao vivo).
+**Formatos:**
+- 1 contra 1.
+- 2 contra 2, cada um no seu tabuleiro.
+- Dupla com tela dividida contra dupla com tela dividida (um tabuleiro por dupla).
 
-Base no código: tabuleiro único (`SH`, `10-shared.js`), `setN` para outro tamanho, desenho do chão no `renderBoard`.
+**Regras (definidas pelo Pedro):**
+- Limpou uma linha ou coluna → as casas dela no mapa mudam:
+  - neutra → fica da sua cor;
+  - da cor do adversário → volta a ser **neutra**;
+  - já da sua cor → continua sua.
+  - Ou seja, para tomar uma casa do rival é preciso limpar aquela linha/coluna duas vezes.
+- Vale para todos os tabuleiros ao mesmo tempo (a linha 3 limpa no meu tabuleiro muda a linha 3 do mapa de todo mundo).
+- **Fim:** quando o tempo acaba ou o tabuleiro fica todo pintado. Ganha quem tiver mais casas.
+- **Travou, perdeu:** se o jogador trava, perde, não importa quantas casas tem. Em dupla, o time só perde quando **os dois** travarem.
+
+**Ainda em aberto:**
+- "Todo pintado" = nenhuma casa neutra (aí ganha quem tem mais), ou todas de uma cor só?
+- Em dupla, quando um trava, o parceiro continua sozinho até o fim?
+- Se os dois limparem a mesma linha quase juntos, quem vale primeiro? (quem criou a sala decide, como já é hoje.)
+- Combo ou tabuleiro limpo pintam algo a mais?
+- Mostrar o placar de casas ao vivo (barra com as duas cores).
+
+Base no código: duelo ao vivo (cada um no seu tabuleiro), tela dividida e times (`tlive`/`tsplit`), desenho do chão no `renderBoard`, quem criou a sala é o dono da verdade (`relay`).
 
 ---
 
@@ -162,3 +176,12 @@ Cada mundo apresenta um modo/modificador que já existe:
 
 ## 12. ❌ Rodada 6 descartada (guardado só para não repetir)
 Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga com subida e descida.
+
+## 13. 💭 Rodada 7
+- **Impostor:** co-op de 4 no tabuleiro único; um, em segredo, tenta fazer o time falhar sem ser descoberto. No fim, todos votam em quem era.
+- **Tabuleiro que encolhe:** sala com vários jogadores; a cada minuto a borda vira pedra em todos os tabuleiros. Vence o último que não travar.
+- **Escolher o alvo:** com 3+ jogadores, quem limpa escolhe para quem vai o ataque (dá para se vingar, fazer aliança...).
+- **Cabo de guerra:** duelo com uma corda no meio da tela; cada linha puxa para o seu lado; ganha quem puxar até o fim.
+- **Combo de dupla:** o combo do time só continua se os dois limparem linhas um depois do outro (revezando).
+- **Rebater ataque:** quando chega um ataque, você tem 3 s para limpar uma linha e mandar de volta.
+- **Tesouro escondido:** antes de começar, cada um esconde 3 tesouros no mapa; limpar a linha onde está um tesouro do rival rouba o tesouro.
