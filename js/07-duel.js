@@ -163,7 +163,7 @@ function duelDrop(src,r,c){
   const tb=tickBombs(D.eng); if(tb.boom){ setTimeout(()=>BC.drop(tb.added),0); toast('💣 A bomba explodiu! Blocos cinza no seu tabuleiro'); SFX.boom(); shake(); }
   duelApply(res,r+p.h/2,c+p.w/2,goldTxt('Bloco dourado é seu! +150'));
   const refilled=D.tray.every(x=>!x);
-  if(refilled) D.tray=gen3(D.rng,D.o);
+  if(D.cfg.vtest) vtPrep(); else if(refilled) D.tray=gen3(D.rng,D.o);
   renderDuel(refilled);
   glowCells(res.placed,D.eng.b); ripple(r+(p.h-1)/2,c+(p.w-1)/2,D.eng.b);
   duelAfter(true);
@@ -367,6 +367,7 @@ function duelEnd(reason){
   if(d.cfg.type==='daily'){ const dl=store.get('ddb_daily',{}); dl[d.cfg.key]={score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo}; store.set('ddb_daily',dl); }
   if(d.cfg.type==='chal') dsRoundEnd(d);
   if(d.cfg.type==='daily') rkDailyEnd(d);
+  if(d.cfg.vtest){ setTimeout(()=>{ if(D===d) quitGame(); },1200); return; } /* teste das vozes: não conta recorde nem histórico */
   d.newBest=d.cfg.type!=='chal'&&checkBest(d.cfg.type,d.o,d.score)&&d.score>0;
   if(d.cfg.type==='solo') soloRecord(d);
   if(!d.live) addHist({date:Date.now(),kind:d.cfg.type,label:d.cfg.type==='daily'?'Desafio do dia':d.cfg.type==='chal'?d.cfg.label:d.cfg.type==='solo'?'Sozinho · '+timeName(d.o.time)+' · '+PLAYS[d.o.play]:'Duelo · '+PLAYS[d.o.play],code:d.cfg.code||'',score:d.score,lines:d.eng.lines,combo:d.eng.maxCombo,result:null});
@@ -506,6 +507,7 @@ $('#qYes').addEventListener('click',()=>{ $('#quitOv').classList.remove('show');
 function quitGame(){
   $('#count').classList.remove('show'); cancelDrag();
   if(D&&D.cfg.type==='chal'&&!D.over){ const c=D.cfg.chal; dsSend(c.id,c.r,D.score); toast(`Rodada ${c.r} enviada com ${fmtN(D.score)} pontos.`); }
+  if(D&&D.cfg.vtest){ D.over=true; D.playing=false; D=null; IN=null; openSettings('home'); return; }
   if(D){ const live=D.live, npc=D.cfg.npc; if(live&&!D.over){ D.over=true; D.playing=false; const info={reason:'quit',score:D.score,lines:D.eng.lines,combo:D.eng.maxCombo,placed:D.placed,timeline:D.timeline,goalTime:null}; send({t:'end',seed:D.cfg.seed,info}); noteEnd(NET.role,info,D.cfg.seed); }
     D.over=true; D.playing=false; D=null; IN=null; if(npc){ npcLeave(); openSolo(); return; } if(live&&NET.open){ toLobby(); return; } }
   if(SH&&SH.cfg.solo){ SH.over=true; SH=null; IN=null; $('#timebar').classList.remove('hp'); openCamp(); return; }

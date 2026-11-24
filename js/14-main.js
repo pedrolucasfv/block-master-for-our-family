@@ -5,7 +5,7 @@ window.addEventListener('resize',()=>{ grC=null; sizeCanvas(); layout(); });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&D&&(!D.live||D.cfg.npc)&&D.playing&&!D.paused) setPaused(true); });
 applyLook(); sizeCanvas(); renderNight(); renderHome(); if(SIM==null) pvAquecer();
 loadVoices();
-['pointerdown','keydown'].forEach(ev=>window.addEventListener(ev,function once(){ ac(); setTimeout(warmSounds,50); if(!Object.values(vbuf).some(Boolean)) loadVoices(); window.removeEventListener(ev,once); },{once:true}));
+['pointerdown','keydown'].forEach(ev=>window.addEventListener(ev,function once(){ ac(); setTimeout(warmSounds,50); if(!vPadLoading) loadVoices(); window.removeEventListener(ev,once); },{once:true}));
 /* ================= MODO TESTE: aparelhos de mentira na sala =================
    Cada aparelho de teste é o próprio jogo aberto num quadro escondido (?sim=n), entrando na sala
    como convidado de verdade. As mensagens vão por postMessage em vez da conexão direta.

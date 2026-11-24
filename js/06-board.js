@@ -323,8 +323,8 @@ function praise(t,sub,big,level=0){
   if(sub!==undefined) setTimeout(()=>{ ['#ffe066','#fff','#ff9f1c'].forEach(c=>burst(x,y,c,6,1.4,{round:true,size:CS*.11,g:.05})); },150);
 }
 const FRUITS=['🍓','🍊','🍋','🍏','🍉','🫐','🍇'];
-function perfectShow(){
-  SFX.perfect(); say('perfect');
+function perfectShow(mine=true){
+  SFX.perfect(); if(mine) say('perfect');
   const fl=document.createElement('div'); fl.className='flash'; $('#fxl').appendChild(fl); setTimeout(()=>fl.remove(),900);
   praise('PERFECT!','TABULEIRO LIMPO',true);
   const app=$('#app'); app.classList.remove('shake'); void app.offsetWidth; app.classList.add('shake');
@@ -342,26 +342,31 @@ function perfectShow(){
 function bigEmoji(e){ const d=document.createElement('div'); d.className='bigemo'; d.textContent=e; $('#fxl').appendChild(d); setTimeout(()=>d.remove(),1650); }
 function shake(){ const b=$('#board'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); }
 function gridPt(r,c){ const gr=GR(); return [gr.left+c*CS,gr.top+r*CS]; }
-function praiseFor(res){
+/* palavra na tela: a do narrador (combo 2 a 8 na escala, depois UNSTOPPABLE…); sem combo, só cascata/bomba/cor */
+function praiseFor(res,nv,mine=true){
   const level=res.n+Math.max(0,res.combo-1)+(res.chain-1)*2+(res.bombs?1:0)+(res.colorLines?1:0);
   let sub=res.chain>1?'CASCATA x'+res.chain:res.combo>=2?'COMBO x'+res.combo:res.bombs?'BUM!':res.colorLines?'COR PERFEITA':'';
-  if(res.perfect) return {w:'PERFECT!',sub:'TABULEIRO LIMPO',say:'Perfect!',level:9};
-  const words=[null,null,'NICE!','GOOD!','GREAT!','EXCELLENT!','AMAZING!','UNBELIEVABLE!'];
-  const w=words[Math.min(level,7)]; if(!w) return null;
-  return {w,sub,say:level>=3?w.charAt(0)+w.slice(1).toLowerCase():null,level};
+  if(res.perfect) return {w:'PERFECT!',sub:'TABULEIRO LIMPO',level:9};
+  const w=nv?nv.w:mine?null:comboTela(res.combo||0);
+  if(!w) return {w:sub&&res.combo<2?sub:null,level};
+  return {w,sub,level};
 }
 function feedback(res,pts,cr,cc,mine=true){
+  const nv=mine?narrStep(res,SH||D):null;
+  if(nv&&!nv.w&&nv.voz) say(nv.voz); /* combo quebrou depois do "i give up" */
   if(res.n>0){
     const [x,y]=gridPt(cr,cc); floatText('+'+fmtN(pts),x,y);
-    const pr=praiseFor(res);
-    if(res.perfect){ SFX.clear(1,res.n,1); setTimeout(perfectShow,350); }
+    const pr=praiseFor(res,nv,mine);
+    if(res.perfect){ SFX.clear(1,res.n,1); setTimeout(()=>perfectShow(mine),350); }
     else { SFX.clear(res.combo||1,res.n,res.chain);
-      const myCombo=mine&&res.combo>=3&&store.get('ddb_bord_combo','');
+      const myCombo=mine&&res.combo>=3&&SET.voiceMode!=='off'&&store.get('ddb_bord_combo','');
       if(mine&&res.combo>=3&&typeof NET!=='undefined'&&NET.open&&(NET.specOn||NET.peers.S)) send({t:'cmb',to:'S',c:res.combo});
-      if(pr) setTimeout(()=>{ praise(pr.w,pr.sub,false,pr.level); if(myCombo) playClip(myCombo); else say(pr.w,pr.level); },90); else if(myCombo) setTimeout(()=>playClip(myCombo),90); }
+      if(pr.w) setTimeout(()=>praise(pr.w,pr.sub,false,pr.level),90);
+      /* o bordão de combo gravado no Perfil fala no lugar do narrador */
+      if(myCombo) setTimeout(()=>{ vozParar(); playClip(myCombo); },90); else if(nv&&nv.voz) setTimeout(()=>say(nv.voz),90); }
     if(res.bombs) SFX.boom();
     if(mine) buzz(res.n>=2?[25,40,25]:22);
-    if(!SET.lite&&((pr&&pr.level>=4)||res.perfect)) shake(); else bump();
+    if(!SET.lite&&(pr.level>=4||res.perfect)) shake(); else bump();
   } else SFX.place();
 }
 let animTimers=[];

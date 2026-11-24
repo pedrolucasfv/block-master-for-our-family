@@ -1,7 +1,7 @@
 'use strict';
 /* utilidades, store (localStorage/SIM), SET (configurações salvas), temas ganhos e dourados */
 /* versão do jogo: aparece no rodapé do menu. A cada mudança publicada, suba o número e anote em CHANGELOG.md */
-const VERSAO='1.21', VERSAO_DATA='22/11/2026';
+const VERSAO='1.22', VERSAO_DATA='24/11/2026';
 /* ===================== utilidades ===================== */
 const PALETTE=['#e5483f','#f08c25','#f3c22f','#4cbb47','#2cb4d6','#3e6fe0','#8a52d8'];
 const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#eab526', RIPEC='#ff4b3e', ROTC='#8d5a2b', STALKC='#8fcf5a', PETALC='#ffb3cc', COINC='#e0a83a', NUTC='#9aa6b8';
@@ -46,11 +46,12 @@ function toast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add(
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 $$('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
 
-const SET = Object.assign({lift:1.4,theme:'toy',skin:'velvet',autoSkin:true,voiceMode:'pack',lite:false},store.get('ddb_set',{}));
+const SET = Object.assign({lift:1.4,theme:'toy',skin:'velvet',autoSkin:true,voiceMode:'std',voiceExtra:'pad',lite:false},store.get('ddb_set',{}));
 if(SET.theme==='wood') SET.theme='soft';
 /* 1.15: visual novo. Quem estava no tema padrão antigo (Suave) passa para o novo padrão (Brinquedos) uma vez; depois vale o que escolher */
 if(!SET.look115){ if(SET.theme==='soft') SET.theme='toy'; SET.look115=1; }
-if(SET.voiceMode!=='off') SET.voiceMode='pack';
+/* voz: 'std' = narrador padrão, 'mine' = com as gravações deste aparelho, 'off' = sem voz ('pack' era a voz com gravações) */
+if(SET.voiceMode==='pack') SET.voiceMode='mine'; if(!['std','mine','off'].includes(SET.voiceMode)) SET.voiceMode='std';
 const THEMES={toy:'Brinquedos',arcade:'Fliperama',starry:'Noite estrelada',soft:'Suave',softdark:'Suave escuro',blue:'Azul',night:'Noite',candy:'Doce',forest:'Floresta'};
 const THEME_COLOR={toy:'#fff1e2',arcade:'#3a2f9e',starry:'#0a0b17',soft:'#e2e7ee',softdark:'#272b33',blue:'#2b4590',night:'#0c0e17',candy:'#f3b0cf',forest:'#5a8757'};
 const SKINS=['velvet','crochet','fruit','brick','candy','lantern','classic'], SKIN_L={velvet:'Pelúcia',crochet:'Crochê',fruit:'Frutinhas',brick:'Tijolinhos',candy:'Bolo de chocolate',lantern:'Japão',classic:'Clássico',bear:'Ursinho',jelly:'Bala',bug:'Joaninha',robot:'Robô',bamboo:'Bambu',sushi:'Sushi'};

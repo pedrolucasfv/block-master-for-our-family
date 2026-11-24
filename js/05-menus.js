@@ -252,24 +252,42 @@ function renderSettings(){
     saveSet(); applyLook(); renderSettings(); }));
   skinPreviews();
   $('#tAuto').classList.toggle('on',SET.autoSkin); $('#tLite').classList.toggle('on',SET.lite);
-  const VM={pack:'Ligada',off:'Desligada'};
+  const VM={std:'Voz padrão',mine:'Voz personalizada',off:'Sem voz'};
   $('#voiceSeg').innerHTML=Object.keys(VM).map(k=>`<button type="button" data-k="${k}" class="${SET.voiceMode===k?'sel':''}">${VM[k]}</button>`).join('');
-  $$('#voiceSeg button').forEach(b=>b.addEventListener('click',()=>{ SET.voiceMode=b.dataset.k; saveSet(); renderSettings(); if(SET.voiceMode!=='off'){ ac(); say('great',9); } }));
-  $('#voiceHint').textContent=SET.voiceMode==='pack'?'Grave cada palavra com bastante energia, tipo GREAAAT!, ou importe um pack de áudios com os nomes das palavras (great.mp3, perfect.wav…). Fica só neste aparelho. Arquivos no repositório também valem: voz/great.mp3 e assim por diante.':'Sem voz, só o som e as palavras na tela.';
+  $$('#voiceSeg button').forEach(b=>b.addEventListener('click',async()=>{ SET.voiceMode=b.dataset.k; saveSet(); renderSettings(); if(SET.voiceMode!=='off'){ ac(); await loadVoices(); await loadPadrao(); say('good'); } }));
+  $('#voiceHint').textContent=SET.voiceMode==='std'?'O narrador fala nos seus combos: GOOD no combo x2, NICE no x3… até LEGENDARY no x8. Depois ele vai perdendo as palavras.'
+    :SET.voiceMode==='mine'?'Grave cada palavra com bastante energia, ou escolha um arquivo de áudio. A palavra que você não gravar fica com o narrador padrão. As gravações ficam só neste aparelho.':'Sem voz, só o som e as palavras na tela.';
   renderVoiceList();
 }
 let recState=null;
+const VX_MODO={seq:'Em sequência',pad:'Depois, o narrador',rnd:'Sorteadas'};
+function vRow(w,nome,sub){ const rec=recState&&recState.w===w, tem=!!store.get('ddb_vrec_'+w,null);
+  return `<div class="vrow"><div><b>${nome}</b><small>${sub}</small></div><div class="row"><button type="button" class="chip ${rec?'rec':''}" data-rec="${w}">${rec?'⏹ Parar':'🎙 Gravar'}</button><button type="button" class="chip" data-file="${w}" aria-label="Escolher arquivo">📁</button><button type="button" class="chip" data-play="${w}" ${vbuf[w]||vpad[w]?'':'disabled'}>▶</button><button type="button" class="chip" data-del="${w}" ${tem?'':'disabled'}>🗑</button></div></div>`; }
+function vApagar(w){ try{ localStorage.removeItem('ddb_vrec_'+w); }catch(e){} vbuf[w]=null; if(w[0]==='x') store.set('ddb_vextra',store.get('ddb_vextra',[]).filter(x=>x!==w)); loadVoices().then(renderVoiceList); }
 function renderVoiceList(){
   const box=$('#voiceList'); if(!box) return;
   if(SET.voiceMode==='off'){ box.innerHTML=''; return; }
-  box.innerHTML=`<div class="row" style="margin:6px 0 4px"><button type="button" class="btn small" id="vPack">Importar pack de vozes</button></div><input type="file" id="vPackIn" accept="audio/*" multiple hidden>`+VWORDS.map(w=>`<div class="vrow"><div><b>${w.toUpperCase()}</b><small>${vsrc[w]||'sem gravação'}</small></div><div class="row"><button type="button" class="chip ${recState&&recState.w===w?'rec':''}" data-rec="${w}">${recState&&recState.w===w?'⏹ Parar':'🎙 Gravar'}</button><button type="button" class="chip" data-file="${w}" aria-label="Escolher arquivo">📁</button><button type="button" class="chip" data-play="${w}" ${vbuf[w]?'':'disabled'}>▶</button><button type="button" class="chip" data-del="${w}" ${store.get('ddb_vrec_'+w,null)?'':'disabled'}>🗑</button></div></div>`).join('');
+  const teste=`<div class="row" style="margin:8px 0 4px"><button type="button" class="btn small" id="vTeste">🧪 Testar as vozes</button></div>`;
+  if(SET.voiceMode==='std'){ box.innerHTML=teste; $('#vTeste').addEventListener('click',vozTeste); return; }
+  /* tira da lista as extras que ficaram sem gravação (gravação cancelada) */
+  const ids=store.get('ddb_vextra',[]), ex=ids.filter(id=>store.get('ddb_vrec_'+id,null)||(recState&&recState.w===id)); if(ex.length!==ids.length) store.set('ddb_vextra',ex);
+  const modo=SET.voiceExtra||'pad';
+  box.innerHTML=teste+`<div class="row" style="margin:6px 0 4px"><button type="button" class="btn small" id="vPack">Importar pack de vozes</button></div><input type="file" id="vPackIn" accept="audio/*" multiple hidden>`
+    +V_ESC.map((w,i)=>vRow(w,w.toUpperCase(),`combo x${i+2} · `+(vbuf[w]?'sua voz':'narrador padrão'))).join('')+vRow('perfect','PERFECT','tabuleiro limpo · '+(vbuf.perfect?'sua voz':'narrador padrão'))
+    +`<h3 class="vsub">Depois do LEGENDARY (combo x9 em diante)</h3>`
+    +(ex.length?ex.map((id,i)=>vRow(id,'Gravação '+(i+1),modo==='pad'?`combo x${i+9}`:'sua voz')).join(''):`<p class="muted" style="margin:4px 0">Sem gravações: fala o narrador padrão.</p>`)
+    +`<div class="row" style="margin:6px 0"><button type="button" class="btn small" id="vNova" ${recState?'disabled':''}>➕ Gravar mais uma</button></div>`
+    +(ex.length?`<p class="muted" style="margin:6px 0 4px">Como tocar as gravações depois do LEGENDARY:</p><div class="seg" id="vxSeg">${Object.keys(VX_MODO).map(k=>`<button type="button" data-k="${k}" class="${modo===k?'sel':''}">${VX_MODO[k]}</button>`).join('')}</div><p class="muted" style="margin:4px 0">${modo==='seq'?'Uma depois da outra, em ordem; quando acabam, voltam para a primeira.':modo==='pad'?'Uma depois da outra, em ordem; quando acabam, o narrador padrão continua.':'Sorteadas, sem repetir a última.'}</p>`:'');
+  $('#vTeste').addEventListener('click',vozTeste);
   box.querySelectorAll('[data-rec]').forEach(b=>b.addEventListener('click',()=>toggleRec(b.dataset.rec)));
+  $('#vNova').addEventListener('click',()=>{ if(recState) return; const id='x'+Date.now().toString(36); store.set('ddb_vextra',[...store.get('ddb_vextra',[]),id]); toggleRec(id); });
+  $$('#vxSeg button').forEach(b=>b.addEventListener('click',()=>{ SET.voiceExtra=b.dataset.k; saveSet(); renderVoiceList(); }));
   const pin=$('#vPackIn'); let fileFor=null;
   $('#vPack').addEventListener('click',()=>{ fileFor=null; pin.value=''; pin.click(); });
   box.querySelectorAll('[data-file]').forEach(b=>b.addEventListener('click',()=>{ fileFor=b.dataset.file; pin.multiple=false; pin.value=''; pin.click(); pin.multiple=true; }));
   pin.addEventListener('change',()=>importVoices([...pin.files],fileFor));
   box.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',()=>{ ac(); playVoice(b.dataset.play); }));
-  box.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ try{ localStorage.removeItem('ddb_vrec_'+b.dataset.del); }catch(e){} loadVoices().then(renderVoiceList); }));
+  box.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>vApagar(b.dataset.del)));
 }
 function readUrl(f){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(f); }); }
 async function importVoices(files,only){
@@ -283,12 +301,12 @@ async function importVoices(files,only){
     try{ localStorage.setItem('ddb_vrec_'+w,JSON.stringify(await readUrl(f))); ok++; }catch(e){ skip.push(f.name+' (sem espaço)'); }
   }
   await loadVoices(); renderVoiceList();
-  toast(ok?`${ok} voz${ok>1?'es':''} importada${ok>1?'s':''}`+(skip.length?` · ignorados: ${skip.slice(0,3).join(', ')}`:''):'Nenhum arquivo com nome de palavra: use great.mp3, perfect.mp3…');
+  toast(ok?`${ok} voz${ok>1?'es':''} importada${ok>1?'s':''}`+(skip.length?` · ignorados: ${skip.slice(0,3).join(', ')}`:''):'Nenhum arquivo com nome de palavra: use good.mp3, legendary.mp3…');
 }
 async function toggleRec(w){
   if(recState){ const r=recState; if(r.mr.state!=='inactive') r.mr.stop(); return; }
-  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ mediaHelp('mic',null); return; }
-  let st; try{ st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}}); }catch(e){ mediaHelp('mic',e); return; }
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ mediaHelp('mic',null); renderVoiceList(); return; }
+  let st; try{ st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}}); }catch(e){ mediaHelp('mic',e); renderVoiceList(); return; }
   const mr=new MediaRecorder(st), chunks=[];
   recState={w,mr}; renderVoiceList();
   mr.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };

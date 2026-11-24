@@ -50,6 +50,26 @@ function startSolo(o){
   ac(); const opts={...o,npc:0,attacks:false,pblocks:false,powers:false};
   startDuel({type:'solo',opts,seed:'S|'+Date.now()+'|'+Math.random().toString(36).slice(2),label:'Sozinho · '+timeName(opts.time)+(opts.play?' · '+PLAYS[opts.play]:'')});
 }
+/* teste das vozes (Configurações): a linha de baixo fica sempre com um buraco e a bandeja só com pecinhas de 1 casa; cada pecinha no buraco é +1 no combo */
+function vtPeca(){ return {cells:[[0,0]],color:Math.floor(Math.random()*NCOL),spec:null,pw:null,h:1,w:1}; }
+function vtBloco(){ return {c:Math.floor(Math.random()*NCOL),s:null,t:0}; }
+function vtPrep(){
+  const b=D.eng.b, y=N-1;
+  if(!b[0][0]) b[0][0]=vtBloco(); /* um bloco no canto: limpar a linha de baixo não deixa o tabuleiro vazio */
+  if(b[y].filter(Boolean).length<N-1){ const gap=Math.floor(Math.random()*N); for(let x=0;x<N;x++) b[y][x]=x===gap?null:(b[y][x]||vtBloco()); }
+  D.tray=D.tray.map(p=>p||vtPeca());
+}
+function vtCombo(n){ if(!D||!D.cfg.vtest) return; if(NARR.ctx!==D) NARR={ctx:D,c:0,desistiu:false,alt:null,tela:null,ext:null};
+  D.eng.combo=n; D.eng.since=0; NARR.c=n; NARR.desistiu=n>=20; renderDuel(); toast(`Combo x${n}: a próxima pecinha no buraco faz x${n+1}`); }
+function vozTeste(){
+  ac(); loadVoices(); if(SET.voiceMode==='off'){ SET.voiceMode='std'; saveSet(); }
+  startDuel({type:'solo',vtest:true,opts:{...defOpts(),time:3},seed:'V|'+Date.now(),label:'🧪 Teste das vozes'});
+  D.tray=[null,null,null]; vtPrep(); renderDuel(true);
+  $('#subTxt').textContent='Pecinha no buraco de baixo = +1 no combo'; setStatus('Fora do buraco 3 vezes seguidas, o combo quebra');
+  setActions(`<button class="chip" id="vt7">⏩ x7</button><button class="chip" id="vt15">⏩ x15</button><button class="chip" id="vt19">⏩ x19</button><button class="chip" id="vtLimpo">🧹 Tabuleiro limpo</button>`);
+  [7,15,19].forEach(n=>$('#vt'+n).addEventListener('click',()=>vtCombo(n)));
+  $('#vtLimpo').addEventListener('click',()=>{ if(!D||!D.cfg.vtest) return; const b=D.eng.b; for(let y=0;y<N-1;y++) b[y].fill(null); vtPrep(); b[0][0]=null; renderDuel(); toast('Agora a pecinha no buraco limpa o tabuleiro inteiro'); });
+}
 function renderHome(){
   const st=soloStats(), el=$('#homeBest'); if(!el) return;
   el.innerHTML=st.games?`<div><b>${fmtN(st.bestScore)}</b><span>seu recorde</span></div><div><b>${st.bestCombo?'x'+st.bestCombo:'0'}</b><span>maior combo</span></div><div><b>${st.ach.length}/${ACH.length}</b><span>conquistas</span></div>`

@@ -127,6 +127,7 @@ h2{margin:0 0 10px;font-size:17px;font-weight:500}
 .skp i{position:relative;display:block;width:var(--cs);height:var(--cs)}
 .vrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
 .vrow:last-child{border:0}
+.vsub{font-size:14px;margin:14px 0 2px}
 .vrow b{font-size:14px}.vrow small{display:block;font-size:11px;color:var(--muted);font-weight:400}
 .vrow .chip{padding:6px 9px;font-size:13px}
 .vrow .chip.rec{background:#c62828;color:#fff}

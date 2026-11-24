@@ -282,27 +282,64 @@ const SFX={
   win(){ const t=now(); [523.3,659.3,784,1046.5,1318.5].forEach((f,i)=>bell(f,t+i*.09,1.3,.12,.5,(i-2)*.15)); pad([261.6,329.6,392,493.9],t+.05,2.4,.1,2800); glitter(t+.3,.9,.08,26); },
   alert(){ const t=now(); playBuf(WOOD(),t,.6,.62,.1); playBuf(WOOD(),t+.13,.6,.52,.1); }
 };
-/* ---------- voz ---------- */
-const VWORDS=['nice','good','great','excellent','amazing','unbelievable','perfect'];
-const vbuf={}, vsrc={};
+/* ---------- voz: narrador dos combos ---------- */
+/* combo 2 a 8: escala; 9 a 16: sorteado sem repetir; 17 a 20: o narrador vai desistindo; 21 em diante: quieto */
+const V_ESC=['good','nice','great','excellent','amazing','unbelievable','legendary'];
+const V_ALT=['unstoppable','incredible','spectacular','phenomenal','somebody_stop_this','what_is_happening','oh_my_goodness','is_this_even_legal'];
+const V_FIM=['on_fire','running_out_of_words','no_words','i_give_up'];
+const V_TELA=['UNSTOPPABLE!','INCREDIBLE!','SPECTACULAR!','PHENOMENAL!'];
+const VWORDS=[...V_ESC,'perfect']; /* as que a pessoa pode gravar por cima */
+const V_ARQ=[...V_ESC,...V_ALT,...V_FIM,'is_it_over','perfect'];
+const vbuf={}, vsrc={}, vpad={};
 function b64ToBuf(d){ const bin=atob(d.split(',')[1]); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u.buffer; }
+/* gravações extras (depois do LEGENDARY): ids em ddb_vextra, áudio em ddb_vrec_<id> */
+function vExtras(){ return store.get('ddb_vextra',[]).filter(id=>store.get('ddb_vrec_'+id,null)); }
+let vPadLoading=null;
+function loadPadrao(){
+  if(vPadLoading||!/^https?:/.test(location.href)) return vPadLoading; const a=bus(); if(!a) return null;
+  vPadLoading=Promise.all(V_ARQ.map(async w=>{ try{ const r=await fetch('voz/'+w+'.mp3',{cache:'force-cache'}); if(r.ok) vpad[w]=await a.decodeAudioData(await r.arrayBuffer()); }catch(e){} }));
+  return vPadLoading;
+}
 async function loadVoices(){
   const a=bus(); if(!a) return;
-  for(const w of VWORDS){
+  if(SET.voiceMode!=='off') loadPadrao();
+  for(const w of [...VWORDS,...store.get('ddb_vextra',[])]){
     vbuf[w]=null; vsrc[w]='';
     const rec=store.get('ddb_vrec_'+w,null);
-    if(rec){ try{ vbuf[w]=await a.decodeAudioData(b64ToBuf(rec)); vsrc[w]='sua voz'; continue; }catch(e){} }
-    if(/^https?:/.test(location.href)){ try{ const r=await fetch('voz/'+w+'.mp3',{cache:'force-cache'}); if(r.ok){ vbuf[w]=await a.decodeAudioData(await r.arrayBuffer()); vsrc[w]='do repositório'; } }catch(e){} }
+    if(rec){ try{ vbuf[w]=await a.decodeAudioData(b64ToBuf(rec)); vsrc[w]='sua voz'; }catch(e){} }
   }
   if($('#settings').classList.contains('active')) renderVoiceList();
 }
-function playVoice(w){
-  const a=bus(); if(!a||!vbuf[w]) return false;
-  const s=a.createBufferSource(), g=a.createGain(); s.buffer=vbuf[w]; g.gain.value=1.7; s.connect(g); g.connect(master); wetSend(a,g,.35); s.start(now()+.02); return true;
+/* uma narração por vez: a nova corta a anterior */
+const VOZ_VOL=1.7;
+let vTocando=null;
+function vozParar(){ if(vTocando){ try{ vTocando.stop(); }catch(e){} vTocando=null; } }
+function playBufVoz(buf){
+  const a=bus(); if(!a||!buf) return false; vozParar();
+  const s=a.createBufferSource(), g=a.createGain(); s.buffer=buf; g.gain.value=VOZ_VOL; s.connect(g); g.connect(master); wetSend(a,g,.18); s.start(now()+.02);
+  vTocando=s; s.onended=()=>{ if(vTocando===s) vTocando=null; }; return true;
 }
-function say(word,level=9){
-  if(muted||SET.voiceMode==='off') return;
-  const w=String(word).toLowerCase().replace(/[^a-z]/g,'');
-  playVoice(w);
+/* gravação da pessoa (só na voz personalizada) ou o mp3 padrão */
+function vozBuf(w){ return (SET.voiceMode==='mine'&&vbuf[w])||vpad[w]||null; }
+function playVoice(w){ return playBufVoz(vbuf[w]||vpad[w]); }
+function say(w){ if(muted||SET.voiceMode==='off') return; playBufVoz(vozBuf(w)); }
+/* estado do narrador na partida atual (zera sozinho quando começa outra) */
+let NARR={ctx:null};
+function sorteiaSem(l,ult){ const ok=l.length>1?l.filter(x=>x!==ult):l; return ok[Math.floor(Math.random()*ok.length)]; }
+/* palavra da tela para um combo (sem mexer no narrador: jogada dos outros) */
+function comboTela(c){ return c<2?null:c<=8?V_ESC[c-2].toUpperCase()+'!':sorteiaSem(V_TELA,null); }
+/* chamado a cada jogada sua: devolve {w: palavra na tela, voz: o que falar}; combo quebrado depois do "i give up" fala "is it over?" */
+function narrStep(res,ctx){
+  if(NARR.ctx!==ctx) NARR={ctx,c:0,desistiu:false,alt:null,tela:null,ext:null};
+  const c=res.combo||0, prev=NARR.c; NARR.c=c;
+  if(c<prev){ if(NARR.desistiu){ NARR.desistiu=false; return {voz:'is_it_over'}; } return null; }
+  if(!(res.n>0)||c<=prev||c<2) return null;
+  const tela=c<=8?V_ESC[c-2].toUpperCase()+'!':(NARR.tela=sorteiaSem(V_TELA,NARR.tela));
+  if(c>=20) NARR.desistiu=true;
+  if(c<=8) return {w:tela,voz:V_ESC[c-2]};
+  if(c>20) return {w:tela,voz:null};
+  const ex=SET.voiceMode==='mine'?vExtras():[], k=c-9, modo=SET.voiceExtra||'pad';
+  if(ex.length&&(modo!=='pad'||k<ex.length)) return {w:tela,voz:modo==='rnd'?(NARR.ext=sorteiaSem(ex,NARR.ext)):ex[k%ex.length]};
+  return {w:tela,voz:c<=16?(NARR.alt=sorteiaSem(V_ALT,NARR.alt)):V_FIM[c-17]};
 }
 function buzz(p){ if(SIM&&!SIMCTL) return; try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }

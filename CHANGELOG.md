@@ -3,6 +3,11 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.22 · 24/11/2026
+- 🎙️ **Narrador dos combos:** agora tem um narrador de verdade. Ele começa no combo x2 com GOOD e vai subindo (NICE, GREAT, EXCELLENT, AMAZING, UNBELIEVABLE) até LEGENDARY no x8. Do x9 em diante ele se empolga com frases sorteadas, e lá pelo x17 começa a ficar sem palavras… até desistir. Se o combo quebrar depois disso, ele pergunta se acabou. Tabuleiro limpo ganha um PERFECT.
+- 🗣️ **Voz padrão ou a sua:** nas Configurações, escolha entre Voz padrão, Voz personalizada ou Sem voz. Na personalizada, você grava as palavras que quiser (o resto fica com o narrador) e pode gravar quantas frases quiser para depois do LEGENDARY, tocando em sequência, sorteadas ou seguidas do narrador.
+- 🧪 **Teste das vozes:** botão nas Configurações que abre um tabuleiro de treino só com pecinhas de 1 casa e um buraco na linha de baixo, para ir subindo o combo e ouvir cada voz.
+
 ## 1.21 · 22/11/2026
 - 🪟 **Tutorial da tela dividida:** aula nova em que você joga a tela dividida de verdade com um 🤖 Robô parceiro: cada um na sua metade, a regra de que a peça precisa tocar a sua parte (mas pode atravessar o meio), os dois jogando ao mesmo tempo para limpar linhas juntos, os cantos com 3 ou 4 jogadores e os Times no tabuleiro dividido, com ataque no outro time.
 - 👥 **Outros estilos para jogar:** outra aula nova, também com o Robô: duelo ao vivo (com a miniatura do tabuleiro dele), co-op em turnos e versus, em que você escolhe a peça que o outro vai jogar.
