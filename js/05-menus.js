@@ -254,7 +254,7 @@ function renderSettings(){
   $('#tAuto').classList.toggle('on',SET.autoSkin); $('#tLite').classList.toggle('on',SET.lite);
   const VM={std:'Voz padrão',mine:'Voz personalizada',off:'Sem voz'};
   $('#voiceSeg').innerHTML=Object.keys(VM).map(k=>`<button type="button" data-k="${k}" class="${SET.voiceMode===k?'sel':''}">${VM[k]}</button>`).join('');
-  $$('#voiceSeg button').forEach(b=>b.addEventListener('click',async()=>{ SET.voiceMode=b.dataset.k; saveSet(); renderSettings(); if(SET.voiceMode!=='off'){ ac(); await loadVoices(); await loadPadrao(); say('good'); } }));
+  $$('#voiceSeg button').forEach(b=>b.addEventListener('click',async()=>{ SET.voiceMode=b.dataset.k; saveSet(); renderSettings(); if(SET.voiceMode!=='off'){ ac(); await loadVoices(); await loadPadrao(); } }));
   $('#voiceHint').textContent=SET.voiceMode==='std'?'O narrador fala nos seus combos: GOOD no combo x2, NICE no x3… até LEGENDARY no x8. Depois ele vai perdendo as palavras.'
     :SET.voiceMode==='mine'?'Grave cada palavra com bastante energia, ou escolha um arquivo de áudio. A palavra que você não gravar fica com o narrador padrão. As gravações ficam só neste aparelho.':'Sem voz, só o som e as palavras na tela.';
   renderVoiceList();

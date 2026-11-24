@@ -3,6 +3,11 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.22.4 · 24/11/2026
+- 🗣️ **Fala e tela combinando:** quando o narrador fala UNSTOPPABLE, INCREDIBLE, SPECTACULAR ou PHENOMENAL, é essa mesma palavra que aparece na tela.
+- 🔠 **Palavras numa linha só:** saiu a escadinha; as palavras compridas voltam para uma linha, menores o bastante para não sair do tabuleiro nem quando as letras pulam.
+- 🔇 **Configurações mais quietas:** escolher Voz padrão ou Voz personalizada não fala mais "good".
+
 ## 1.22.3 · 24/11/2026
 - 🎙️ **Narrador antes do LEGENDARY:** em alguns celulares o GOOD, NICE, GREAT, EXCELLENT, AMAZING, UNBELIEVABLE e o PERFECT ficavam mudos, porque o aparelho tinha guardado que esses áudios não existiam (de antes de eles chegarem). Agora o jogo busca de novo e eles tocam.
 - 🪜 **Palavras em escadinha:** as palavras compridas (LEGENDARY, UNBELIEVABLE, SPECTACULAR…) aparecem quebradas em pedaços, um embaixo do outro, descendo em escadinha, sempre dentro do tabuleiro.

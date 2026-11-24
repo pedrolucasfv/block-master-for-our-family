@@ -346,12 +346,13 @@ function narrStep(res,ctx){
   const c=res.combo||0, prev=NARR.c; NARR.c=c;
   if(c<prev){ if(NARR.desistiu){ NARR.desistiu=false; return {voz:'is_it_over'}; } return null; }
   if(!(res.n>0)||c<=prev||c<2) return null;
-  const tela=c<=8?V_ESC[c-2].toUpperCase()+'!':sacola('tela',V_TELA);
   if(c>=20) NARR.desistiu=true;
-  if(c<=8) return {w:tela,voz:V_ESC[c-2]};
-  if(c>20) return {w:tela,voz:null};
-  const ex=SET.voiceMode==='mine'?vExtras():[], k=c-9, modo=SET.voiceExtra||'pad';
-  if(ex.length&&(modo!=='pad'||k<ex.length)) return {w:tela,voz:modo==='rnd'?sacola('ext',ex):ex[k%ex.length]};
-  return {w:tela,voz:c<=16?sacola('alt',V_ALT):V_FIM[c-17]};
+  if(c<=8) return {w:V_ESC[c-2].toUpperCase()+'!',voz:V_ESC[c-2]};
+  let voz=null;
+  if(c<=20){ const ex=SET.voiceMode==='mine'?vExtras():[], k=c-9, modo=SET.voiceExtra||'pad';
+    voz=ex.length&&(modo!=='pad'||k<ex.length)?(modo==='rnd'?sacola('ext',ex):ex[k%ex.length]):c<=16?sacola('alt',V_ALT):V_FIM[c-17]; }
+  /* quando o narrador fala UNSTOPPABLE, INCREDIBLE, SPECTACULAR ou PHENOMENAL, a tela mostra a mesma; nas outras frases, qualquer uma das quatro */
+  const igual=voz&&V_TELA.find(t=>t===voz.toUpperCase()+'!');
+  return {w:igual||sacola('tela',V_TELA),voz};
 }
 function buzz(p){ if(SIM&&!SIMCTL) return; try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
