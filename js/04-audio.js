@@ -285,7 +285,7 @@ const SFX={
 /* ---------- voz: narrador dos combos ---------- */
 /* combo 2 a 8: escala; 9 a 16: sorteado sem repetir; 17 a 20: o narrador vai desistindo; 21 em diante: quieto */
 const V_ESC=['good','nice','great','excellent','amazing','unbelievable','legendary'];
-const V_ALT=['unstoppable','incredible','spectacular','phenomenal','somebody_stop_this','what_is_happening','oh_my_goodness','is_this_even_legal'];
+const V_ALT=['unstoppable','incredible','spectacular','phenomenal','somebody_stop_this','what_is_happening','oh_my_goodness'];
 const V_FIM=['on_fire','running_out_of_words','no_words','i_give_up'];
 const V_TELA=['UNSTOPPABLE!','INCREDIBLE!','SPECTACULAR!','PHENOMENAL!'];
 const VWORDS=[...V_ESC,'perfect']; /* as que a pessoa pode gravar por cima */
