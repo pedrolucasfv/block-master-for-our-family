@@ -313,12 +313,21 @@ setInterval(()=>{
     d.style.animationDelay=(k*260)+'ms'; d.textContent='✦'; $('#fxl').appendChild(d); setTimeout(()=>d.remove(),1300+k*260); }
 },1100);
 function floatText(t,x,y){ const d=document.createElement('div'); d.className='ft'; d.textContent=t; d.style.left=x+'px'; d.style.top=y+'px'; $('#fxl').appendChild(d); setTimeout(()=>d.remove(),1000); }
-function letters(t){ let i=0; return String(t).split(' ').map(w=>`<span class="wd">${[...w].map(c=>`<span class="ch" style="--i:${i++}">${esc(c)}</span>`).join('')}</span>`).join(' '); }
+function letters(t,i=0){ return String(t).split(' ').map(w=>`<span class="wd">${[...w].map(c=>`<span class="ch" style="--i:${i++}">${esc(c)}</span>`).join('')}</span>`).join(' '); }
+/* palavras compridas viram uma escadinha de pedaços (uma linha cada, descendo para a direita) para caber no tabuleiro */
+const ESCADA={LEGENDARY:['LEGEN','DARY'],UNBELIEVABLE:['UNBE','LIEVA','BLE'],UNSTOPPABLE:['UNSTOP','PABLE'],SPECTACULAR:['SPECTA','CULAR'],
+  INCREDIBLE:['INCRE','DIBLE'],PHENOMENAL:['PHENO','MENAL'],EXCELLENT:['EXCEL','LENT']};
+function escadinha(t){
+  const m=String(t).match(/^([A-Z]+)(!?)$/), p=m&&ESCADA[m[1]]; if(!p) return letters(t);
+  let i=0; const n=p.length;
+  return `<span class="esc">${p.map((s,k)=>{ const tx=s+(k===n-1?m[2]:''), off=(k-(n-1)/2)*1.1, h=letters(tx,i); i+=tx.length;
+    return `<span class="deg" style="${off>0?'margin-left':'margin-right'}:${Math.abs(off*2).toFixed(2)}em">${h}</span>`; }).join('')}</span>`;
+}
 function praise(t,sub,big,level=0){
   const gr=GR(), d=document.createElement('div');
   const plain=sub===undefined&&!big;
   d.className='praise'+(big?' big':'')+(plain?' plain':'')+(level>=7?' lvl7':level>=5?' lvl5':'');
-  d.innerHTML=`<span class="w">${letters(t)}</span>`+(sub?`<span class="sub">${letters(sub)}</span>`:'');
+  d.innerHTML=`<span class="w">${escadinha(t)}</span>`+(sub?`<span class="sub">${letters(sub)}</span>`:'');
   const x=big?innerWidth/2:gr.left+gr.width/2, y=big?innerHeight*.42:gr.top+gr.height*.42; d.style.left=x+'px'; d.style.top=y+'px'; $('#fxl').appendChild(d); setTimeout(()=>d.remove(),1950);
   /* palavra comprida (SPECTACULAR!, UNBELIEVABLE!…): diminui a letra até caber na largura do tabuleiro */
   if(!big){ const max=gr.width*.94; for(const el of d.querySelectorAll('.w,.sub')){ const w=el.scrollWidth; if(w>max) el.style.fontSize=parseFloat(getComputedStyle(el).fontSize)*max/w+'px'; } }

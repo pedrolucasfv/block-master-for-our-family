@@ -1824,4 +1824,10 @@ const JA={
 "🧪 Testar as vozes":"🧪 声をテスト",
 "🧪 Teste das vozes":"🧪 声のテスト",
 "🧹 Tabuleiro limpo":"🧹 盤面クリア",
+"${off>0?'margin-left':'margin-right'}:${Math.abs(off*2).toFixed(2)}em":null,
+"não encontrado":null,
+"Apagar a gravação":"録音を消す",
+"sem gravação: toque em 🎙 Gravar":"録音なし：🎙 Gravar をタップ",
+"➕ Adicionar gravação":"➕ 録音を追加",
+"Tirar a linha":"この行を消す",
 };

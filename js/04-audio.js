@@ -294,10 +294,11 @@ const vbuf={}, vsrc={}, vpad={};
 function b64ToBuf(d){ const bin=atob(d.split(',')[1]); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u.buffer; }
 /* gravações extras (depois do LEGENDARY): ids em ddb_vextra, áudio em ddb_vrec_<id> */
 function vExtras(){ return store.get('ddb_vextra',[]).filter(id=>store.get('ddb_vrec_'+id,null)); }
+/* ?v=2: a versão antiga pedia voz/good.mp3… quando ainda não existiam, e alguns celulares guardaram o "não encontrado" */
 let vPadLoading=null;
 function loadPadrao(){
   if(vPadLoading||!/^https?:/.test(location.href)) return vPadLoading; const a=bus(); if(!a) return null;
-  vPadLoading=Promise.all(V_ARQ.map(async w=>{ try{ const r=await fetch('voz/'+w+'.mp3',{cache:'force-cache'}); if(r.ok) vpad[w]=await a.decodeAudioData(await r.arrayBuffer()); }catch(e){} }));
+  vPadLoading=Promise.all(V_ARQ.map(async w=>{ try{ const r=await fetch('voz/'+w+'.mp3?v=2'); if(r.ok) vpad[w]=await a.decodeAudioData(await r.arrayBuffer()); }catch(e){} }));
   return vPadLoading;
 }
 async function loadVoices(){

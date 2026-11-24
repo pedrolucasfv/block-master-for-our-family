@@ -10,6 +10,7 @@
   -webkit-text-stroke:calc(var(--CS)*.05) rgba(90,30,0,.9);paint-order:stroke fill;
   animation:chIn .55s cubic-bezier(.2,1.6,.4,1) both,chWave 1.1s ease-in-out .6s 2;animation-delay:calc(var(--i)*45ms),calc(.55s + var(--i)*70ms)}
 .praise .wd{display:inline-block;white-space:nowrap}
+.praise .esc{display:flex;flex-direction:column;align-items:center;line-height:.92}.praise .deg{display:block}
 .praise .sub{display:block;font-weight:700;font-size:calc(var(--CS)*.5);letter-spacing:3px;margin-top:.2em}
 .praise .sub .ch{background:linear-gradient(180deg,#fff,#cfe8ff);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:calc(var(--CS)*.03) rgba(20,30,80,.85);animation:chPop .4s cubic-bezier(.2,1.5,.4,1) both;animation-delay:calc(.25s + var(--i)*25ms)}
 .praise.lvl5 .ch{background-image:linear-gradient(180deg,#fff 0%,#ffd0f0 40%,#ff4fa0 100%);-webkit-text-stroke-color:rgba(90,0,50,.9)}

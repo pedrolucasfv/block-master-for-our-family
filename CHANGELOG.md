@@ -3,6 +3,11 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.22.3 · 24/11/2026
+- 🎙️ **Narrador antes do LEGENDARY:** em alguns celulares o GOOD, NICE, GREAT, EXCELLENT, AMAZING, UNBELIEVABLE e o PERFECT ficavam mudos, porque o aparelho tinha guardado que esses áudios não existiam (de antes de eles chegarem). Agora o jogo busca de novo e eles tocam.
+- 🪜 **Palavras em escadinha:** as palavras compridas (LEGENDARY, UNBELIEVABLE, SPECTACULAR…) aparecem quebradas em pedaços, um embaixo do outro, descendo em escadinha, sempre dentro do tabuleiro.
+- ➕ **Adicionar gravação:** o botão agora só cria a linha nova; você grava quando quiser tocando em 🎙 Gravar. A 🗑 tira a linha.
+
 ## 1.22.2 · 24/11/2026
 - 🔠 **Palavras cabendo na tela:** SPECTACULAR!, UNSTOPPABLE!, UNBELIEVABLE! e as outras palavras compridas diminuem sozinhas até caber na largura do tabuleiro.
 
