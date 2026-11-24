@@ -320,6 +320,8 @@ function praise(t,sub,big,level=0){
   d.className='praise'+(big?' big':'')+(plain?' plain':'')+(level>=7?' lvl7':level>=5?' lvl5':'');
   d.innerHTML=`<span class="w">${letters(t)}</span>`+(sub?`<span class="sub">${letters(sub)}</span>`:'');
   const x=big?innerWidth/2:gr.left+gr.width/2, y=big?innerHeight*.42:gr.top+gr.height*.42; d.style.left=x+'px'; d.style.top=y+'px'; $('#fxl').appendChild(d); setTimeout(()=>d.remove(),1950);
+  /* palavra comprida (SPECTACULAR!, UNBELIEVABLE!…): diminui a letra até caber na largura do tabuleiro */
+  if(!big){ const max=gr.width*.94; for(const el of d.querySelectorAll('.w,.sub')){ const w=el.scrollWidth; if(w>max) el.style.fontSize=parseFloat(getComputedStyle(el).fontSize)*max/w+'px'; } }
   if(sub!==undefined) setTimeout(()=>{ ['#ffe066','#fff','#ff9f1c'].forEach(c=>burst(x,y,c,6,1.4,{round:true,size:CS*.11,g:.05})); },150);
 }
 const FRUITS=['🍓','🍊','🍋','🍏','🍉','🫐','🍇'];

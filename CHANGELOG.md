@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.22.2 · 24/11/2026
+- 🔠 **Palavras cabendo na tela:** SPECTACULAR!, UNSTOPPABLE!, UNBELIEVABLE! e as outras palavras compridas diminuem sozinhas até caber na largura do tabuleiro.
+
 ## 1.22.1 · 24/11/2026
 - 🎙️ **Narrador do começo ao fim:** quem tinha gravações da voz antiga ouvia essas gravações (ou nada) até o AMAZING, e o narrador só aparecia no LEGENDARY. Agora todo mundo começa na Voz padrão; as gravações continuam guardadas e voltam se você escolher Voz personalizada.
 - 🔀 **Frases sem repetir:** depois do LEGENDARY, o narrador sorteia as frases e fala todas antes de repetir alguma (o mesmo vale para as palavras na tela e para as suas gravações sorteadas).
