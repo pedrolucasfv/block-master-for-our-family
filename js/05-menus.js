@@ -255,12 +255,13 @@ function renderSettings(){
   const VM={std:'Voz padrão',mine:'Voz personalizada',off:'Sem voz'};
   $('#voiceSeg').innerHTML=Object.keys(VM).map(k=>`<button type="button" data-k="${k}" class="${SET.voiceMode===k?'sel':''}">${VM[k]}</button>`).join('');
   $$('#voiceSeg button').forEach(b=>b.addEventListener('click',async()=>{ SET.voiceMode=b.dataset.k; saveSet(); renderSettings(); if(SET.voiceMode!=='off'){ ac(); await loadVoices(); await loadPadrao(); } }));
-  $('#voiceHint').textContent=SET.voiceMode==='std'?'O narrador fala nos seus combos: GOOD no combo x2, NICE no x3… até LEGENDARY no x8. Depois ele vai perdendo as palavras.'
+  $('#voiceHint').innerHTML=SET.voiceMode==='std'?'O narrador fala nos seus combos: GOOD no combo x2, NICE no x3… até LEGENDARY no x8. Depois ele vai perdendo as palavras.<br><small class="vcred">Voz do narrador feita com <a href="https://elevenlabs.io" target="_blank" rel="noopener">ElevenLabs</a></small>'
     :SET.voiceMode==='mine'?'Grave cada palavra com bastante energia, ou escolha um arquivo de áudio. A palavra que você não gravar fica com o narrador padrão. As gravações ficam só neste aparelho.':'Sem voz, só o som e as palavras na tela.';
   renderVoiceList();
 }
 let recState=null;
 const VX_MODO={seq:'Em sequência',pad:'Depois, o narrador',rnd:'Sorteadas'};
+const VL_MODO={last:'Depois da última gravação',all:'Todo combo',n:'A partir de um combo'};
 function vRow(w,nome,sub){ const rec=recState&&recState.w===w, tem=!!store.get('ddb_vrec_'+w,null);
   return `<div class="vrow"><div><b>${nome}</b><small>${sub}</small></div><div class="row"><button type="button" class="chip ${rec?'rec':''}" data-rec="${w}">${rec?'⏹ Parar':'🎙 Gravar'}</button><button type="button" class="chip" data-file="${w}" aria-label="Escolher arquivo">📁</button><button type="button" class="chip" data-play="${w}" ${vbuf[w]||vpad[w]?'':'disabled'}>▶</button><button type="button" class="chip" data-del="${w}" ${tem||w[0]==='x'?'':'disabled'} aria-label="${w[0]==='x'?'Tirar a linha':'Apagar a gravação'}">🗑</button></div></div>`; }
 function vApagar(w){ try{ localStorage.removeItem('ddb_vrec_'+w); }catch(e){} vbuf[w]=null; if(w[0]==='x') store.set('ddb_vextra',store.get('ddb_vextra',[]).filter(x=>x!==w)); loadVoices().then(renderVoiceList); }
@@ -277,11 +278,17 @@ function renderVoiceList(){
     +`<h3 class="vsub">Depois do LEGENDARY (combo x9 em diante)</h3>`
     +(ex.length?ex.map((id,i)=>{ const g=gravadas.indexOf(id); return vRow(id,'Gravação '+(i+1),g<0?'sem gravação: toque em 🎙 Gravar':modo==='pad'?`combo x${g+9}`:'sua voz'); }).join(''):`<p class="muted" style="margin:4px 0">Sem gravações: fala o narrador padrão.</p>`)
     +`<div class="row" style="margin:6px 0"><button type="button" class="btn small" id="vNova">➕ Adicionar gravação</button></div>`
-    +(gravadas.length?`<p class="muted" style="margin:6px 0 4px">Como tocar as gravações depois do LEGENDARY:</p><div class="seg" id="vxSeg">${Object.keys(VX_MODO).map(k=>`<button type="button" data-k="${k}" class="${modo===k?'sel':''}">${VX_MODO[k]}</button>`).join('')}</div><p class="muted" style="margin:4px 0">${modo==='seq'?'Uma depois da outra, em ordem; quando acabam, voltam para a primeira.':modo==='pad'?'Uma depois da outra, em ordem; quando acabam, o narrador padrão continua.':'Sorteadas, sem repetir a última.'}</p>`:'');
+    +(gravadas.length?`<p class="muted" style="margin:6px 0 4px">Como tocar as gravações depois do LEGENDARY:</p><div class="seg" id="vxSeg">${Object.keys(VX_MODO).map(k=>`<button type="button" data-k="${k}" class="${modo===k?'sel':''}">${VX_MODO[k]}</button>`).join('')}</div><p class="muted" style="margin:4px 0">${modo==='seq'?'Uma depois da outra, em ordem; quando acabam, voltam para a primeira.':modo==='pad'?'Uma depois da outra, em ordem; quando acabam, o narrador padrão continua.':'Sorteadas, sem repetir a última.'}</p>`:'')
+    +`<h3 class="vsub">Quando perder o combo</h3>`+vRow('is_it_over','PERDEU O COMBO',vbuf.is_it_over?'sua voz':'narrador padrão (IS IT OVER?, só depois do x20)')
+    +(vbuf.is_it_over?`<p class="muted" style="margin:6px 0 4px">Quando tocar:</p><div class="seg" id="vlSeg">${Object.keys(VL_MODO).map(k=>`<button type="button" data-k="${k}" class="${(SET.voiceLose||'last')===k?'sel':''}">${VL_MODO[k]}</button>`).join('')}</div>`
+      +((SET.voiceLose||'last')==='n'?`<div class="row" style="margin:6px 0;gap:8px;align-items:center"><span class="muted">Combo de</span><select id="vlN">${Array.from({length:19},(_,i)=>i+2).map(n=>`<option value="${n}" ${(SET.voiceLoseN||5)===n?'selected':''}>x${n}</option>`).join('')}</select><span class="muted">ou mais que quebrar</span></div>`
+        :`<p class="muted" style="margin:4px 0">${(SET.voiceLose||'last')==='all'?'Toca sempre que um combo (x2 ou mais) quebrar.':`Toca quando um combo de x${perdeuDesde()} ou mais quebrar (depois da sua última gravação).`}</p>`):'');
   $('#vTeste').addEventListener('click',vozTeste);
   box.querySelectorAll('[data-rec]').forEach(b=>b.addEventListener('click',()=>toggleRec(b.dataset.rec)));
   $('#vNova').addEventListener('click',()=>{ store.set('ddb_vextra',[...store.get('ddb_vextra',[]),'x'+Date.now().toString(36)]); renderVoiceList(); });
   $$('#vxSeg button').forEach(b=>b.addEventListener('click',()=>{ SET.voiceExtra=b.dataset.k; saveSet(); renderVoiceList(); }));
+  $$('#vlSeg button').forEach(b=>b.addEventListener('click',()=>{ SET.voiceLose=b.dataset.k; saveSet(); renderVoiceList(); }));
+  const vlN=$('#vlN'); if(vlN) vlN.addEventListener('change',()=>{ SET.voiceLoseN=+vlN.value; saveSet(); });
   const pin=$('#vPackIn'); let fileFor=null;
   $('#vPack').addEventListener('click',()=>{ fileFor=null; pin.value=''; pin.click(); });
   box.querySelectorAll('[data-file]').forEach(b=>b.addEventListener('click',()=>{ fileFor=b.dataset.file; pin.multiple=false; pin.value=''; pin.click(); pin.multiple=true; }));
@@ -295,7 +302,7 @@ async function importVoices(files,only){
   let ok=0, skip=[];
   for(const f of files){
     const base=f.name.toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/[^a-z]/g,'');
-    const w=only||VWORDS.find(x=>base===x)||VWORDS.find(x=>base.includes(x));
+    const w=only||VWORDS.find(x=>base===x.replace(/_/g,''))||VWORDS.find(x=>base.includes(x.replace(/_/g,'')));
     if(!w){ skip.push(f.name); continue; }
     if(f.size>900*1024){ skip.push(f.name+' (grande demais)'); continue; }
     try{ localStorage.setItem('ddb_vrec_'+w,JSON.stringify(await readUrl(f))); ok++; }catch(e){ skip.push(f.name+' (sem espaço)'); }

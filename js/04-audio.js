@@ -288,7 +288,7 @@ const V_ESC=['good','nice','great','excellent','amazing','unbelievable','legenda
 const V_ALT=['unstoppable','incredible','spectacular','phenomenal','somebody_stop_this','what_is_happening','oh_my_goodness'];
 const V_FIM=['on_fire','running_out_of_words','no_words','i_give_up'];
 const V_TELA=['UNSTOPPABLE!','INCREDIBLE!','SPECTACULAR!','PHENOMENAL!'];
-const VWORDS=[...V_ESC,'perfect']; /* as que a pessoa pode gravar por cima */
+const VWORDS=[...V_ESC,'perfect','is_it_over']; /* as que a pessoa pode gravar por cima */
 const V_ARQ=[...V_ESC,...V_ALT,...V_FIM,'is_it_over','perfect'];
 const vbuf={}, vsrc={}, vpad={};
 function b64ToBuf(d){ const bin=atob(d.split(',')[1]); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u.buffer; }
@@ -340,11 +340,19 @@ function sacola(nome,l){
 }
 /* palavra da tela para um combo (sem mexer no narrador: jogada dos outros) */
 function comboTela(c){ return c<2?null:c<=8?V_ESC[c-2].toUpperCase()+'!':sorteiaSem(V_TELA,null); }
+/* "perdeu o combo" gravado (voz personalizada): toca quando um combo deste tamanho ou maior quebra.
+   'last' = depois da sua última gravação (LEGENDARY + extras; sem extras, a última palavra gravada), 'all' = todo combo, 'n' = a partir de SET.voiceLoseN. Sem gravação: só depois do x20 */
+function perdeuDesde(){
+  if(SET.voiceMode!=='mine'||!vbuf.is_it_over) return Infinity;
+  const m=SET.voiceLose||'last'; if(m==='all') return 2; if(m==='n') return SET.voiceLoseN||5;
+  const ex=vExtras().length; if(ex) return Math.min(20,8+ex);
+  for(let i=V_ESC.length-1;i>=0;i--) if(vbuf[V_ESC[i]]) return i+2; return 20;
+}
 /* chamado a cada jogada sua: devolve {w: palavra na tela, voz: o que falar}; combo quebrado depois do "i give up" fala "is it over?" */
 function narrStep(res,ctx){
   if(NARR.ctx!==ctx) NARR={ctx,c:0,desistiu:false};
   const c=res.combo||0, prev=NARR.c; NARR.c=c;
-  if(c<prev){ if(NARR.desistiu){ NARR.desistiu=false; return {voz:'is_it_over'}; } return null; }
+  if(c<prev){ const d=NARR.desistiu||(prev>=2&&prev>=perdeuDesde()); NARR.desistiu=false; return d?{voz:'is_it_over'}:null; }
   if(!(res.n>0)||c<=prev||c<2) return null;
   if(c>=20) NARR.desistiu=true;
   if(c<=8) return {w:V_ESC[c-2].toUpperCase()+'!',voz:V_ESC[c-2]};

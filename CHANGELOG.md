@@ -3,6 +3,10 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.23 · 24/11/2026
+- 💔 **Sua voz quando perder o combo:** na Voz personalizada, grave o que quiser ouvir quando o combo quebrar e escolha quando toca: depois da sua última gravação, em todo combo que quebrar, ou só a partir de um combo que você escolher (x5, x10…).
+- 🙏 **Créditos:** a Voz padrão agora mostra que a voz do narrador foi feita com a ElevenLabs.
+
 ## 1.22.4 · 24/11/2026
 - 🗣️ **Fala e tela combinando:** quando o narrador fala UNSTOPPABLE, INCREDIBLE, SPECTACULAR ou PHENOMENAL, é essa mesma palavra que aparece na tela.
 - 🔠 **Palavras numa linha só:** saiu a escadinha; as palavras compridas voltam para uma linha, menores o bastante para não sair do tabuleiro nem quando as letras pulam.
