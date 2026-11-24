@@ -3,6 +3,10 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.22.1 · 24/11/2026
+- 🎙️ **Narrador do começo ao fim:** quem tinha gravações da voz antiga ouvia essas gravações (ou nada) até o AMAZING, e o narrador só aparecia no LEGENDARY. Agora todo mundo começa na Voz padrão; as gravações continuam guardadas e voltam se você escolher Voz personalizada.
+- 🔀 **Frases sem repetir:** depois do LEGENDARY, o narrador sorteia as frases e fala todas antes de repetir alguma (o mesmo vale para as palavras na tela e para as suas gravações sorteadas).
+
 ## 1.22 · 24/11/2026
 - 🎙️ **Narrador dos combos:** agora tem um narrador de verdade. Ele começa no combo x2 com GOOD e vai subindo (NICE, GREAT, EXCELLENT, AMAZING, UNBELIEVABLE) até LEGENDARY no x8. Do x9 em diante ele se empolga com frases sorteadas, e lá pelo x17 começa a ficar sem palavras… até desistir. Se o combo quebrar depois disso, ele pergunta se acabou. Tabuleiro limpo ganha um PERFECT.
 - 🗣️ **Voz padrão ou a sua:** nas Configurações, escolha entre Voz padrão, Voz personalizada ou Sem voz. Na personalizada, você grava as palavras que quiser (o resto fica com o narrador) e pode gravar quantas frases quiser para depois do LEGENDARY, tocando em sequência, sorteadas ou seguidas do narrador.

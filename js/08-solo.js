@@ -59,7 +59,7 @@ function vtPrep(){
   if(b[y].filter(Boolean).length<N-1){ const gap=Math.floor(Math.random()*N); for(let x=0;x<N;x++) b[y][x]=x===gap?null:(b[y][x]||vtBloco()); }
   D.tray=D.tray.map(p=>p||vtPeca());
 }
-function vtCombo(n){ if(!D||!D.cfg.vtest) return; if(NARR.ctx!==D) NARR={ctx:D,c:0,desistiu:false,alt:null,tela:null,ext:null};
+function vtCombo(n){ if(!D||!D.cfg.vtest) return; if(NARR.ctx!==D) NARR={ctx:D,c:0,desistiu:false};
   D.eng.combo=n; D.eng.since=0; NARR.c=n; NARR.desistiu=n>=20; renderDuel(); toast(`Combo x${n}: a próxima pecinha no buraco faz x${n+1}`); }
 function vozTeste(){
   ac(); loadVoices(); if(SET.voiceMode==='off'){ SET.voiceMode='std'; saveSet(); }

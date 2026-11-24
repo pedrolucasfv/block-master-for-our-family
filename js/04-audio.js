@@ -330,20 +330,27 @@ function say(w){ if(muted||SET.voiceMode==='off') return; playBufVoz(vozBuf(w));
 /* estado do narrador na partida atual (zera sozinho quando começa outra) */
 let NARR={ctx:null};
 function sorteiaSem(l,ult){ const ok=l.length>1?l.filter(x=>x!==ult):l; return ok[Math.floor(Math.random()*ok.length)]; }
+/* sorteio de sacola: todas saem antes de alguma repetir; a primeira da rodada nova nunca é a última da anterior */
+function sacola(nome,l){
+  let s=NARR[nome]; if(!s||s.id!==l.join()) s=NARR[nome]={id:l.join(),fila:[],ult:null};
+  if(!s.fila.length){ const f=l.slice(); for(let i=f.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [f[i],f[j]]=[f[j],f[i]]; }
+    if(f.length>1&&f[0]===s.ult){ const j=1+Math.floor(Math.random()*(f.length-1)); [f[0],f[j]]=[f[j],f[0]]; } s.fila=f; }
+  return s.ult=s.fila.shift();
+}
 /* palavra da tela para um combo (sem mexer no narrador: jogada dos outros) */
 function comboTela(c){ return c<2?null:c<=8?V_ESC[c-2].toUpperCase()+'!':sorteiaSem(V_TELA,null); }
 /* chamado a cada jogada sua: devolve {w: palavra na tela, voz: o que falar}; combo quebrado depois do "i give up" fala "is it over?" */
 function narrStep(res,ctx){
-  if(NARR.ctx!==ctx) NARR={ctx,c:0,desistiu:false,alt:null,tela:null,ext:null};
+  if(NARR.ctx!==ctx) NARR={ctx,c:0,desistiu:false};
   const c=res.combo||0, prev=NARR.c; NARR.c=c;
   if(c<prev){ if(NARR.desistiu){ NARR.desistiu=false; return {voz:'is_it_over'}; } return null; }
   if(!(res.n>0)||c<=prev||c<2) return null;
-  const tela=c<=8?V_ESC[c-2].toUpperCase()+'!':(NARR.tela=sorteiaSem(V_TELA,NARR.tela));
+  const tela=c<=8?V_ESC[c-2].toUpperCase()+'!':sacola('tela',V_TELA);
   if(c>=20) NARR.desistiu=true;
   if(c<=8) return {w:tela,voz:V_ESC[c-2]};
   if(c>20) return {w:tela,voz:null};
   const ex=SET.voiceMode==='mine'?vExtras():[], k=c-9, modo=SET.voiceExtra||'pad';
-  if(ex.length&&(modo!=='pad'||k<ex.length)) return {w:tela,voz:modo==='rnd'?(NARR.ext=sorteiaSem(ex,NARR.ext)):ex[k%ex.length]};
-  return {w:tela,voz:c<=16?(NARR.alt=sorteiaSem(V_ALT,NARR.alt)):V_FIM[c-17]};
+  if(ex.length&&(modo!=='pad'||k<ex.length)) return {w:tela,voz:modo==='rnd'?sacola('ext',ex):ex[k%ex.length]};
+  return {w:tela,voz:c<=16?sacola('alt',V_ALT):V_FIM[c-17]};
 }
 function buzz(p){ if(SIM&&!SIMCTL) return; try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
