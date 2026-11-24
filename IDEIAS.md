@@ -16,6 +16,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 6 | 🥔 Batata quente na sala | M | Em cima do co-op em turnos do tabuleiro único | 1 ou 3 peças por vez; vidas |
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
+| — | 🎙️ Mais falas do locutor (seção 14) | P/M | Independe de tudo; só falta gravar os mp3 no ElevenLabs | Texto de cada fala; quais entram |
 | — | 🗺️ Mundos novos da campanha | G | Para bem depois | Quais mundos primeiro |
 | — | 🕵️ Impostor | ? | Só se ficar legal depois de refinar | Quase tudo |
 
@@ -238,3 +239,44 @@ Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga
 - **Combo de dupla:** o combo do time só continua se os dois limparem linhas um depois do outro (revezando).
 - **Rebater ataque:** quando chega um ataque, você tem 3 s para limpar uma linha e mandar de volta.
 - **Tesouro escondido:** antes de começar, cada um esconde 3 tesouros no mapa; limpar a linha onde está um tesouro do rival rouba o tesouro.
+
+---
+
+## 14. 🎙️ Mais falas do locutor ⭐🧪
+Hoje o locutor (`voz/*.mp3`, em inglês, voz de *announcer* do ElevenLabs) só fala nos combos (`good`…`legendary`), no PERFECT e no "is it over?". Tudo passa por `say(w)` em `js/04-audio.js` (carrega `voz/<nome>.mp3`, iguala o volume, respeita voz desligada / padrão / gravada pela pessoa). Cada fala nova = gravar o mp3 + `say('nome')` no momento certo + incluir em `V_ARQ`.
+
+**Falta decidir (numa conversa depois):** o texto exato de cada fala, quantas variações por momento (sorteadas para não cansar), e se cada uma entra também na lista "gravar minha voz" das Configurações. Os nomes de arquivo abaixo são só sugestão.
+
+### Escolhidas ⭐
+| Momento | Onde no código | Sugestão de fala → arquivo |
+|---|---|---|
+| Contagem antes de começar | `countdown` (`07-duel.js`; serve duelo e tabuleiro único) | "Three", "Two", "One", "GO!" → `three`, `two`, `one`, `go` (ou um só "Ready… GO!") |
+| Vitória | placar final (`winnerLine` em `07-duel.js`, `10-shared.js` versus/times) | "You win!" / "Victory!" → `you_win` |
+| Derrota | mesmos lugares | "Better luck next time!" → `you_lose` |
+| Empate | mesmos lugares | "It's a draw!" → `draw` |
+| Fim do Sozinho / Desafio do dia | onde toca `SFX.over` | "Game over!" → `game_over` |
+| Passou o próprio recorde no meio da partida | `07-duel.js` ("NOVO RECORDE!") | "New high score!" → `new_record` |
+| Campanha: fase vencida | `12-campaign.js` (`praise('VITÓRIA!'…)`) | "Stage clear!" → `stage_clear`; talvez variar por estrelas: `one_star`, `two_stars`, `three_stars` / "Flawless!" |
+| Campanha: fase perdida | mesmo lugar (`'Não foi dessa vez'`) | "Try again!" → `try_again` (a decidir) |
+| Chefão aparece | `bossShow` (`11-bosses.js`) | "Here comes the boss!" → `boss_appears` |
+| Chefão derrotado | vitória em fase `goal:'boss'` | "Boss defeated!" → `boss_defeated` |
+| Bloco dourado aparece (poder `powers`) | onde o bloco dourado nasce | "Gold block!" → `gold_block` |
+| Pegou o bloco dourado | quem limpa primeiro (+150) | "Got it!" / "Jackpot!" → `jackpot` (a decidir) |
+| Menu: abrir o jogo | inicialização (`14-main.js`), **só 1× por dia** | "Welcome back!" → `welcome` |
+| Menu: Desafio do dia novo | botão do Desafio do dia, só se ainda não jogou hoje | "New daily challenge!" → `daily_new` |
+
+### Outras ideias para decidir junto 💭
+- **Ataques no duelo:** "Incoming!" quando chegam blocos blindados; "Take that!" para quem atacou.
+- **Últimos segundos:** "30 seconds!" no modo pontos em dobro (`final`); "Hurry up!" quando o tempo por peça aperta (`sudden`, Desafio do dia).
+- **Série melhor de 3/5:** "Match point!" e "Champion!".
+- **Modo TV (espectador):** "Blue team takes the lead!" / "Red team…", pódio "And the winner is…".
+- **Bomba explodindo:** "Boom!" / "Kaboom!".
+- **Martelo** (tabuleiro único): "Smash!".
+- **Co-op:** "Teamwork!" quando a equipe faz combo grande junta.
+- **Por um triz:** a última peça que cabia salvou a partida → "Close call!".
+- **Conquista do Sozinho** (`ACH` em `08-solo.js`): "Achievement unlocked!".
+- **1º lugar do dia no ranking:** "Number one!".
+- **Desafio a distância:** "Your turn!" ao abrir um desafio em que é a sua vez.
+- **Tutorial:** "Well done!" ao terminar uma aula.
+
+Cuidado: falas de menu e de eventos frequentes cansam rápido; manter as do menu raras (1× por dia) e sortear variações nas que repetem muito.
