@@ -311,12 +311,16 @@ async function loadVoices(){
   if($('#settings').classList.contains('active')) renderVoiceList();
 }
 /* uma narração por vez: a nova corta a anterior */
-const VOZ_VOL=1.7;
+/* cada voz é nivelada pelo volume da fala (sem os silêncios), para todas soarem iguais e um pouco acima do som do combo */
+const VOZ_ALVO=-9;
+function vozGanho(buf){ if(buf._g) return buf._g; const d=buf.getChannelData(0), w=Math.floor(buf.sampleRate*.05); let s=0,n=0;
+  for(let i=0;i+w<=d.length;i+=w){ let e=0; for(let j=i;j<i+w;j++) e+=d[j]*d[j]; e/=w; if(e>1e-4){ s+=e; n++; } }
+  const db=n?10*Math.log10(s/n):VOZ_ALVO; return buf._g=Math.min(4,Math.max(.4,Math.pow(10,(VOZ_ALVO-db)/20))); }
 let vTocando=null;
 function vozParar(){ if(vTocando){ try{ vTocando.stop(); }catch(e){} vTocando=null; } }
 function playBufVoz(buf){
   const a=bus(); if(!a||!buf) return false; vozParar();
-  const s=a.createBufferSource(), g=a.createGain(); s.buffer=buf; g.gain.value=VOZ_VOL; s.connect(g); g.connect(master); wetSend(a,g,.18); s.start(now()+.02);
+  const s=a.createBufferSource(), g=a.createGain(); s.buffer=buf; g.gain.value=vozGanho(buf); s.connect(g); g.connect(master); wetSend(a,g,.18); s.start(now()+.02);
   vTocando=s; s.onended=()=>{ if(vTocando===s) vTocando=null; }; return true;
 }
 /* gravação da pessoa (só na voz personalizada) ou o mp3 padrão */
