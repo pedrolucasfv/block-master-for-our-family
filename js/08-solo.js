@@ -66,9 +66,30 @@ function vozTeste(){
   startDuel({type:'solo',vtest:true,opts:{...defOpts(),time:3},seed:'V|'+Date.now(),label:'🧪 Teste das vozes'});
   D.tray=[null,null,null]; vtPrep(); renderDuel(true);
   $('#subTxt').textContent='Pecinha no buraco de baixo = +1 no combo'; setStatus('Fora do buraco 3 vezes seguidas, o combo quebra');
-  setActions(`<button class="chip" id="vt7">⏩ x7</button><button class="chip" id="vt15">⏩ x15</button><button class="chip" id="vt19">⏩ x19</button><button class="chip" id="vtLimpo">🧹 Tabuleiro limpo</button>`);
+  vtBotoes();
+}
+function vtBotoes(){
+  bossHide(); setActions(`<button class="chip" id="vt7">⏩ x7</button><button class="chip" id="vt15">⏩ x15</button><button class="chip" id="vt19">⏩ x19</button><button class="chip" id="vtLimpo">🧹 Tabuleiro limpo</button><button class="chip" id="vtChefes">👹 Chefões</button>`);
   [7,15,19].forEach(n=>$('#vt'+n).addEventListener('click',()=>vtCombo(n)));
   $('#vtLimpo').addEventListener('click',()=>{ if(!D||!D.cfg.vtest) return; const b=D.eng.b; for(let y=0;y<N-1;y++) b[y].fill(null); vtPrep(); b[0][0]=null; renderDuel(); toast('Agora a pecinha no buraco limpa o tabuleiro inteiro'); });
+  $('#vtChefes').addEventListener('click',vtChefes);
+}
+/* testar os chefões: escolhe um e toca a chegada, o ataque, o bravo e a derrota (com animação e fala) */
+function vtChefes(){
+  bossHide(); setActions(Object.keys(BOSSES).map(id=>`<button class="chip" data-vtc="${id}">${BOSSES[id].name}</button>`).join('')+`<button class="chip" id="vtVoltar">↩ Voltar</button>`);
+  $$('#actions [data-vtc]').forEach(b=>b.addEventListener('click',()=>vtChefe(b.dataset.vtc)));
+  $('#vtVoltar').addEventListener('click',vtBotoes);
+}
+const VT_ACAO={enter:'👋 Chegada',attack:'💥 Ataque',rage:'😡 Bravo',defeat:'💀 Derrota'};
+function vtChefe(id){
+  ac(); const B=BOSSES[id]; let bravo=false;
+  setActions(Object.keys(VT_ACAO).map(m=>`<button class="chip" data-vta="${m}">${VT_ACAO[m]}</button>`).join('')+`<button class="chip" id="vtTroca">👹 Outro chefão</button><button class="chip" id="vtVoltar">↩ Voltar</button>`);
+  const vai=m=>bossPrep(id).then(()=>{ if(!D||!D.cfg.vtest) return; BOSS_ID=id; if(m==='enter') bravo=false; if(m==='rage') bravo=true;
+    bossDock(bravo); bossShow(m,{rage:bravo}); const f=B.say[{enter:'enter',attack:bravo?'atkRage':'atk',rage:'rage',defeat:'defeat'}[m]];
+    if(f) setTimeout(()=>bossSay(f,1600),300); });
+  $$('#actions [data-vta]').forEach(b=>b.addEventListener('click',()=>vai(b.dataset.vta)));
+  $('#vtTroca').addEventListener('click',vtChefes); $('#vtVoltar').addEventListener('click',vtBotoes);
+  vai('enter');
 }
 function renderHome(){
   const st=soloStats(), el=$('#homeBest'); if(!el) return;

@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.25 · 26/11/2026
+- 👹 **Testar os chefões:** no Teste das vozes (Configurações), o novo botão 👹 Chefões deixa escolher um chefão e ver a chegada, o ataque, a raiva e a derrota dele, com som, animação e fala.
+
 ## 1.24 · 26/11/2026
 - 🐻 **Chefões com voz nova:** o Ursão ganhou som próprio para quando chega, ataca e perde, e a Rainha Jujuba agora ri "hihihi" quando chega, fica brava ou ataca, e tem seu próprio som de derrota. Os outros chefões continuam rugindo até ganharem os deles.
 

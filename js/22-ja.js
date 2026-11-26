@@ -1843,4 +1843,11 @@ const JA={
 "narrador padrão (IS IT OVER?, só depois do x20)":"標準のナレーター（IS IT OVER?、x20 のあとだけ）",
 "ou mais que quebrar":"以上が切れたとき",
 "PERDEU O COMBO":"コンボ終了",
+"↩ Voltar":"↩ もどる",
+"👋 Chegada":"👋 登場",
+"👹 Chefões":"👹 ボス",
+"👹 Outro chefão":"👹 ほかのボス",
+"💀 Derrota":"💀 やられた",
+"💥 Ataque":"💥 攻撃",
+"😡 Bravo":"😡 おこった",
 };
