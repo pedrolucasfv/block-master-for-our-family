@@ -219,6 +219,7 @@ function bearLayerSVG(svg,o){
 function loadSVG(src,w,h){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.width=w; im.height=h; im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(src); }); }
 function bossPrep(id){
   if(id) BOSS_ID=id; id=BOSS_ID; const svg=BOSS().svg;
+  bossSomPrep(id);
   if(BOSS_PR[id]) return BOSS_PR[id];
   prepRoars();
   BOSS_PR[id]=(async()=>{
@@ -317,7 +318,7 @@ function bossShow(mode,o={}){
       const a=b.animate([{transform:`translate(${x0-CS/2}px,${y0-CS/2}px) scale(.5) rotate(0deg)`,opacity:0},{offset:.12,opacity:1},{offset:.5,transform:`translate(${mx-CS/2}px,${my}px) scale(1.15) rotate(200deg)`},{transform:`translate(${x1}px,${y1}px) scale(1) rotate(360deg)`,opacity:1}],{duration:650,delay:640+k*120,easing:'cubic-bezier(.3,.1,.5,1)',fill:'both'});
       a.onfinish=()=>b.remove(); });
   }
-  if(mode==='attack'||mode==='rage'||mode==='enter') setTimeout(()=>{ SFX.roar((mode==='rage'?.85:1)*BOSS().pitch); buzz([40,60,40]); },mode==='attack'?380:250);
+  if(mode==='attack'||mode==='rage'||mode==='enter') setTimeout(()=>{ const p=(mode==='rage'?.85:1)*BOSS().pitch; bossSom(BOSS_ID,mode==='attack'?'ataque':'inicial',()=>SFX.roar(p)); buzz([40,60,40]); },mode==='attack'?380:250);
   if(mode==='attack'&&o.cells&&o.cells.length) setTimeout(()=>SFX.thud(),1300);
-  if(mode==='defeat') setTimeout(()=>{ SFX.roar(1.6*BOSS().pitch); },300);
+  if(mode==='defeat') setTimeout(()=>{ const p=1.6*BOSS().pitch; bossSom(BOSS_ID,'derrota',()=>SFX.roar(p)); },300);
 }

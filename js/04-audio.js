@@ -65,6 +65,20 @@ function bearRoar(t,len=1.05,pitch=1){
   const b=ROAR[pitch]; if(b&&b!=='…'){ playBuf(b,t,1,1,.25); return; }
   bearRoarGraph(a,(()=>{ const g=a.createGain(); g.connect(master); wetSend(a,g,.25); return g; })(),t,len,pitch,noiseBuf);
 }
+/* sons gravados dos chefões (voz/chefe-<id>-<momento>.mp3); quem não tem arquivo continua com o rugido.
+   inicial = entrada e quando fica bravo (sem ele, usa o de ataque) */
+const BOSS_SONS={bear:['inicial','ataque','derrota'],queen:['ataque','derrota']}, BSOM={};
+function bossSomPrep(id){
+  const a=bus(); if(!a||BSOM[id]||!BOSS_SONS[id]||!/^https?:/.test(location.href)) return; const s=BSOM[id]={};
+  s._p=Promise.all(BOSS_SONS[id].map(async k=>{ try{ const r=await fetch(`voz/chefe-${id}-${k}.mp3`); if(r.ok) s[k]=await a.decodeAudioData(await r.arrayBuffer()); }catch(e){} }));
+}
+/* toca o som gravado do chefão; se ainda está carregando, espera até 1,5 s; sem arquivo, chama o rugido (sen) */
+function bossSom(id,k,sen){
+  const s=BSOM[id]; if(!s){ sen(); return; }
+  const toca=()=>{ const b=s[k]||(k==='inicial'&&s.ataque); if(!b){ sen(); return; } if(!muted){ ac(); playBuf(b,now()+.01,Math.min(1.6,vozGanho(b)*.8),1,.12); } };
+  if(s[k]||(k==='inicial'&&s.ataque)){ toca(); return; }
+  let feito=false; const vai=()=>{ if(!feito){ feito=true; toca(); } }; s._p.then(vai); setTimeout(vai,1500);
+}
 function bearOof(t){ if(muted) return; osc('sawtooth',170,95,t,.2,.12,.01); osc('sine',120,70,t,.22,.2,.006); nz(t,.12,.08,'bandpass',500,1.2,0,.004); }
 function tone(freq,dur=.1,type='sine',vol=.2,when=0,slide=0){ osc(type,freq,slide?freq*slide:0,now()+when,dur,vol,.008); }
 /* PÃ: impacto grave que cresce com o nível do combo */

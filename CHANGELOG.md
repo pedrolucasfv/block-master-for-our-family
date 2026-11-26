@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.24 · 26/11/2026
+- 🐻 **Chefões com voz nova:** o Ursão ganhou som próprio para quando chega, ataca e perde, e a Rainha Jujuba agora ri "hihihi" quando chega, fica brava ou ataca, e tem seu próprio som de derrota. Os outros chefões continuam rugindo até ganharem os deles.
+
 ## 1.23 · 24/11/2026
 - 💔 **Sua voz quando perder o combo:** na Voz personalizada, grave o que quiser ouvir quando o combo quebrar e escolha quando toca: depois da sua última gravação, em todo combo que quebrar, ou só a partir de um combo que você escolher (x5, x10…).
 - 🙏 **Créditos:** a Voz padrão agora mostra que a voz do narrador foi feita com a ElevenLabs.
