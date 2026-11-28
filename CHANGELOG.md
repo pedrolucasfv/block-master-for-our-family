@@ -3,6 +3,13 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.30 · 28/11/2026
+- 🐻 **Ursinho novo:** agora ele dá duas mordidas (nhac, nhac!), some numa poeirinha e sai correndo. Na linha ele corre para o lado, visto de perfil; na coluna corre para cima ou para baixo, visto de cima.
+- 🧸 **Pelúcia:** o pompom é apertado, balança e se desmancha em pompons pequenininhos que sobem flutuando.
+- 🧱 **Tijolinhos:** o muro treme, racha e os tijolos desabam, levantando poeira.
+- 🍉 **Frutinhas:** a fruta é apertada, abre em duas metades que caem para os lados e espirra suco, deixando uma mancha que some.
+- 🎂 **Bolo:** aparece uma velinha acesa, ela é soprada e o bolo se desfaz em pedaços com granulado colorido.
+
 ## 1.29 · 28/11/2026
 - ✨ **Cada bloco com seu jeito de sumir:** quando uma linha ou coluna some, agora todos os blocos têm animação própria:
 - 🤖 **Robô:** os olhos piscam vermelho, ele se teletransporta em faixas e os parafusos saltam.

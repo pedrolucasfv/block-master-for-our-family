@@ -16,7 +16,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 6 | 🥔 Batata quente na sala | M | Em cima do co-op em turnos do tabuleiro único | 1 ou 3 peças por vez; vidas |
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
-| — | ✨ Animação própria de cada bloco ao limpar | ✅ feito (1.28–1.29) | Todos os blocos têm a sua; ajustes vão em 1.x.y. Ver seção "Animações dos blocos" | Efeito de linha inteira |
+| — | ✨ Animação própria de cada bloco ao limpar | ✅ feito (1.28–1.30) | Todos os blocos têm a sua (as antigas refeitas no mesmo nível na 1.30); ajustes vão em 1.x.y. Ver seção "Animações dos blocos" | Efeito de linha inteira |
 | — | 🗺️ Mundos novos da campanha | G | Para bem depois | Quais mundos primeiro |
 | — | 🕵️ Impostor | ? | Só se ficar legal depois de refinar | Quase tudo |
 
@@ -261,7 +261,7 @@ Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga
 ## ✨ Animações dos blocos (ao limpar linha/coluna)
 Cada bloco com uma animação própria, como o crochê desfiando. Tudo desenhado no canvas único por cima do tabuleiro (`CLR`, `clrAdd` no `06-board.js`: cada tema tem um `xxxAdd` + `xxxDraw(x,it,e)`, ligado em `CLR_SKIN`); com "aparelho fraco" fica a animação simples. Os dourados usam a do tema de origem (`baseSkin`).
 
-Já tinham: Pelúcia (estufa e sobe), Crochê (desfia), Tijolinhos (racha em 4), Frutinhas (amassa e espirra), Bolo (racha e solta granulado).
+Já tinham: Crochê (desfia, é a referência de capricho). Refeitas na 1.30 para ficar no nível das novas: Pelúcia (aperta e vira pompons pequenos que sobem, `velvetDraw`), Tijolinhos (racha e os tijolos desabam com poeira, `brickDraw`), Frutinhas (abre em duas metades, suco e mancha, `fruitDraw`), Bolo (velinha acesa, soprada, e o bolo se desfaz com granulado, `candyDraw`). As antigas em CSS ficaram só para pedras e especiais desses temas.
 
 | Bloco | Ideia | Situação |
 |---|---|---|
@@ -269,7 +269,7 @@ Já tinham: Pelúcia (estufa e sobe), Crochê (desfia), Tijolinhos (racha em 4),
 | 🤖 Robô | Olhos piscam vermelho, some em faixas (teletransporte), parafusos saltam (`robotDraw`) | ✅ 1.29 |
 | 🎋 Bambu | Corte de espada em diagonal; a metade de cima escorrega e caem folhinhas (`bambooDraw`) | ✅ 1.29 |
 | 🍣 Sushi | Hashis descem e levam o sushi (`sushiDraw`); se não agradar, simplificar: o peixe pula do arroz | ✅ 1.29 |
-| 🐻 Ursinho | Pisca, pulinho com achatar/esticar, sai pulando para o lado (`bearDraw`) | ✅ 1.29 |
+| 🐻 Ursinho | Duas mordidas, poeirinha e sai correndo: de perfil na linha (`bearSide`), visto de cima na coluna (`bearTop`). A 1.29 (pulinho) foi achada sem graça | ✅ 1.30 |
 | 🍬 Bala | As pontas do papel torcem, a bala gira como pião e some com brilho (`jellyDraw`) | ✅ 1.29 |
 | ⛩️ Japão | Vira lanterna acesa que sobe balançando (`lanternDraw`; tsuru descartado: já tem a joaninha voando) | ✅ 1.29 |
 | 🟥 Clássico | Pisca 3 vezes (fliperama) e se desfaz em quadradinhos (`classicDraw`) | ✅ 1.29 |
