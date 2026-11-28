@@ -17,6 +17,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
 | — | ✨ Animação própria de cada bloco ao limpar | ✅ feito (1.28–1.30) | Todos os blocos têm a sua (as antigas refeitas no mesmo nível na 1.30); ajustes vão em 1.x.y. Ver seção "Animações dos blocos" | Efeito de linha inteira |
+| — | 🔊 Som próprio de cada animação de linha | M | Combina com as animações da 1.28–1.30. Ver seção "Sons das animações" | Somar ou trocar a kalimba; botão próprio ou junto com "Animação ao fazer linha" |
 | — | 🗺️ Mundos novos da campanha | G | Para bem depois | Quais mundos primeiro |
 | — | 🕵️ Impostor | ? | Só se ficar legal depois de refinar | Quase tudo |
 
@@ -275,3 +276,40 @@ Já tinham: Crochê (desfia, é a referência de capricho). Refeitas na 1.30 par
 | 🟥 Clássico | Pisca 3 vezes (fliperama) e se desfaz em quadradinhos (`classicDraw`) | ✅ 1.29 |
 
 Falta decidir: se a linha inteira ganha um efeito de grupo (revoada, corte único, ola).
+
+
+---
+
+## 🔊 Sons das animações (ao limpar linha/coluna) 💭
+Cada bloco ganha um som que acompanha a sua animação (seção acima). Ainda não feito: rascunho para começar.
+
+**Como é hoje:** tudo é som sintetizado na hora (sem arquivo, funciona offline) em `js/04-audio.js`, com os ajudantes `osc`, `nz` (ruído com filtro), `bell`, `pad`, `glitter`, `impact`, `playBuf(TIK()/TOK()/WOOD())`. A linha/coluna toca `SFX.clear(combo,lines,chain)`: kalimba (uma nota a mais por linha extra) e, do combo x2 em diante, os "Mil pianos". As animações ficam no `06-board.js` (`spawnClear` → `CLR_SKIN[tema]`), e `spawnClear` é chamado **uma vez por casa** (8 a 16 vezes numa jogada).
+
+**Cuidados combinados para quando for fazer:**
+- Tocar **uma vez por jogada**, não uma por bloco (senão 8 joaninhas = 8 zumbidos). Ex.: um `clrSom(tema)` chamado no `spawnClear` que ignora novas chamadas por ~100 ms; no máximo 2–3 repetições espalhadas se ficar bom (revoada).
+- Respeitar o volume/mudo que já existem e o botão "Animação ao fazer linha" (`SET.clrAnim` desligado = sem som próprio). Com o Modo leve, também sem.
+- Som curto e mais baixo que a kalimba/os pianos, que dizem quantas linhas e qual combo.
+- Os dourados usam o som do tema de origem (`baseSkin`).
+
+**Rascunho por bloco** (tempo em ms desde o começo da animação; os tempos estão nas constantes de cada desenho, ex.: `BUG_T`, `BEAR_T`, `CAKE_T`):
+
+| Bloco | Som | Quando |
+|---|---|---|
+| 🐞 Joaninha | "plic" do casco abrindo + zumbido de asinhas (vibrado rápido) que sobe e some enquanto voa | 150 / 200–1000 |
+| 🤖 Robô | bipe-bipe (olhos vermelhos), "vuuum" de teletransporte subindo, "tlim" metálico dos parafusos | 0–260 / 260–680 / 330–600 |
+| 🎋 Bambu | "shing" da espada (ruído agudo + sino), "toc" oco da metade caindo, folhinhas | 0–110 / ~400 |
+| 🍣 Sushi | "tic-tic" dos hashis pegando + "fiu" subindo | ~300 / 400–1000 |
+| ⛩️ Japão | sino/gongo baixinho e longo, ar subindo bem suave (calmo) | ~100 / 200–1500 |
+| 🐻 Ursinho | "nhac, nhac" (duas mordidas), "puf" da poeirinha, passinhos rápidos que aceleram e somem | 0–420 / 420 / 420–1300 |
+| 🍬 Bala | papel amassando, assobio de pião subindo, "plim" no brilho | 0–300 / 300–680 / ~680 |
+| 🟥 Clássico | 3 bipes de fliperama (8-bit) piscando + arpejo descendo quando os quadradinhos caem | 0–330 / 330–900 |
+| 🧸 Pelúcia | sopro "fuuu" e brilhinhos delicados das sementinhas | 100–600 / 400–1400 |
+| 🧶 Crochê | "zíp" de fio puxado (um por fio, bem baixinho) | 0–800 |
+| 🧱 Tijolinhos | estalo da rachadura, tijolos caindo (baques graves espalhados) e cascalho | ~100 / 200–700 |
+| 🍉 Frutinhas | "plop" do canudo espetando, "slurp" de canudinho borbulhando, chupada seca no fim | ~240 / 240–890 / ~890 |
+| 🎂 Bolo | fósforo acendendo, "nhac" das três mordidas juntas, sopro "fff", "plim" do granulado | 0–160 / 300 / 500 / 620 |
+
+**Falta decidir:**
+- O som do bloco **soma** com a kalimba (sugestão: soma, um pouco mais baixo) ou **troca** a kalimba quando a animação está ligada.
+- Botão próprio ("Som das animações") ou junto com "Animação ao fazer linha".
+- Testar no "Teste das vozes" (Configurações) com um botão para ouvir o som de cada bloco.
