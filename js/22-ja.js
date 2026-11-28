@@ -569,6 +569,8 @@ const JA={
 "Modo de jogo":"ゲームモード",
 "Modo espectador":"観戦モード",
 "Modo leve":"軽量モード",
+"Animação ao fazer linha":"ライン消しのアニメーション",
+"cada bloco some do seu jeito (a joaninha voa, o bolo é mordido…); desligue se ficar lento ao jogar rápido":"ブロックごとに消え方がちがいます（てんとう虫は飛び、ケーキはかじられる…）。速く置くと重いときはオフに",
 "Modo teste desligado":"テストモード オフ",
 "Moedas da sorte":"幸運のコイン",
 "Moedas da sorte… pra mim! Miau!":"幸運のコイン…オレのもの!ニャー!",

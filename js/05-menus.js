@@ -269,7 +269,7 @@ function renderSettings(){
     if(baseSkin(SET.skin)===k&&hasGold(k)) SET.skin=isGold(SET.skin)?k:k+'Gold'; else SET.skin=k;
     saveSet(); applyLook(); renderSettings(); }));
   skinPreviews();
-  $('#tAuto').classList.toggle('on',SET.autoSkin); $('#tLite').classList.toggle('on',SET.lite);
+  $('#tAuto').classList.toggle('on',SET.autoSkin); $('#tLite').classList.toggle('on',SET.lite); $('#tClrAnim').classList.toggle('on',SET.clrAnim!==false);
   const VM={std:'Voz padrão',mine:'Voz personalizada',off:'Sem voz'};
   $('#voiceSeg').innerHTML=Object.keys(VM).map(k=>`<button type="button" data-k="${k}" class="${SET.voiceMode===k?'sel':''}">${VM[k]}</button>`).join('');
   $$('#voiceSeg button').forEach(b=>b.addEventListener('click',async()=>{ SET.voiceMode=b.dataset.k; saveSet(); renderSettings(); if(SET.voiceMode!=='off'){ ac(); await loadVoices(); await loadPadrao(); } }));
@@ -344,6 +344,7 @@ async function toggleRec(w){
 }
 $('#tAuto').addEventListener('click',()=>{ SET.autoSkin=!SET.autoSkin; saveSet(); renderSettings(); });
 $('#tLite').addEventListener('click',()=>{ SET.lite=!SET.lite; saveSet(); applyLook(); renderSettings(); });
+$('#tClrAnim').addEventListener('click',()=>{ SET.clrAnim=SET.clrAnim===false; saveSet(); renderSettings(); });
 /* configurações abertas de qualquer lugar (início, sala conectada, pausa) e voltam para onde estavam */
 let setFrom='home';
 function openSettings(from){ setFrom=from; renderSettings(); show('settings'); }
