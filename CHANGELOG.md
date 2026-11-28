@@ -3,6 +3,16 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.29 · 28/11/2026
+- ✨ **Cada bloco com seu jeito de sumir:** quando uma linha ou coluna some, agora todos os blocos têm animação própria:
+- 🤖 **Robô:** os olhos piscam vermelho, ele se teletransporta em faixas e os parafusos saltam.
+- 🎋 **Bambu:** um corte de espada atravessa o bloco, a parte de cima escorrega e cai, e caem folhinhas.
+- 🍣 **Sushi:** um par de hashis desce, pega o sushi e leva embora.
+- ⛩️ **Japão:** o bloco vira uma lanterna de papel acesa que sobe balançando.
+- 🐻 **Ursinho:** pisca, dá um pulinho e sai pulando para fora do tabuleiro.
+- 🍬 **Bala:** o papel torce, a bala gira como pião e some num brilho.
+- 🟥 **Clássico:** pisca como fliperama e se desfaz em quadradinhos.
+
 ## 1.28 · 28/11/2026
 - 🐞 **Joaninhas voando:** com o bloco Joaninha, quando uma linha ou coluna some, cada joaninha abre o casco, bate as asinhas e sai voando em zigue-zague para fora do tabuleiro. É a primeira de uma série: os outros blocos também vão ganhar sua própria animação.
 

@@ -16,7 +16,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 | `js/03-blocks.js` | Desenho dos blocos em canvas por tema (`drawBlock`, `GOLD_DECO`), `applyLook()` aplica tema e skin |
 | `js/04-audio.js` | `SFX`, rugidos, combos, sons do laboratório, voz (`voz/*.mp3` opcional + gravações do perfil) |
 | `js/05-menus.js` | Partículas, opções e códigos de desafio (`TIMES`, `enc4`/`dec4`, `TYPE_HINT`, desenho de cada estilo `modePic`, etapas da progressão `rampEditor`/`rampOf`), placar da noite, histórico, recordes, configurações, perfil |
-| `js/06-board.js` | Tabuleiro em canvas (`setN`, `renderBoard`, `CELL`), cenário dos mundos, marcações, animações de limpeza, bandeja e arraste (`drag`, `IN`) |
+| `js/06-board.js` | Tabuleiro em canvas (`setN`, `renderBoard`, `CELL`), cenário dos mundos, marcações, animações de limpeza (`spawnClear`; as de cada bloco num canvas só: `CLR`/`clrAdd`, um `xxxDraw` por tema em `CLR_SKIN`), bandeja e arraste (`drag`, `IN`) |
 | `js/07-duel.js` | HUD, DUELO local/ao vivo (`D`, `startDuel`, `duelIN`), poderes e ataques, placar final, pausa/saída |
 | `js/08-solo.js` | Modo Sozinho (`startSolo`) e fluxo offline por código |
 | `js/09-net.js` | WebRTC + QR (`NET`, `send`, `sendTo`, `encodeSig`/`decodeSig`, `scan`), sala até 6 jogadores, mensagens (`hostMsg`, `guestMsg`, `common`), `hostStart`, abas da sala |
