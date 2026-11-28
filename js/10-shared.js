@@ -34,10 +34,11 @@ function startShared(cfg){
     ids.forEach(id=>{ const key=ts?'T'+ids.filter(x=>cfg.teams[x]===cfg.teams[id]).indexOf(id):id; rng[id]=makeRng(cfg.seed+'|'+key); scs[id]=0; stuck[id]=false; ptsBy[id]=0; });
     const H={bd,rng,trays,tray:null,scs,ptsBy,hammer:{},turn:ids[0],ph:'choose',ch:null,timeline:[[0,0]],ev:null,suddenAt:Infinity,over:null,paused:false,stuck,out:{}};
     if(cfg.type==='versus') H.tray=gen3(rng[ids[0]],o); else ids.forEach(id=>trays[id]=gen3(rng[id],o));
+    if(ts&&o.terr) H.tmap=Array(N*N).fill('');
     SH.H=H; if(SH.hook&&SH.hook.init) SH.hook.init(H); SH.view=hostView();
   }
   resetScore(); animTimers.forEach(clearTimeout); $('#fx').innerHTML=''; BC.reset(); MK=null;
-  $('#gLabel').textContent=TYPES[cfg.type]+' · R'+cfg.round; $('#gMute').textContent=muted?'🔇':'🔊';
+  $('#gLabel').textContent=typeName(cfg)+' · R'+cfg.round; $('#gMute').textContent=muted?'🔇':'🔊';
   const vs=cfg.type==='versus', myT=ts?cfg.teams[me]:null;
   if(vs) oppsSetup(ids.filter(x=>x!==me),false);
   else if(ts){ const ot=otherTeam(myT), el=$('#opps'); el.hidden=false; el.classList.remove('many');
@@ -67,22 +68,22 @@ function buildSharedActions(){
 /* a visão de cada aparelho: todos os tabuleiros + os campos do seu próprio tabuleiro (b, hold, marks, sc…) */
 function deriveView(v){ const my=v.bds[bdKey(SH.me)]||v.bds.all||Object.values(v.bds)[0]; return Object.assign(v,{b:my.b,hold:my.hold,marks:my.marks,sc:my.sc,combo:my.combo,since:my.since,shield:my.shield}); }
 function hostView(){ const H=SH.H, bds={}; for(const k in H.bd){ const B=H.bd[k]; bds[k]={b:B.eng.b,hold:B.hold,marks:B.marks,sc:B.sc,combo:B.eng.combo,since:B.eng.since,shield:B.shield}; }
-  return deriveView({bds,tr:SH.type==='versus'?H.tray:H.trays,scs:H.scs,turn:H.turn,ph:H.ph,ch:H.ch,paused:H.paused,stuck:H.stuck,out:H.out,cp:H.cp||null,hammer:(H.hammer||{})[SH.me]||0}); }
-function serBoard(b){ const now=performance.now(); return b.flat().map(v=>v?[v.c,v.s||0,Math.round(now-v.t),v.cr?1:0,v.pw?PWK.indexOf(v.pw)+1:0,v.tb!=null?v.tb:-1]:0); }
-function deserBoard(a){ const now=performance.now(), b=Array.from({length:N},()=>Array(N).fill(null)); a.forEach((v,i)=>{ if(v){ const o={c:v[0],s:v[1]||null,t:now-v[2],cr:v[3]}; if(v[4]) o.pw=PWK[v[4]-1]; if(v[5]!=null&&v[5]>=0) o.tb=v[5]; b[(i/N)|0][i%N]=o; } }); return b; }
+  return deriveView({bds,tm:H.tmap?terrStr(H.tmap):null,tr:SH.type==='versus'?H.tray:H.trays,scs:H.scs,turn:H.turn,ph:H.ph,ch:H.ch,paused:H.paused,stuck:H.stuck,out:H.out,cp:H.cp||null,hammer:(H.hammer||{})[SH.me]||0}); }
+function serBoard(b){ const now=performance.now(); return b.flat().map(v=>v?[v.c,v.s||0,Math.round(now-v.t),v.cr?1:0,v.pw?PWK.indexOf(v.pw)+1:0,v.tb!=null?v.tb:-1,v.tp==='az'?1:v.tp==='la'?2:0]:0); }
+function deserBoard(a){ const now=performance.now(), b=Array.from({length:N},()=>Array(N).fill(null)); a.forEach((v,i)=>{ if(v){ const o={c:v[0],s:v[1]||null,t:now-v[2],cr:v[3]}; if(v[4]) o.pw=PWK[v[4]-1]; if(v[5]!=null&&v[5]>=0) o.tb=v[5]; if(v[6]) o.tp=v[6]===1?'az':'la'; b[(i/N)|0][i%N]=o; } }); return b; }
 function broadcast(){
   if(!SH||!SH.host) return; const H=SH.H, tot=TIMES[SH.o.time]*1000;
   SH.view=hostView();
   if(SH.cfg.solo){ SH.lastSync=performance.now(); return; }
   const bds={}; for(const k in H.bd){ const B=H.bd[k]; bds[k]={b:serBoard(B.eng.b),hold:B.hold,marks:B.marks,sc:B.sc,combo:B.eng.combo,since:B.eng.since,shield:B.shield}; }
-  send({t:'sync',bds,tr:SH.view.tr,scs:H.scs,turn:H.turn,ph:H.ph,ch:H.ch,paused:H.paused,stuck:H.stuck,out:H.out,cp:H.cp||null,hm:H.hammer||{},
+  send({t:'sync',bds,tm:SH.view.tm,tr:SH.view.tr,scs:H.scs,turn:H.turn,ph:H.ph,ch:H.ch,paused:H.paused,stuck:H.stuck,out:H.out,cp:H.cp||null,hm:H.hammer||{},
     rem:tot?tot-SH.elapsed:null,sd:SH.o.sudden&&SH.type==='versus'?H.suddenAt-SH.elapsed:null,playing:SH.playing,ev:H.ev,over:H.over,tl:H.timeline.length>1?H.timeline[H.timeline.length-1]:null});
   SH.lastSync=performance.now();
 }
 function applySync(m){
   const s=SH; const prevPaused=s.view&&s.view.paused;
   const bds={}; for(const k in m.bds){ const q=m.bds[k]; bds[k]={b:deserBoard(q.b),hold:q.hold||null,marks:q.marks||null,sc:q.sc,combo:q.combo,since:q.since,shield:q.shield}; }
-  s.view=deriveView({bds,tr:m.tr,scs:m.scs,turn:m.turn,ph:m.ph,ch:m.ch,paused:m.paused,stuck:m.stuck,out:m.out||{},cp:m.cp||null,hammer:(m.hm||{})[s.me]||0});
+  s.view=deriveView({bds,tm:m.tm||null,tr:m.tr,scs:m.scs,turn:m.turn,ph:m.ph,ch:m.ch,paused:m.paused,stuck:m.stuck,out:m.out||{},cp:m.cp||null,hammer:(m.hm||{})[s.me]||0});
   s.remAt={rem:m.rem,sd:m.sd,at:performance.now()}; s.pending=null;
   if(m.paused!==prevPaused&&s.playing) { s.paused=m.paused; if(m.paused){ cancelDrag(); campPauseInfo(); $('#pauseTitle').textContent='Pausado'; $('#pauseTxt').textContent='A partida está pausada para todos.'; campStuckPauseTxt(); if(!$('#settings').classList.contains('active')) $('#pauseOv').classList.add('show'); } else { $('#pauseOv').classList.remove('show'); if($('#settings').classList.contains('active')) show('game'); } }
   if(m.ev&&m.ev.id!==s.lastEv) playEv(m.ev);
@@ -140,10 +141,12 @@ function hostPlace(who,src,r,c){
   const tb=tickBombs(eng); if(tb.boom) H.ev.boom={k,cells:tb.added};
   if(ts&&SH.o.attacks&&res.n>=3) hostAttackBoard(otherTeam(k),res.n-1);
   if(ts&&res.powers&&res.powers.length) hostPowers(who,k,res.powers);
+  const tw=ts&&SH.o.terr?terrSplitPlace(H,k,res,eng):null;
   if(SH.hook&&SH.hook.afterPlace) SH.hook.afterPlace(who,res,pts,B);
   cleanMarks(res,B);
   playEv(H.ev);
   if(H.over) return true;
+  if(tw){ hostEnd('terrWin',tw); return true; }
   if(vs){ if(H.tray.every(x=>!x)) H.tray=gen3(H.rng[SH.ids[0]],SH.o); H.turn=nextOf(who); H.ph='choose'; H.ch=null; armSuddenH(); }
   else if(H.trays[who].every(x=>!x)&&!(SH.hook&&SH.hook.noRegen)) H.trays[who]=gen3(H.rng[who],SH.o);
   const g=GOALS[SH.o.goal];
@@ -167,6 +170,7 @@ function hostPowers(who,k,list){
 }
 /* o que os poderes fazem na tela de cada um (tabuleiro dividido dos times) */
 function playPowers(ev,mk){
+  if(SH.o.terr) terrSplitEv(ev,mk);
   if(ev.boom&&ev.boom.k===mk){ setTimeout(()=>BC.drop(ev.boom.cells),0); toast('💣 A bomba explodiu!'); SFX.boom(); shake(); }
   for(const f of ev.pwf||[]){
     const mine=f.to===mk;
@@ -220,7 +224,7 @@ function hostCheckStuck(){
     /* time sem jogadas fica de fora; o outro continua até passar a pontuação dele */
     ['az','la'].forEach(k=>{ if(!H.out[k]&&bdIds(k).every(id=>H.stuck[id])) H.out[k]=true; });
     if(H.out.az&&H.out.la){ hostEnd('stuck',null); return; }
-    const o=H.out.az?'az':H.out.la?'la':null; if(o){ const w=otherTeam(o); if(H.bd[w].sc>H.bd[o].sc) hostEnd('passed',w); }
+    const o=H.out.az?'az':H.out.la?'la':null; if(o){ const w=otherTeam(o); if(SH.o.terr) hostEnd('terrTravou',w); else if(H.bd[w].sc>H.bd[o].sc) hostEnd('passed',w); } /* território: travou, perdeu */
     return;
   }
   if(SH.hook&&SH.hook.stuck&&SH.ids.every(id=>H.stuck[id])){ SH.hook.stuck(); return; }
@@ -232,9 +236,10 @@ function hostEnd(reason,winner,quitter){
   const H=SH.H; if(H.over) return; const vs=SH.type==='versus', ts=SH.type==='tsplit';
   if(vs&&(reason==='time'||reason==='oppQuit')) winner=argmaxScore(quitter);
   if(vs&&reason==='sudden') winner=argmaxScore(H.turn);
-  if(ts&&(reason==='time'||reason==='stuck'||reason==='oppQuit')) winner=H.bd.az.sc>H.bd.la.sc?'az':H.bd.la.sc>H.bd.az.sc?'la':null;
+  if(ts&&SH.o.terr){ if(reason==='time'||reason==='stuck') winner=terrSplitWinner(H); else if(reason==='oppQuit') winner=otherTeam(SH.cfg.teams[quitter]); }
+  else if(ts&&(reason==='time'||reason==='stuck'||reason==='oppQuit')) winner=H.bd.az.sc>H.bd.la.sc?'az':H.bd.la.sc>H.bd.az.sc?'la':null;
   const bs=Object.values(H.bd);
-  H.over={reason,winner,quitter:quitter||null,sc:H.bd.all?H.bd.all.sc:0,scs:{...H.scs},scT:ts?{az:H.bd.az.sc,la:H.bd.la.sc}:null,teams:ts?SH.cfg.teams:null,ptsBy:{...H.ptsBy},ids:SH.ids,
+  H.over={reason,winner,quitter:quitter||null,sc:H.bd.all?H.bd.all.sc:0,scs:{...H.scs},scT:ts?{az:H.bd.az.sc,la:H.bd.la.sc}:null,teams:ts?SH.cfg.teams:null,ptsBy:{...H.ptsBy},ids:SH.ids,tm:H.tmap?terrStr(H.tmap):null,
     lines:bs.reduce((s,b)=>s+b.eng.lines,0),combo:Math.max(...bs.map(b=>b.eng.maxCombo)),timeline:H.timeline};
   if(SH.hook&&SH.hook.onEnd) SH.hook.onEnd(H.over);
   if(reason!=='disc'&&!SH.cfg.solo) recordShared(H.over);
@@ -246,7 +251,7 @@ function versusRows(o){
   return rows;
 }
 function recordShared(o){
-  const label=TYPES[SH.type]+' · R'+SH.cfg.round;
+  const label=typeName(SH.cfg)+' · R'+SH.cfg.round;
   if(SH.type==='versus') recordMatch({type:'versus',label,date:Date.now(),rows:versusRows(o).map(r=>({n:nm(r.id,false),s:r.score,p:r.place,c:0,q:r.sub?1:0}))});
   else if(SH.type==='tsplit') recordMatch(teamRec('tsplit',label,o.teams,o.scT,o.winner,o.ptsBy,o.quitter));
   else if(SH.type==='camp') return;
@@ -330,7 +335,7 @@ function renderSharedStatus(t){
     { const tr=v.tr[me]||[], reg=regionOf(SH.type,me); VE.b=v.b; const rescue=SH.o.hold&&!tr.some(p=>p&&VE.anyFit(p,reg))&&!(v.hold&&VE.anyFit(v.hold,reg))&&holdRescue(tr,v.hold,true)&&(!isTurnType(SH.type)||v.turn===me);
       holdPulse(rescue); if(rescue){ st='Nenhuma peça cabe: guarde a peça!'; warn=true; } }
     if(SH.type==='tsplit'&&v.out&&v.out[bdKey(me)]){ st='Seu time ficou sem jogadas. Agora é torcer!'; warn=true; }
-    if(SH.type==='tsplit'){ const bl=bombLeft(v.b); if(bl!=null){ st=`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`; warn=bl<=1; } }
+    if(SH.type==='tsplit'){ const bl=bombLeft(v.b), tl=SH.o.terr?terrTintaLeft(v.b):null; if(bl!=null){ st=`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`; warn=bl<=1; } else if(tl!=null){ st=`🎨 Limpe a tinta em ${tl} jogada${tl>1?'s':''}!`; warn=tl<=1; } }
     if(v.hammer>0){ st=`🔨 Toque em ${v.hammer} bloco${v.hammer>1?'s':''} do seu tabuleiro para quebrar`; warn=false; }
     if(SH.hook&&SH.hook.status){ const h=SH.hook.status(v); if(h) { st=h.t; warn=!!h.w; } }
     if(SH.markMode) { st='Marcando: toque numa casa vazia ou arraste por uma linha/coluna'; warn=false; }
@@ -342,6 +347,7 @@ function renderShared(anim){
   const v=s.view, vs=s.type==='versus', me=s.me, reg=regionOf(s.type,me);
   const mks=!vs&&v.marks&&(v.marks.c.length||v.marks.r.length||v.marks.k.length)?v.marks:null, key=JSON.stringify(mks||0);
   MK=mks; if(key!==s.mkKey){ s.mkKey=key; bDirty=true; bReq(); }
+  if(s.o.terr&&v.tm) terrSetMap(terrDe(v.tm));
   renderBoard(v.b,s.o,s.pv,{region:reg});
   VE.b=v.b;
   if(vs){
@@ -358,7 +364,7 @@ function renderShared(anim){
   updateCombo(v.combo,v.since);
   renderSharedStatus(performance.now());
 }
-const SREASON={campwin:'Fase concluída!',campfail:'Não foi dessa vez',time:'Tempo esgotado',stuck:'Sem espaço',sudden:'O tempo da jogada acabou',goal:'Meta atingida',disc:'Conexão perdida'};
+const SREASON={terrWin:'O mapa ficou todo de uma cor!',terrTravou:'Um time ficou sem jogadas',campwin:'Fase concluída!',campfail:'Não foi dessa vez',time:'Tempo esgotado',stuck:'Sem espaço',sudden:'O tempo da jogada acabou',goal:'Meta atingida',disc:'Conexão perdida'};
 function sharedReason(info){ return info.reason==='oppQuit'?`${nm(info.quitter)} saiu da partida`:SREASON[info.reason]||'Fim'; }
 function sharedOver(info){
   const s=SH; if(!s||s.over) return;
@@ -369,7 +375,7 @@ function sharedOver(info){
   if(vs){ res=info.winner===s.me?'win':info.winner?'lose':'tie'; if(info.reason!=='disc'){ addNight(res); seriesAdd(info.winner); NET.lastWinner=info.winner; } }
   if(ts){ res=info.winner===myT?'win':info.winner?'lose':'tie'; if(info.reason!=='disc'){ addNight(res); seriesAdd(info.winner); } }
   if(!vs&&!ts) s.newBest=checkBest(s.type,s.o,info.sc)&&info.sc>0;
-  addHist({date:Date.now(),kind:s.type,label:TYPES[s.type]+' · '+PLAYS[s.o.play]+(s.ids.length>2?` · ${s.ids.length} jogadores`:''),code:'',score:vs?info.scs[s.me]:ts?(info.scT?info.scT[myT]:0):info.sc,lines:info.lines,combo:info.combo,result:res});
+  addHist({date:Date.now(),kind:s.type,label:typeName(s.cfg)+' · '+PLAYS[s.o.play]+(s.ids.length>2?` · ${s.ids.length} jogadores`:''),code:'',score:vs?info.scs[s.me]:ts?(info.scT?info.scT[myT]:0):info.sc,lines:info.lines,combo:info.combo,result:res});
   setTimeout(()=>{ if(SH!==s) return;
     praise(vs?(res==='win'?'Você venceu!':res==='lose'?`${nm(info.winner)} venceu`:'Empate'):ts?(res==='win'?'Seu time venceu!':res==='lose'?`${TEAM[info.winner].n} venceu`:'Empate'):sharedReason(info)); SFX.over();
     BC.dead();
@@ -387,7 +393,9 @@ function showSharedEnd(info){
     body+=seriesLine();
   } else if(s.type==='tsplit'){
     const myT=s.cfg.teams[me], res=info.winner===myT?'win':info.winner?'lose':'tie', sc=info.scT||{az:0,la:0};
-    body+=`<div class="winner ${res}">${res==='win'?'Seu time venceu!':res==='lose'?esc(TEAM[info.winner].n)+' venceu':'Empate'}</div>`+teamVsHTML(sc,info.teams,ids,info.ptsBy);
+    body+=`<div class="winner ${res}">${res==='win'?'Seu time venceu!':res==='lose'?esc(TEAM[info.winner].n)+' venceu':'Empate'}</div>`;
+    if(s.o.terr){ const tr=terrSplitTr(info); s.trr=tr; body=`<div class="winner ${res}">${res==='win'?'Seu time venceu!':res==='lose'?esc(caboLado(info.winner,info.teams,me))+' venceu':'Empate'}</div><p class="muted">${esc(terrPorque(tr,info.teams))}</p>`+terrMapHTML(terrDe(info.tm))+terrBarHTML('terrFim'); }
+    body+=teamVsHTML(sc,info.teams,ids,info.ptsBy);
     body+=statsHTML([[info.lines,'linhas'],[info.combo?'x'+info.combo:'0','maior combo'],[tl.length-1,'peças']]);
     body+=graphSVG([{tl:tl.map(x=>[x[0],x[1]||0]),color:TEAM.az.c,label:TEAM.az.n},{tl:tl.map(x=>[x[0],x[2]||0]),color:TEAM.la.c,label:TEAM.la.n}]);
     body+=seriesLine();
@@ -398,9 +406,10 @@ function showSharedEnd(info){
   }
   const btns=[];
   if(NET.open) btns.push(rematchBtn());
-  btns.push({t:'Compartilhar',on:()=>{ let t=`Duelo de Blocos · ${TYPES[s.type]}\n`+(s.type==='tsplit'?teamShareLine(info.teams,info.scT,info.ptsBy):vs?versusRows({...info,ids}).map(r=>`${r.place}º ${nm(r.id,false)} ${fmtN(r.score)}`).join(' · '):`${fmtN(info.sc)} pontos da ${teamWord()} (${ids.map(id=>nm(id,false)).join(', ')})`)+`\n${info.lines} linhas · combo x${info.combo}`; const l=gameLink(); if(l) t+='\n'+l; shareText(t); }});
+  btns.push({t:'Compartilhar',on:()=>{ let t=`Duelo de Blocos · ${typeName(s.cfg)}\n`+(s.type==='tsplit'?teamShareLine(info.teams,info.scT,info.ptsBy):vs?versusRows({...info,ids}).map(r=>`${r.place}º ${nm(r.id,false)} ${fmtN(r.score)}`).join(' · '):`${fmtN(info.sc)} pontos da ${teamWord()} (${ids.map(id=>nm(id,false)).join(', ')})`)+`\n${info.lines} linhas · combo x${info.combo}`; const l=gameLink(); if(l) t+='\n'+l; shareText(t); }});
   btns.push({t:NET.open?'Voltar à sala':'Menu',cls:'ghost',on:()=>{ if(NET.open) backToRoom(); else goHome(); }});
   openEnd(body,btns);
+  if(s.trr){ const f=$('#terrFim'); if(f){ f.classList.add('fim'); terrBarSet(f,s.trr.n,'az',caboLado('az',info.teams,me),caboLado('la',info.teams,me)); } }
 }
 
 function hasBlocks(str){ if(!str) return false; for(let i=0;i<str.length;i+=2) if(str[i]!=='.') return true; return false; }

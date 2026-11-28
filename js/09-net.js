@@ -2,7 +2,7 @@
 /* CONEXÃO WebRTC, QR, sala com vários jogadores, mensagens, resultados, abas da sala */
 /* ===================== CONEXÃO (WebRTC) ===================== */
 const IDS='ABCDEF', MAXP=6;
-const LIMITS={live:[2,6],coop:[2,4],halves:[2,4],versus:[2,4],tlive:[2,6],tsplit:[2,6],cabo:[2,6],terr:[2,6],camp:[1,4]};
+const LIMITS={live:[2,6],coop:[2,4],halves:[2,4],versus:[2,4],tlive:[2,6],tsplit:[2,6],cabo:[2,6],terr:[2,6],tterr:[2,6],camp:[1,4]};
 const NET={prof:{},role:null,open:false,session:'',round:0,peers:{},pend:null,link:null,players:[],names:{},daily:{},
   rematch:{me:false},rematchReq:new Set(),ser:{},lastWinner:null,lobby:{type:'live',opts:defOpts()},cur:null,match:null,room:{matches:[]}};
 function rawSend(dc,txt){ if(dc&&dc.readyState==='open'){ try{ dc.send(txt); }catch(e){} } }
@@ -392,7 +392,7 @@ function renderLobby(){
   $('#typeSeg').innerHTML=TYPE_GROUPS.map(([g,ks])=>`<div class="tgroup"><small>${g}</small><div class="seg tpics">${ks.map(k=>`<button type="button" data-k="${k}" class="${L.type===k?'sel':''}">${modePic(k,n,tc)}<span>${TYPES[k]}</span></button>`).join('')}</div></div>`).join('');
   if(host) $$('#typeSeg button').forEach(b=>b.addEventListener('click',()=>{ L.type=b.dataset.k; sendLobby(); renderLobby(); }));
   const [lo,hi]=LIMITS[L.type]; let warn=n<Math.max(2,lo)?'Chame mais alguém: precisa de pelo menos 2 jogadores.':n>hi?`${TYPES[L.type]} aceita até ${hi} jogadores.`:'';
-  if(!warn&&isTeamType(L.type)){ const T=teamsFinal(), c={az:0,la:0}; Object.values(T).forEach(k=>c[k]++); if(!c.az||!c.la) warn='Cada time precisa de pelo menos 1 jogador.'; else if(L.type==='tsplit'&&(c.az>3||c.la>3)) warn='No tabuleiro dividido, cada time pode ter até 3 jogadores.'; }
+  if(!warn&&isTeamType(L.type)){ const T=teamsFinal(), c={az:0,la:0}; Object.values(T).forEach(k=>c[k]++); if(!c.az||!c.la) warn='Cada time precisa de pelo menos 1 jogador.'; else if((L.type==='tsplit'||L.type==='tterr')&&(c.az>3||c.la>3)) warn='No tabuleiro dividido, cada time pode ter até 3 jogadores.'; }
   renderTeamBox();
   $('#typeHint').innerHTML=`<b>${esc(TYPES[L.type])}:</b> `+esc(TYPE_HINT[L.type])+(warn?`<br><b class="err">${esc(warn)}</b>`:'');
   /* aba Sala: o estilo que quem criou escolheu, com a explicação e (nos times) a escolha do time */
@@ -410,7 +410,7 @@ function renderLobby(){
   if(ms.length){ const {list}=roomStats(); $('#roomList').innerHTML=`<p class="muted">${ms.length} partida${ms.length>1?'s':''} nesta sala</p>`+list.slice(0,6).map((p,i)=>`<div class="kv"><span>${i+1}º ${esc(p.n)}</span><b>${p.w} V · ${fmtN(p.pts)}</b></div>`).join(''); }
 }
 /* abas da sala (Sala, Partida, Placar) e sub-abas da partida (Estilo, Regras/Fase, Modificadores — as opções "Conectados" ficam dentro de Modificadores) */
-const TYPE_GROUPS=[['Individual',['live','versus']],['Em times',['tlive','tsplit','cabo','terr']],['Cooperação',['coop','halves','camp']]];
+const TYPE_GROUPS=[['Individual',['live','versus']],['Em times',['tlive','tsplit','cabo','terr','tterr']],['Cooperação',['coop','halves','camp']]];
 /* Regras e Modificadores ficam juntos numa aba só (os modificadores em grupos que abrem e fecham) */
 const OPT_TABS=[['estilo','Estilo de jogo'],['fase','Fase'],['regras','Regras e modificadores']];
 let LTAB='partida', OTAB='estilo';
@@ -435,19 +435,19 @@ function hostStart(rematch){
   if(ids.length<lo||ids.length>hi){ toast(ids.length<lo?'Precisa de pelo menos 2 jogadores':`${TYPES[L.type]} aceita até ${hi} jogadores`); return; }
   NET.round++;
   let teams=null;
-  if(isTeamType(L.type)){ teams=teamsFinal(); const c={az:0,la:0}; Object.values(teams).forEach(k=>c[k]++); if(!c.az||!c.la){ toast('Cada time precisa de pelo menos 1 jogador'); NET.round--; return; } if(L.type==='tsplit'&&(c.az>3||c.la>3)){ toast('No tabuleiro dividido, até 3 por time'); NET.round--; return; } NET.teams=teams; sendRoster(); }
-  const size=L.type==='halves'&&ids.length>2?10:L.type==='tsplit'&&teams&&Math.max(...['az','la'].map(k=>Object.values(teams).filter(x=>x===k).length))===3?9:8;
-  const cfg={t:'cfg',type:L.type,opts:{...L.opts,cabo:L.type==='cabo',terr:L.type==='terr'},seed:'N|'+NET.session+'|'+NET.round,round:NET.round,newSeries:!rematch,hc:null,players:ids,size,teams};
+  if(isTeamType(L.type)){ teams=teamsFinal(); const c={az:0,la:0}; Object.values(teams).forEach(k=>c[k]++); if(!c.az||!c.la){ toast('Cada time precisa de pelo menos 1 jogador'); NET.round--; return; } if((L.type==='tsplit'||L.type==='tterr')&&(c.az>3||c.la>3)){ toast('No tabuleiro dividido, até 3 por time'); NET.round--; return; } NET.teams=teams; sendRoster(); }
+  const size=L.type==='halves'&&ids.length>2?10:(L.type==='tsplit'||L.type==='tterr')&&teams&&Math.max(...['az','la'].map(k=>Object.values(teams).filter(x=>x===k).length))===3?9:8;
+  const cfg={t:'cfg',type:L.type==='tterr'?'tsplit':L.type,opts:{...L.opts,cabo:L.type==='cabo',terr:L.type==='terr'||L.type==='tterr'},seed:'N|'+NET.session+'|'+NET.round,round:NET.round,newSeries:!rematch,hc:null,players:ids,size,teams};
   if(L.type==='camp'){ const w=L.w||1, ph=L.ph||1, def=CWD(w).phases[ph-1], st=campLoad('group'), k=ck(w,ph); st.att[k]=(st.att[k]||0)+1; campSave('group',st);
     cfg.opts=campOpts(def); cfg.size=ids.length>2&&def.setup!=='puzzle'?10:8; cfg.camp={w,ph,helps:campHelps(st),slot:'group',att:st.att[k]}; }
-  if(L.type==='cabo'||L.type==='terr'){ cfg.opts.goal=0; cfg.opts.handicap=false; }
+  if(L.type==='cabo'||L.type==='terr'||L.type==='tterr'){ cfg.opts.goal=0; cfg.opts.handicap=false; }
   if(!rematch) NET.ser={};
   if(L.type==='live'&&L.opts.handicap&&rematch&&NET.lastWinner) cfg.hc=NET.lastWinner;
   NET.cur=cfg; send(cfg); beginOnline(cfg);
 }
 function beginOnline(cfg){
   NET.rematch={me:false}; NET.rematchReq=new Set(); closeEnd(); $('#pauseOv').classList.remove('show');
-  NET.match={type:cfg.type==='tlive'||cfg.type==='cabo'||cfg.type==='terr'?'live':cfg.type,cabo:cfg.type==='cabo',terr:cfg.type==='terr',seed:cfg.seed,ids:cfg.players.slice(),infos:{},label:TYPES[cfg.type]+' · R'+cfg.round,done:false,teams:cfg.teams||null};
+  NET.match={type:cfg.type==='tlive'||cfg.type==='cabo'||cfg.type==='terr'?'live':cfg.type,cabo:cfg.type==='cabo',terr:cfg.type==='terr',seed:cfg.seed,ids:cfg.players.slice(),infos:{},label:typeName(cfg)+' · R'+cfg.round,done:false,teams:cfg.teams||null};
   if(cfg.type==='live'||cfg.type==='tlive'||cfg.type==='cabo'||cfg.type==='terr') startDuel({type:'live',opts:cfg.opts,seed:cfg.seed,label:TYPES[cfg.type]+' · R'+cfg.round,handicapMe:cfg.type==='live'&&cfg.hc===NET.role,players:cfg.players,teams:cfg.teams||null});
   else startShared(cfg);
 }

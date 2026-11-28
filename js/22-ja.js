@@ -1897,4 +1897,9 @@ const JA={
 "🏰 Território":"🏰 陣取り",
 "🏰 Território ·":"🏰 陣取り ·",
 "🏰 {} venceu!":"🏰 {}の勝ち！",
+"O Território com um tabuleiro por time, dividido em faixas (uma para cada jogador, até 3 por time), e um mapa igual nos dois tabuleiros. Limpou uma linha ou coluna: as casas neutras dela ficam da cor do seu time e as do outro time voltam a ser neutras. Ganha quem tiver mais casas quando o tempo acabar ou pintar o mapa inteiro. O time que ficar sem jogadas perde (quem trava espera o parceiro, que continua sozinho). Com Ataques, 3 linhas ou mais de uma vez mandam blindados e um bloco de tinta para o outro time.":"陣取りをチームごとの盤で。盤は列に分かれていて（1人1列、1チーム3人まで）、2つの盤に同じ地図があります。横か縦の列を消すと、その列の中立マスはあなたのチームの色になり、相手チームのマスは中立に戻ります。時間切れのときマスが多い方か、地図を全部ぬった方の勝ち。置けなくなったチームの負け（置けなくなった人は仲間を待ち、仲間は1人で続けます）。攻撃ありだと、一度に3列以上消すと相手チームにかたいブロックとペンキブロックを送ります。",
+"O mapa ficou todo de uma cor!":"地図が全部ひとつの色になった！",
+"Território no tabuleiro dividido":"分かれた盤の陣取り",
+"Um time ficou sem jogadas":"一方のチームが置けなくなった",
+"🎨 Bloco de tinta no {}!":"🎨 {}にペンキブロック！",
 };

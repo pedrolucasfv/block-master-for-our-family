@@ -12,7 +12,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 2 | 🤖 Supere o robô | P | Reaproveita o robô do duelo; é a base do robô treinador | Nível do robô; robô joga no aparelho ou no banco |
 | 3 | 🎓 Robô treinador | G | Melhorar o cérebro do robô (3 peças em todas as ordens), depois: aviso na hora → revisão no fim → erros mais comuns | Quando falar; quantas dicas 💡 |
 | 4 | 🪢 Cabo de guerra | ✅ feito (1.26) | Só uma regra nova em cima do duelo ao vivo; aquece para o Território | Ver se a ponta de 1.000 pontos está boa jogando de verdade |
-| 5 | 🏰 Território | ✅ feito (1.27), menos a dupla com tela dividida | Duelo ao vivo + mapa igual para todos + bloco de tinta | Formato dupla × dupla com tela dividida; combo/tabuleiro limpo pintarem algo a mais |
+| 5 | 🏰 Território | ✅ feito (1.27) | Duelo ao vivo + tabuleiro dividido + mapa igual para todos + bloco de tinta | Combo/tabuleiro limpo pintarem algo a mais |
 | 6 | 🥔 Batata quente na sala | M | Em cima do co-op em turnos do tabuleiro único | 1 ou 3 peças por vez; vidas |
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
@@ -145,7 +145,7 @@ Ver ao vivo a partida de alguém da família, **só se a pessoa deixar**.
 
 ---
 
-## 7. 🏰 Território ✅ feito na 1.27 (1×1 e times; falta a dupla com tela dividida)
+## 7. 🏰 Território ✅ feito na 1.27
 Cada um joga no **seu tabuleiro**, mas existe um **mapa de território igual em todos os tabuleiros** (o chão por baixo das peças, com as mesmas marcações em todos).
 
 **Formatos:**
@@ -176,8 +176,9 @@ Cada um joga no **seu tabuleiro**, mas existe um **mapa de território igual em 
 - Casa com bloco em cima mostra uma bolinha da cor do dono no canto; casa vazia fica com o chão colorido.
 - Meta de pontos e Handicap não valem no Território. Os pontos continuam contando (gráfico, placar), mas quem ganha é o mapa.
 
+- **Dupla com tela dividida:** estilo `tterr` da sala ("Território no tabuleiro dividido"), que vira um `tsplit` com `opts.terr`. Lá quem criou a sala já calcula tudo, então o mapa fica em `SH.H.tmap` e vai no `sync` (campo `tm`); a tinta vai junto com os blindados (o escudo do time bloqueia os dois). Quando um da dupla trava, o parceiro continua sozinho; o time inteiro travado perde na hora.
+
 **Ainda em aberto:**
-- Dupla com tela dividida contra dupla com tela dividida (um tabuleiro por dupla, em cima do `tsplit`).
 - Combo ou tabuleiro limpo pintam algo a mais?
 - O robô ainda não pensa no mapa (só joga bem); dava para ele preferir linhas que tomam casas.
 

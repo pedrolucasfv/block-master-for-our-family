@@ -45,7 +45,7 @@ function specBegin(cfg){
   SP.cfg=cfg; setForceSkin(cfg.type==='camp'?campSkin(cfg):null); setWorldLook(cfg.type==='camp'?(cfg.camp.w||1):null); SP.over=null; SP.view=null; SP.leader=null; SP.paused=false; SP.mode=(cfg.type==='live'||cfg.type==='tlive'||cfg.type==='cabo'||cfg.type==='terr')?'live':'shared'; SP.tmap=terrDe(''); SP.tfim=false;
   SP.pl={}; cfg.players.forEach(id=>SP.pl[id]={score:0,b:'',info:null});
   SP.start=performance.now()+(cfg.late?0:3200);
-  specAnn(null); specRender(); specAnn(`${TYPES[cfg.type]} · Rodada ${cfg.round}`);
+  specAnn(null); specRender(); specAnn(`${typeName(cfg)} · Rodada ${cfg.round}`);
   if(!SP.raf) SP.raf=requestAnimationFrame(specTick);
 }
 function specLeader(){
@@ -67,12 +67,14 @@ function specSync(m){
   const des=a=>{ const b=Array.from({length:n},()=>Array(n).fill(null)); (a||[]).forEach((v,i)=>{ if(v) b[(i/n)|0][i%n]={c:v[0],s:v[1]||null,cr:v[3]}; }); return b; };
   const prev=SP.view, bds={}; for(const k in (m.bds||{})){ const q=m.bds[k]; bds[k]={b:des(q.b),sc:q.sc,combo:q.combo,marks:q.marks}; }
   const my=bds.all||bds.az||{b:des([]),sc:0};
+  if(m.tm) SP.tmap=terrDe(m.tm); /* território no tabuleiro dividido: o mapa vem junto */
   SP.view={bds,b:my.b,sc:my.sc,scs:m.scs||{},turn:m.turn,ph:m.ph,stuck:m.stuck||{},out:m.out||{},combo:my.combo,marks:my.marks,rem:m.rem,at:performance.now(),paused:m.paused,cp:m.cp||null};
   if(m.ev&&(!prev||!prev.ev||prev.ev!==m.ev.id)){ SP.view.ev=m.ev.id; const e=m.ev;
     if(e.res.perfect) specAnn(`✨ PERFECT de ${nm(e.who)}!`,e.who); else if(e.pwf&&e.pwf.length){ const q=e.pwf[0]; specAnn(`${PWI[q.k]} ${PWN[q.k]}${q.blocked?' bloqueado pelo escudo':''} · ${nm(e.who)}`,e.who); } else if(e.atk) specAnn(`💥 ${nm(e.who)} atacou o ${TEAM[e.atk.to].n}! +${e.atk.n} blindados`,e.who); else if(e.res.n>=3) specAnn(`🧹 ${nm(e.who)} limpou ${e.res.n} linhas!`,e.who); }
   else if(prev) SP.view.ev=prev.ev;
   if(m.over&&!SP.over){ SP.over=m.over; const vs=SP.cfg.type==='versus';
-    if(SP.cfg.type==='tsplit'){ const w=m.over.winner, sc=m.over.scT||{az:0,la:0}; specPodium(null,w?`${TEAM[w].e} ${TEAM[w].n} venceu!`:'Empate!',`${TEAM.az.n} ${fmtN(sc.az)} × ${fmtN(sc.la)} ${TEAM.la.n}`); }
+    if(SP.cfg.type==='tsplit'&&SP.cfg.opts.terr){ const w=m.over.winner; specPodium(null,w?`🏰 ${caboLado(w,SP.cfg.teams)} venceu!`:'Empate!',terrPorque(terrSplitTr(m.over),SP.cfg.teams)); }
+    else if(SP.cfg.type==='tsplit'){ const w=m.over.winner, sc=m.over.scT||{az:0,la:0}; specPodium(null,w?`${TEAM[w].e} ${TEAM[w].n} venceu!`:'Empate!',`${TEAM.az.n} ${fmtN(sc.az)} × ${fmtN(sc.la)} ${TEAM.la.n}`); }
     else if(SP.cfg.type==='camp'){ specPodium(null,m.over.win?'Fase concluída! '+'⭐'.repeat(m.over.stars||1):'Não foi dessa vez',m.over.msg||''); }
     else if(vs) specPodium(versusRows({...m.over,ids:m.over.ids||SP.cfg.players}));
     else specPodium(null,`${fmtN(m.over.sc)} pontos da equipe`,sharedReason(m.over)); }
@@ -107,7 +109,7 @@ function specDraw(cv,b,n,o={}){
 function specRender(){
   if(!$('#spec').classList.contains('active')) return;
   const body=$('#spBody'), n=NET.players.length;
-  $('#spTitle').textContent=SP.mode==='lobby'?'Sala conectada':`${TYPES[SP.cfg.type]} · R${SP.cfg.round}`;
+  $('#spTitle').textContent=SP.mode==='lobby'?'Sala conectada':`${typeName(SP.cfg)} · R${SP.cfg.round}`;
   $('#spSub').textContent=`${n} jogador${n>1?'es':''} · espectador`;
   if(SP.mode==='lobby'){
     $('#spTimer').textContent='';
@@ -165,7 +167,8 @@ function specPaint(){
   } else if(SP.view&&SP.cfg.type==='tsplit'){
     const v=SP.view, T=SP.cfg.teams, ids=SP.cfg.players;
     ['az','la'].forEach(k=>{ const B=v.bds[k]; if(!B) return; specDraw($('#spB_'+k),B.b,SP.cfg.size||8,{marks:B.marks}); $('#spSc_'+k).textContent=fmtN(B.sc||0); $('#spSt_'+k).textContent=v.out&&v.out[k]?'sem jogadas':(B.combo>=2?'🔥 combo x'+B.combo:''); });
-    if(rank) rank.innerHTML='<h2>Jogadores</h2>'+ids.map(id=>`<div class="kv"><span>${TEAM[T[id]].e} ${avatarHTML(id,24)}${esc(nm(id))}</span><b>${v.stuck&&v.stuck[id]?'<small class="muted">sem jogada</small>':''}</b></div>`).join('');
+    if(rank) rank.innerHTML=(SP.cfg.opts.terr?`<h2>🏰 Território</h2>${terrMapHTML(SP.tmap)}${terrBarHTML('spTerr')}`:'')+'<h2>Jogadores</h2>'+ids.map(id=>`<div class="kv"><span>${TEAM[T[id]].e} ${avatarHTML(id,24)}${esc(nm(id))}</span><b>${v.stuck&&v.stuck[id]?'<small class="muted">sem jogada</small>':''}</b></div>`).join('');
+    if(SP.cfg.opts.terr) terrBarSet($('#spTerr'),terrConta(SP.tmap),'az',caboLado('az',T),caboLado('la',T));
   } else if(SP.view){
     const v=SP.view, cfg=SP.cfg, vs=cfg.type==='versus', ids=cfg.players;
     let reg=null; if(cfg.type==='halves'){ /* mostra as divisões sem escurecer nenhuma */ }

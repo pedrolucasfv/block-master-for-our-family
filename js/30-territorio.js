@@ -6,7 +6,7 @@
 let TERR={seed:'',v:0,fim:false};
 const terrOn=()=>!!(D&&D.live&&D.o.terr&&D.teams);
 function terrStr(m){ return (m||[]).map(k=>k==='az'?'a':k==='la'?'l':'.').join(''); }
-function terrDe(s){ return Array.from({length:64},(_,i)=>s&&s[i]==='a'?'az':s&&s[i]==='l'?'la':''); }
+function terrDe(s){ return Array.from({length:s?s.length:N*N},(_,i)=>s&&s[i]==='a'?'az':s&&s[i]==='l'?'la':''); }
 function terrConta(m){ const n={az:0,la:0,ne:0}; (m||[]).forEach(k=>{ if(k==='az'||k==='la') n[k]++; else n.ne++; }); return n; }
 function terrInicio(seed){ TERR={seed,v:0,fim:false}; TMAP=Array(N*N).fill(''); TMAPT=Array(N*N).fill(0); }
 /* regra do mapa: a linha limpa pinta as casas neutras com a sua cor e tira a cor do outro lado (volta a neutra); a tinta pinta direto */
@@ -87,7 +87,7 @@ function terrPorque(tr,teams){
 /* barra com as casas de cada lado (esq = time que fica à esquerda) */
 function terrBarHTML(id){ return `<div class="terr"${id?` id="${id}"`:''}><div class="terrlbl"><span class="tl"></span><small class="tt"></small><span class="tr"></span></div><div class="terrtrk"><i class="terre"></i><i class="terrd"></i></div></div>`; }
 function terrBarSet(el,n,esq,lblE,lblD){
-  if(!el) return; const dir=otherTeam(esq), tot=N*N;
+  if(!el) return; const dir=otherTeam(esq), tot=n.az+n.la+n.ne;
   el.style.setProperty('--ce',TEAM[esq].c); el.style.setProperty('--cd',TEAM[dir].c);
   el.querySelector('.terre').style.width=(n[esq]/tot*100).toFixed(1)+'%'; el.querySelector('.terrd').style.width=(n[dir]/tot*100).toFixed(1)+'%';
   el.querySelector('.tl').textContent=`${lblE} ${n[esq]}`; el.querySelector('.tr').textContent=`${n[dir]} ${lblD}`;
@@ -95,11 +95,12 @@ function terrBarSet(el,n,esq,lblE,lblD){
 }
 /* barra no jogo (o seu lado fica à esquerda) */
 function terrRender(){
-  const el=$('#terr'); if(!el) return; const on=terrOn(); el.hidden=!on; if(!on) return;
-  terrBarSet(el,terrConta(TMAP),D.myTeam,caboLado(D.myTeam,D.teams,NET.role),caboLado(otherTeam(D.myTeam),D.teams,NET.role));
+  const el=$('#terr'); if(!el) return; const sp=terrSplit(), on=terrOn()||sp; el.hidden=!on; if(!on) return;
+  const teams=sp?SH.cfg.teams:D.teams, me=sp?SH.me:NET.role, my=teams[me];
+  terrBarSet(el,terrConta(TMAP),my,caboLado(my,teams,me),caboLado(otherTeam(my),teams,me));
 }
 /* o mapa em miniatura (placar final e TV) */
-function terrMapHTML(m,id){ return `<div class="tmapa"${id?` id="${id}"`:''}>${(m||terrDe('')).map(k=>`<i${k?` style="background:${TEAM[k].c}"`:''}></i>`).join('')}</div>`; }
+function terrMapHTML(m,id){ m=m||terrDe(''); return `<div class="tmapa"${id?` id="${id}"`:''} style="grid-template-columns:repeat(${Math.round(Math.sqrt(m.length))},1fr)">${m.map(k=>`<i${k?` style="background:${TEAM[k].c}"`:''}></i>`).join('')}</div>`; }
 /* placar final do Território (o que vai no showDuelEnd) */
 function terrEndBody(d,i,stats,btns){
   const final=NET.role==='A'||!!d.cfg.npc||TERR.fim;
@@ -121,3 +122,31 @@ function terrEndBody(d,i,stats,btns){
   return body;
 }
 function terrEndBar(d){ if(!d.trr) return; const f=$('#terrFim'); if(f){ f.classList.add('fim'); terrBarSet(f,d.trr.n,'az',caboLado('az',d.teams,NET.role),caboLado('la',d.teams,NET.role)); } } /* Azul à esquerda, como o placar logo abaixo */
+
+/* ----- Território no tabuleiro dividido dos times (dupla × dupla, até 3 por time) -----
+   Na sala é o tipo 'tterr', que vira um tsplit com opts.terr. Lá quem criou a sala já calcula tudo (SH.H): o mapa fica em H.tmap
+   e vai no 'sync' (campo tm, em texto). Cada aparelho desenha o que chega (terrSetMap no renderShared). */
+const terrSplit=()=>!!(SH&&SH.type==='tsplit'&&SH.o.terr);
+/* quem criou a sala, depois de cada peça no tabuleiro do time k; devolve o time que pintou o mapa inteiro (ou null) */
+function terrSplitPlace(H,k,res,eng){
+  if(res.n) terrAplica(H.tmap,{k,r:[...new Set(res.rowsC)],c:[...new Set(res.colsC)]});
+  terrTickTinta(eng).forEach(t=>{ terrAplica(H.tmap,{k:t.k,p:t.p}); (H.ev.tboom=H.ev.tboom||[]).push({k,i:t.i,by:t.k}); });
+  if(SH.o.attacks&&res.n>=3&&!H.ev.blocked){ const ot=otherTeam(k), i=terrPoeTinta(H.bd[ot].eng,k); if(i>=0) H.ev.tinta={to:ot,cells:[i]}; }
+  const n=terrConta(H.tmap); return n.az===N*N?'az':n.la===N*N?'la':null;
+}
+/* fim por tempo ou com os dois times travados: ganha quem tem mais casas */
+function terrSplitWinner(H){ const n=terrConta(H.tmap); return n.az>n.la?'az':n.la>n.az?'la':null; }
+/* o mapa que chegou (ou o de quem criou): pisca as casas que mudaram */
+function terrSetMap(nv){
+  if(!TMAP||TMAP.length!==nv.length){ TMAP=nv; TMAPT=Array(nv.length).fill(0); bDirty=true; bReq(); terrRender(); return; }
+  const t=performance.now(); let mud=false; for(let i=0;i<nv.length;i++) if(TMAP[i]!==nv[i]){ TMAP[i]=nv[i]; TMAPT[i]=t; mud=true; }
+  if(mud){ bDirty=true; bReq(); terrRender(); }
+}
+/* avisos de tinta na tela de cada um (mk = o tabuleiro do meu time) */
+function terrSplitEv(ev,mk){
+  if(ev.tinta){ if(ev.tinta.to===mk){ showAttacker(ev.who,`${nm(ev.who)} jogou um bloco de tinta!`); setTimeout(()=>BC.drop(ev.tinta.cells),0); toast('🎨 Bloco de tinta! Limpe a linha ou coluna dele em 3 jogadas, senão ele pinta o mapa em volta'); }
+    else if(ev.k===mk) toast(`🎨 Bloco de tinta no ${TEAM[ev.tinta.to].n}!`); }
+  (ev.tboom||[]).forEach(t=>{ if(t.k!==mk) return; spawnExplosion(t.i,0); SFX.boom(); toast(t.by===mk?'🎨 A tinta explodiu e pintou o mapa com a sua cor!':'🎨 A tinta explodiu: o mapa em volta ficou da cor do outro lado'); });
+}
+/* o resultado do tabuleiro dividido no formato do terrPorque */
+function terrSplitTr(info){ return {winner:info.winner,why:info.reason==='terrWin'?'terrWin':info.reason==='terrTravou'?'terrTravou':info.reason==='oppQuit'?'terrSaiu':'terrMais',n:terrConta(terrDe(info.tm))}; }
