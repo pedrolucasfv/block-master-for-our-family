@@ -17,7 +17,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
 | — | ✨ Animação própria de cada bloco ao limpar | ✅ feito (1.28–1.30) | Todos os blocos têm a sua (as antigas refeitas no mesmo nível na 1.30); ajustes vão em 1.x.y. Ver seção "Animações dos blocos" | Efeito de linha inteira |
-| — | 🔊 Som próprio de cada animação de linha | M | Combina com as animações da 1.28–1.30. Ver seção "Sons das animações" | Somar ou trocar a kalimba; botão próprio ou junto com "Animação ao fazer linha" |
+| — | 🔊 Som próprio de cada animação de linha | ✅ feito (1.31) | Troca a kalimba; botão "Som das animações"; toca ao escolher o tema. Ver seção "Sons das animações" | Ajustar cada som ouvindo no celular (1.31.y) |
 | — | 🗺️ Mundos novos da campanha | G | Para bem depois | Quais mundos primeiro |
 | — | 🕵️ Impostor | ? | Só se ficar legal depois de refinar | Quase tudo |
 
@@ -280,8 +280,8 @@ Falta decidir: se a linha inteira ganha um efeito de grupo (revoada, corte únic
 
 ---
 
-## 🔊 Sons das animações (ao limpar linha/coluna) 💭
-Cada bloco ganha um som que acompanha a sua animação (seção acima). Ainda não feito: rascunho para começar.
+## 🔊 Sons das animações (ao limpar linha/coluna) ✅ feito (1.31)
+Cada bloco ganha um som que acompanha a sua animação (seção acima). Feito na 1.31: `CLR_SOM` (um por tema) e `clrSomToca` em `js/04-audio.js`, chamado pelo `SFX.clear` (uma vez por jogada, no lugar da kalimba). A tabela abaixo foi o rascunho seguido.
 
 **Como é hoje:** tudo é som sintetizado na hora (sem arquivo, funciona offline) em `js/04-audio.js`, com os ajudantes `osc`, `nz` (ruído com filtro), `bell`, `pad`, `glitter`, `impact`, `playBuf(TIK()/TOK()/WOOD())`. A linha/coluna toca `SFX.clear(combo,lines,chain)`: kalimba (uma nota a mais por linha extra) e, do combo x2 em diante, os "Mil pianos". As animações ficam no `06-board.js` (`spawnClear` → `CLR_SKIN[tema]`), e `spawnClear` é chamado **uma vez por casa** (8 a 16 vezes numa jogada).
 
@@ -309,7 +309,7 @@ Cada bloco ganha um som que acompanha a sua animação (seção acima). Ainda n�
 | 🍉 Frutinhas | "plop" do canudo espetando, "slurp" de canudinho borbulhando, chupada seca no fim | ~240 / 240–890 / ~890 |
 | 🎂 Bolo | fósforo acendendo, "nhac" das três mordidas juntas, sopro "fff", "plim" do granulado | 0–160 / 300 / 500 / 620 |
 
-**Falta decidir:**
-- O som do bloco **soma** com a kalimba (sugestão: soma, um pouco mais baixo) ou **troca** a kalimba quando a animação está ligada.
-- Botão próprio ("Som das animações") ou junto com "Animação ao fazer linha".
-- Testar no "Teste das vozes" (Configurações) com um botão para ouvir o som de cada bloco.
+**Decidido (28/11/2026):**
+- O som do bloco **troca** a kalimba: com o som das animações ligado, a linha/coluna toca só o som do bloco. Do combo x2 em diante os "Mil pianos" continuam por cima (eles dizem o combo). Para não perder a dica de quantas linhas, o som do bloco fica um pouco mais agudo a cada linha extra.
+- **Botão próprio** "Som das animações" nas Configurações, ligado por padrão (`SET.clrSom`). Só vale com "Animação ao fazer linha" ligado e sem Modo leve; senão volta a kalimba.
+- Para ouvir: **tocar no tema** das peças nas Configurações toca o som dele (sem botões novos no "Teste das vozes").

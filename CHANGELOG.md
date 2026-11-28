@@ -3,6 +3,10 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.31 · 28/11/2026
+- 🔊 **Cada bloco com o seu som:** ao fazer linha, o bloco toca um som que combina com a animação dele, no lugar da kalimba: a joaninha abre o casco e sai zumbindo, o ursinho dá duas mordidas e sai correndo, o bambu é cortado pela espada, o bolo tem fósforo, mordida e sopro… Quanto mais linhas de uma vez, mais agudo. Nos combos os pianos continuam tocando por cima.
+- ⚙️ **Som das animações:** botão novo nas Configurações, em Desempenho, para voltar à kalimba. O som do bloco só toca com a "Animação ao fazer linha" ligada. Para ouvir, toque no tema das peças nas Configurações.
+
 ## 1.30.2 · 28/11/2026
 - ⚙️ **Desligar a animação de linha:** nas Configurações, em Desempenho, o novo botão "Animação ao fazer linha" tira só a animação de cada bloco quando a linha ou coluna some (fica a animação simples) e mantém o resto dos efeitos.
 - 🍉 **Frutinhas mais leve:** a animação do canudinho ficou mais curta e pesa menos no celular quando você joga rápido.

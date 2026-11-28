@@ -267,9 +267,9 @@ function renderSettings(){
   $$('#skinSeg button').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.k; if(b.classList.contains('locked')){ toast('🔒 '+(SKIN_LOCK[k]||'Tema bloqueado')); return; }
     /* tocar de novo no tema escolhido troca entre o normal e o dourado (se já ganhou o dourado) */
     if(baseSkin(SET.skin)===k&&hasGold(k)) SET.skin=isGold(SET.skin)?k:k+'Gold'; else SET.skin=k;
-    saveSet(); applyLook(); renderSettings(); }));
+    saveSet(); applyLook(); renderSettings(); clrSomTeste(); }));
   skinPreviews();
-  $('#tAuto').classList.toggle('on',SET.autoSkin); $('#tLite').classList.toggle('on',SET.lite); $('#tClrAnim').classList.toggle('on',SET.clrAnim!==false);
+  $('#tAuto').classList.toggle('on',SET.autoSkin); $('#tLite').classList.toggle('on',SET.lite); $('#tClrAnim').classList.toggle('on',SET.clrAnim!==false); $('#tClrSom').classList.toggle('on',SET.clrSom!==false);
   const VM={std:'Voz padrão',mine:'Voz personalizada',off:'Sem voz'};
   $('#voiceSeg').innerHTML=Object.keys(VM).map(k=>`<button type="button" data-k="${k}" class="${SET.voiceMode===k?'sel':''}">${VM[k]}</button>`).join('');
   $$('#voiceSeg button').forEach(b=>b.addEventListener('click',async()=>{ SET.voiceMode=b.dataset.k; saveSet(); renderSettings(); if(SET.voiceMode!=='off'){ ac(); await loadVoices(); await loadPadrao(); } }));
@@ -345,6 +345,7 @@ async function toggleRec(w){
 $('#tAuto').addEventListener('click',()=>{ SET.autoSkin=!SET.autoSkin; saveSet(); renderSettings(); });
 $('#tLite').addEventListener('click',()=>{ SET.lite=!SET.lite; saveSet(); applyLook(); renderSettings(); });
 $('#tClrAnim').addEventListener('click',()=>{ SET.clrAnim=SET.clrAnim===false; saveSet(); renderSettings(); });
+$('#tClrSom').addEventListener('click',()=>{ SET.clrSom=SET.clrSom===false; saveSet(); renderSettings(); if(SET.clrSom) clrSomTeste(); });
 /* configurações abertas de qualquer lugar (início, sala conectada, pausa) e voltam para onde estavam */
 let setFrom='home';
 function openSettings(from){ setFrom=from; renderSettings(); show('settings'); }

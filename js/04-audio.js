@@ -270,15 +270,67 @@ function prepareChosen(){
 function kalimbaHit(n,t){ const seq=[72,76,79,84,88];
   if(!REC.kal){ for(let i=0;i<n+1;i++) bell(mtof(seq[i]),t+i*.08,.6,.12,.3,(i%2?.3:-.3)); return; }
   for(let i=0;i<n+1;i++) playBuf(REC.kal,t+i*.08,.55,mtof(seq[i])/523.25,.3,(i%2?.3:-.3)); }
+/* ===================== som de cada bloco ao fazer linha =====================
+   Acompanha a animação do bloco (CLR_SKIN no 06-board.js; os tempos são os da animação, em segundos desde o começo).
+   Com ele ligado, toca no lugar da kalimba; p sobe um pouco a cada linha extra (para ainda dar para ouvir quantas foram). */
+/* oscilador com vibrato (lfo em Hz, vib = quanto balança em Hz) e filtro passa-baixa opcional */
+function oscV(type,f0,f1,t,dur,peak,att,lfo,vib,lp=0,wet=0,pan=0){
+  if(muted) return; const a=bus(); if(!a) return;
+  const o=a.createOscillator(), g=a.createGain(); o.type=type; o.frequency.setValueAtTime(f0,t); if(f1) o.frequency.exponentialRampToValueAtTime(f1,t+att+dur);
+  const l=a.createOscillator(), lg=a.createGain(); l.frequency.value=lfo; lg.gain.value=vib; l.connect(lg); lg.connect(o.frequency);
+  env(g,t,peak,att,dur); let src=o; if(lp){ const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp; o.connect(f); src=f; }
+  src.connect(g); let out=g; if(pan&&a.createStereoPanner){ const pn=a.createStereoPanner(); pn.pan.value=pan; g.connect(pn); out=pn; }
+  out.connect(master); wetSend(a,out,wet); [o,l].forEach(n=>{ n.start(t); n.stop(t+att+dur+.05); });
+}
+const somRnd=(a,b)=>a+Math.random()*(b-a);
+function somMordida(t,v){ nz(t,.05,.22*v,'bandpass',1700,1.4,.04,.003); osc('sine',320,140,t,.05,.16*v,.003); nz(t+.02,.06,.08*v,'lowpass',700,.6,0,.004); }
+const CLR_SOM={
+  bug(t,p){ playBuf(TIK(),t+.15,.45,1.35*p,.05); osc('sine',1500*p,800*p,t+.15,.04,.12,.002);
+    oscV('sawtooth',170*p,380*p,t+.2,.75,.045,.12,42,28,1800,.1); oscV('triangle',340*p,760*p,t+.2,.75,.03,.12,42,40,0,.1); },
+  robot(t,p){ osc('square',1250*p,0,t,.05,.09,.003); osc('square',1250*p,0,t+.13,.05,.09,.003);
+    osc('sawtooth',180*p,1500*p,t+.26,.4,.05,.03,.15); osc('sine',360*p,2400*p,t+.26,.4,.06,.03,.2);
+    [2093,2637,3136].forEach((f,i)=>bell(f*p,t+.34+i*.1,.4,.05,.25,(i-1)*.4)); },
+  bamboo(t,p){ nz(t,.16,.16,'highpass',4200,.7,.3,.004,9000); bell(1760*p,t+.02,.6,.07,.4); bell(2637*p,t+.03,.5,.035,.4);
+    playBuf(WOOD(),t+.4,.65,.5*p,.15); nz(t+.46,.4,.035,'bandpass',3200,2.5,.2,.08,2000); },
+  sushi(t,p){ playBuf(TIK(),t+.28,.45,1.5*p,.04,-.2); playBuf(TIK(),t+.36,.4,1.65*p,.04,.2);
+    osc('sine',600*p,1900*p,t+.42,.42,.07,.05,.2); nz(t+.42,.4,.03,'bandpass',1500,1.2,.1,.08,4000); },
+  lantern(t,p){ bell(196*p,t+.1,1.6,.11,.6); bell(392*p,t+.1,1.2,.04,.6); osc('sine',98*p,95*p,t+.1,1.3,.07,.01,.4);
+    nz(t+.2,1.1,.03,'bandpass',700,.8,.5,.4,2200); },
+  bear(t,p){ somMordida(t,1); somMordida(t+.21,.9); nz(t+.42,.24,.13,'lowpass',900,.6,.2,.005);
+    let tt=t+.48; for(let k=0;k<8;k++){ playBuf(TOK(),tt,.32*(1-k/9),(1.1+k*.03)*p,.03,(k/7)*.9-.2); tt+=.11-k*.009; } },
+  jelly(t,p){ for(let k=0;k<6;k++) nz(t+k*.048+somRnd(0,.02),.03,.16,'bandpass',somRnd(2400,5200),1.2,.05,.002);
+    oscV('sine',900*p,2300*p,t+.3,.36,.1,.03,14,30,0,.2); bell(2093*p,t+.68,.6,.07,.4); bell(3136*p,t+.72,.5,.035,.4); },
+  classic(t,p){ [0,.11,.22].forEach(d=>osc('square',880*p,0,t+d,.05,.11,.003));
+    [1568,1319,1047,784,659,523].forEach((f,i)=>osc('square',f*p,0,t+.33+i*.09,.07,.085,.003)); },
+  velvet(t,p){ nz(t+.1,.5,.2,'bandpass',1300,.6,.25,.15,600); glitter(t+.4,.9,.06);
+    [3136,3951,4699].forEach((f,i)=>bell(f*p,t+.5+i*.22,.5,.06,.5,(i-1)*.5)); },
+  crochet(t,p){ for(let k=0;k<4;k++) nz(t+k*.18,.11,.5,'bandpass',1400*p,2,.1,.01,4200*p); },
+  brick(t,p){ nz(t+.1,.05,.22,'highpass',2500,.7,.1,.001); playBuf(WOOD(),t+.1,.35,.4*p,.1);
+    for(let k=0;k<4;k++){ const tt=t+.2+k*.12+somRnd(0,.03); osc('sine',(115-k*10)*p,45,tt,.16,.16,.003,.06); nz(tt,.08,.07,'lowpass',500,.6,0,.003); }
+    nz(t+.25,.45,.05,'bandpass',3500,.6,.15,.05); },
+  fruit(t,p){ osc('sine',380*p,950*p,t+.24,.05,.14,.003,.05); nz(t+.3,.58,.1,'bandpass',900,2,.1,.1,1800);
+    for(let k=0;k<9;k++) osc('sine',somRnd(450,900)*p,somRnd(900,1400)*p,t+.3+k*.065,.03,.05,.003,.05); nz(t+.89,.12,.1,'bandpass',1300,2,.05,.01,600); },
+  candy(t,p){ nz(t,.14,.12,'highpass',3200,.7,.1,.002,1500); nz(t+.05,.14,.06,'bandpass',600,.8,.1,.02);
+    somMordida(t+.3,1); nz(t+.5,.18,.09,'bandpass',900,.6,.15,.04,500); bell(2349*p,t+.62,.5,.07,.4); bell(3136*p,t+.68,.4,.04,.4); }
+};
+let clrSomUlt=0;
+/* toca o som do bloco do tema atual, se estiver ligado (devolve false para a kalimba tocar no lugar) */
+function clrSomToca(n,t){
+  const f=CLR_SOM[baseSkin(effSkin())]; if(!f||SET.clrSom===false||SET.clrAnim===false||SET.lite) return false;
+  const agora=performance.now(); if(agora-clrSomUlt<120) return true; clrSomUlt=agora;
+  if(!muted) f(t,1+.07*(Math.max(1,Math.min(4,n))-1)); return true;
+}
+/* nas Configurações: ao escolher o tema das peças, toca o som dele */
+function clrSomTeste(){ if(muted) return; ac(); clrSomUlt=0; clrSomToca(1,now()+.02); }
 const SFX={
   pick(){ const t=now(); playBuf(TOK(),t,.9,.97+Math.random()*.06,.04); },
   place(){ const t=now(); playBuf(TIK(),t,.75,.96+Math.random()*.08,.05); osc('sine',150,70,t,.09,.45,.002,.03); },
   back(){ const t=now(); playBuf(TIK(),t,.35,.7,.05); playBuf(TOK(),t+.05,.3,.8,.05); },
-  /* linha/coluna: kalimba (uma nota a mais por linha extra); do combo x2 em diante entram os "Mil pianos" por cima */
+  /* linha/coluna: som do bloco (CLR_SOM) ou kalimba (uma nota a mais por linha extra); do combo x2 em diante entram os "Mil pianos" por cima */
   clear(combo=1,lines=1,chain=1){
     const t=now(); if(!t) return;
     const n=Math.max(1,Math.min(4,lines)), lvl=Math.min(10,combo+(chain-1));
-    kalimbaHit(n,t);
+    if(!clrSomToca(n,t)) kalimbaHit(n,t);
     if(lvl>=2){ const b=REC.piano[lvl]||REC.piano[Math.max(2,...Object.keys(REC.piano).map(Number).filter(k=>k<=lvl))];
       if(b) playBuf(b,t,.95,1,0); else impact(Math.min(8,lvl)); }
   },

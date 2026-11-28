@@ -570,6 +570,8 @@ const JA={
 "Modo espectador":"観戦モード",
 "Modo leve":"軽量モード",
 "Animação ao fazer linha":"ライン消しのアニメーション",
+"Som das animações":"アニメーションの音",
+"cada bloco tem o seu som ao fazer linha, no lugar da kalimba (só com a animação ligada). Toque no tema das peças para ouvir":"ラインを消すと、カリンバの代わりにブロックごとの音が鳴ります（アニメーションがオンのときだけ）。ピースのテーマをタップすると聞けます",
 "cada bloco some do seu jeito (a joaninha voa, o bolo é mordido…); desligue se ficar lento ao jogar rápido":"ブロックごとに消え方がちがいます（てんとう虫は飛び、ケーキはかじられる…）。速く置くと重いときはオフに",
 "Modo teste desligado":"テストモード オフ",
 "Moedas da sorte":"幸運のコイン",
