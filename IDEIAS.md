@@ -16,6 +16,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 6 | 🥔 Batata quente na sala | M | Em cima do co-op em turnos do tabuleiro único | 1 ou 3 peças por vez; vidas |
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
+| — | ✨ Animação própria de cada bloco ao limpar | P cada | Uma versão por bloco; Joaninha ✅ (1.28). Ver seção "Animações dos blocos" | Sushi (hashi ou peixe nadando); Japão (lanterna ou tsuru); efeito de linha inteira |
 | — | 🗺️ Mundos novos da campanha | G | Para bem depois | Quais mundos primeiro |
 | — | 🕵️ Impostor | ? | Só se ficar legal depois de refinar | Quase tudo |
 
@@ -253,3 +254,24 @@ Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga
 - **Combo de dupla:** o combo do time só continua se os dois limparem linhas um depois do outro (revezando).
 - **Rebater ataque:** quando chega um ataque, você tem 3 s para limpar uma linha e mandar de volta.
 - **Tesouro escondido:** antes de começar, cada um esconde 3 tesouros no mapa; limpar a linha onde está um tesouro do rival rouba o tesouro.
+
+
+---
+
+## ✨ Animações dos blocos (ao limpar linha/coluna)
+Cada bloco com uma animação própria, como o crochê desfiando. Tudo desenhado no canvas único por cima do tabuleiro (`CLR`, `clrAdd` no `06-board.js`: cada tema só tem um `xxxAdd` + `xxxDraw(x,it,e)`); com "aparelho fraco" fica a animação simples. Os dourados usam a do tema de origem (`baseSkin`).
+
+Já tinham: Pelúcia (estufa e sobe), Crochê (desfia), Tijolinhos (racha em 4), Frutinhas (amassa e espirra), Bolo (racha e solta granulado).
+
+| Bloco | Ideia | Situação |
+|---|---|---|
+| 🐞 Joaninha | Abre o casco, bate as asinhas e sai voando em zigue-zague para fora (`bugAdd`/`bugDraw`) | ✅ 1.28 |
+| 🤖 Robô | Olhos piscam vermelho, some em faixas (teletransporte), parafusos saltam | 💭 |
+| 🎋 Bambu | Corte de espada em diagonal; a metade de cima escorrega e caem folhinhas | 💭 |
+| 🍣 Sushi | Hashis descem e levam o sushi (ou o peixe pula do arroz e nada) | 💭 decidir |
+| 🐻 Ursinho | Pisca, pulinho com achatar/esticar, sai pulando pela borda mais perto | 💭 |
+| 🍬 Bala | As pontas do papel giram e abrem, a bala gira como pião e some com brilho | 💭 |
+| ⛩️ Japão | Vira lanterna que sobe balançando (ou dobra num tsuru e voa) | 💭 decidir |
+| 🟥 Clássico | Pisca 3 vezes (fliperama) e se desfaz em quadradinhos | 💭 |
+
+Falta decidir: se a linha inteira ganha um efeito de grupo (revoada, corte único, ola).

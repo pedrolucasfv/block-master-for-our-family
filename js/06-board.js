@@ -242,28 +242,40 @@ function spawnExplosion(i,delay){
 /* direção de cada casa limpa: 'h' se a linha inteira saiu, 'v' se foi a coluna */
 function clearDirs(cells){ const rows={}, cols={}, out={}; cells.forEach(([i])=>{ const y=(i/N)|0, x=i%N; rows[y]=(rows[y]||0)+1; cols[x]=(cols[x]||0)+1; });
   cells.forEach(([i])=>{ const y=(i/N)|0, x=i%N; out[i]=rows[y]>=N?'h':cols[x]>=N?'v':'h'; }); return out; }
-/* crochê desfiando: tudo num canvas só por cima do tabuleiro (leve no celular).
+/* animações de limpeza desenhadas num canvas só por cima do tabuleiro (leve no celular), com folga em volta para o que sai voando.
+   Cada item tem t0 (quando começa), dur e draw(x,it,e): e = ms desde o início (negativo = ainda esperando, desenha o bloco parado). */
+const CLR={cv:null,x:null,list:[],raf:0,dpr:1,m:0};
+const KEY_OF={'-13':'z','-1':'s','-4':'s','-2':'g','-5':'u','-6':'m','-7':'f','-8':'r','-9':'k','-10':'p','-11':'c','-12':'n'};
+function clrKey(c,s){ return s==='wild'?'w':c>=0?String(c):KEY_OF[c]||'s'; }
+function clrAdd(it){
+  const g=$('#fx'), W=Math.round(CS*N), m=Math.round(CS*3), dpr=Math.min(2,window.devicePixelRatio||1);
+  if(!CLR.cv){ CLR.cv=document.createElement('canvas'); CLR.cv.className='clrcv'; CLR.x=CLR.cv.getContext('2d'); }
+  if(CLR.cv.parentNode!==g) g.appendChild(CLR.cv);
+  if(CLR.cv.width!==(W+2*m)*dpr){ CLR.cv.width=CLR.cv.height=(W+2*m)*dpr; Object.assign(CLR.cv.style,{width:W+2*m+'px',height:W+2*m+'px',left:-m+'px',top:-m+'px'}); }
+  CLR.dpr=dpr; CLR.m=m; CLR.list.push(it);
+  if(!CLR.raf) CLR.raf=requestAnimationFrame(clrStep);
+}
+function clrStep(t){
+  const x=CLR.x, d=CLR.dpr;
+  x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,CLR.cv.width,CLR.cv.height);
+  CLR.list=CLR.list.filter(it=>t-it.t0<it.dur);
+  for(const it of CLR.list){ x.setTransform(d,0,0,d,d*CLR.m,d*CLR.m); x.globalAlpha=1; it.draw(x,it,t-it.t0); }
+  x.globalAlpha=1;
+  if(CLR.list.length) CLR.raf=requestAnimationFrame(clrStep); else { CLR.raf=0; x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,CLR.cv.width,CLR.cv.height); }
+}
+/* crochê desfiando.
    Linha limpa: o bloco solta 4 fios na horizontal (as 4 carreiras); coluna: 3 fios em pé (as 3 colunas de pontos).
    Cada fio tem a grossura dos pontos, corre para a casa vizinha da mesma linha/coluna e some. */
-const YARN={cv:null,x:null,list:[],raf:0,dpr:1};
-const KEY_OF={'-13':'z','-1':'s','-4':'s','-2':'g','-5':'u','-6':'m','-7':'f','-8':'r','-9':'k','-10':'p','-11':'c','-12':'n'};
+const YARN_PEEL=70, YARN_PULL=520;
 function yarnAdd(i,c,s,delay,dir,flip){
-  const g=$('#fx'), W=Math.round(CS*N), dpr=Math.min(2,window.devicePixelRatio||1);
-  if(!YARN.cv){ YARN.cv=document.createElement('canvas'); YARN.cv.className='yarncv'; YARN.x=YARN.cv.getContext('2d'); }
-  if(YARN.cv.parentNode!==g) g.appendChild(YARN.cv);
-  if(YARN.cv.width!==W*dpr){ YARN.cv.width=YARN.cv.height=W*dpr; YARN.cv.style.width=YARN.cv.style.height=W+'px'; }
-  YARN.dpr=dpr;
-  const key=s==='wild'?'w':c>=0?String(c):KEY_OF[c]||'s', col=c>=0?PALETTE[c]:c===-2?goldCol():STONE;
-  YARN.list.push({x:i%N,y:(i/N)|0,key,col,lite:hmix(col,'#ffffff',.55),dark:hmix(col,'#000000',.6),v:dir==='v',flip,t0:performance.now()+delay,ph:Math.random()*6});
-  if(!YARN.raf) YARN.raf=requestAnimationFrame(yarnStep);
+  const col=c>=0?PALETTE[c]:c===-2?goldCol():STONE;
+  clrAdd({x:i%N,y:(i/N)|0,key:clrKey(c,s),col,lite:hmix(col,'#ffffff',.55),dark:hmix(col,'#000000',.6),v:dir==='v',flip,t0:performance.now()+delay,ph:Math.random()*6,dur:YARN_PEEL*4+YARN_PULL+40,draw:yarnDraw});
 }
-function yarnStep(t){
-  const x=YARN.x, d=YARN.dpr, cs=CS, n4=4, n3=3, PEEL=70, PULL=520;
-  x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,YARN.cv.width,YARN.cv.height); x.setTransform(d,0,0,d,0,0);
+function yarnDraw(x,it,e){
+  const cs=CS, n4=4, n3=3, PEEL=YARN_PEEL, PULL=YARN_PULL;
   x.lineCap='round'; x.lineJoin='round';
-  YARN.list=YARN.list.filter(it=>t-it.t0<PEEL*4+PULL+40);
-  for(const it of YARN.list){
-    const e=t-it.t0, n=it.v?n3:n4, ox=it.x*cs, oy=it.y*cs, img=SPR.cv&&SPR.cv[it.key], dirS=it.flip?-1:1;
+  {
+    const n=it.v?n3:n4, ox=it.x*cs, oy=it.y*cs, img=SPR.cv&&SPR.cv[it.key], dirS=it.flip?-1:1;
     /* parte do bloco que ainda não desfiou */
     const done=Math.max(0,Math.min(n,Math.floor(e/PEEL)+(e>=0?1:0)));
     if(done<n){ const k0=done, frac=k0/n, pad=cs*.03, bs=cs*.94;
@@ -281,15 +293,58 @@ function yarnStep(t){
       x.strokeStyle=it.dark; x.lineWidth=th; x.stroke();
       x.strokeStyle=it.col; x.lineWidth=th*.72; x.stroke();
       x.strokeStyle=it.lite; x.lineWidth=Math.max(1,th*.18); x.setLineDash([th*.5,th*.45]); x.stroke(); x.setLineDash([]); }
-    x.globalAlpha=1;
   }
-  if(YARN.list.length) YARN.raf=requestAnimationFrame(yarnStep); else { YARN.raf=0; x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,YARN.cv.width,YARN.cv.height); }
+}
+/* joaninha: abre o casco, bate as asinhas e sai voando em zigue-zague para fora do tabuleiro */
+function bugAdd(i,c,s,delay,dir){
+  const x=i%N, y=(i/N)|0, side=dir==='h'?(x<N/2?-1:1):dir==='v'?(y%2?1:-1):(Math.random()<.5?-1:1);
+  const ang=side*(.25+Math.random()*.45), col=c>=0?PALETTE[c]:WILDC;
+  clrAdd({x,y,key:clrKey(c,s),col,ang,ph:Math.random()*6,zig:2+Math.random()*1.5,t0:performance.now()+delay+Math.random()*70,dur:1250,draw:bugDraw});
+}
+const BUG_T={hop:150,open:200,fly:850};
+function bugDraw(x,it,e){
+  const cs=CS, img=SPR.cv&&SPR.cv[it.key], pad=cs*.03, bs=cs*.94, T=BUG_T;
+  const cx=it.x*cs+cs/2, cy=it.y*cs+cs/2;
+  if(e<0||!img){ if(img) x.drawImage(img,cx-bs/2,cy-bs/2,bs,bs); return; }
+  const iw=img.width, u=bs; /* medidas do desenho da joaninha (em partes do bloco) */
+  let op=0, dx=0, dy=0, rot=0, sc=1, al=1;
+  if(e<T.hop){ const p=e/T.hop; sc=1+.1*Math.sin(p*Math.PI); rot=.12*Math.sin(p*Math.PI*3); }
+  else { op=Math.min(1,(e-T.hop)/T.open); op=1-(1-op)*(1-op); }
+  const fe=e-T.hop-T.open*.6;
+  if(fe>0){ const p=Math.min(1,fe/T.fly), dist=Math.pow(p,1.5)*cs*4.2, wob=Math.sin(p*Math.PI*it.zig+it.ph)*cs*.45*Math.min(1,p*3);
+    const vx=Math.sin(it.ang), vy=-Math.cos(it.ang);
+    dx=vx*dist-vy*wob; dy=vy*dist+vx*wob;
+    const dw=Math.cos(p*Math.PI*it.zig+it.ph)*it.zig*.5*Math.min(1,p*3);
+    rot=it.ang+Math.atan(dw)*.5; sc=(1+.15*Math.min(1,p*5))*(1-.45*p); al=p<.75?1:1-(p-.75)/.25;
+    /* sombrinha que fica no chão e some */
+    if(p<.45){ x.globalAlpha=.22*(1-p/.45); x.fillStyle='#000'; x.beginPath(); x.ellipse(cx+dx*.35,cy+dy*.2+cs*.12,cs*.3*(1-p),cs*.14*(1-p),0,0,7); x.fill(); } }
+  x.globalAlpha=Math.max(0,al);
+  x.save(); x.translate(cx+dx,cy+dy); x.rotate(rot); x.scale(sc,sc); x.translate(-u/2,-u/2);
+  const hy=.26*u, py=.3*u, a=op*.7;
+  if(op>0){
+    /* corpinho preto embaixo do casco */
+    x.fillStyle='#2a2320'; x.beginPath(); x.ellipse(u*.5,u*.6,u*.2,u*.32,0,0,7); x.fill();
+    /* asinhas transparentes batendo bem rápido */
+    const fl=.55+.45*Math.abs(Math.sin(e*.09));
+    for(const sd of [-1,1]){ x.save(); x.translate(u*.5,py); x.rotate(-sd*(.35+op*.45)); x.scale(sd*fl,1);
+      x.beginPath(); x.ellipse(u*.12,u*.42,u*.17,u*.46,-.12,0,7); x.fillStyle='rgba(240,248,255,.72)'; x.fill();
+      x.strokeStyle='rgba(90,110,140,.75)'; x.lineWidth=Math.max(1,u*.016); x.stroke();
+      x.beginPath(); x.moveTo(u*.02,u*.04); x.quadraticCurveTo(u*.13,u*.35,u*.15,u*.8); x.moveTo(u*.08,u*.3); x.quadraticCurveTo(u*.2,u*.4,u*.24,u*.6); x.stroke(); x.restore(); }
+  }
+  /* as duas metades do casco giram para fora (dobradiça perto da cabeça) */
+  for(const sd of [-1,1]){ x.save(); x.translate(u*.5,py); x.rotate(-sd*a); x.translate(-u*.5,-py);
+    x.beginPath(); sd<0?x.rect(0,hy,u*.5,u-hy):x.rect(u*.5,hy,u*.5,u-hy); x.clip();
+    x.drawImage(img,0,0,iw,iw,0,0,u,u); x.restore(); }
+  /* cabeça por cima */
+  x.save(); x.beginPath(); x.rect(0,0,u,hy); x.clip(); x.drawImage(img,0,0,iw,iw,0,0,u,u); x.restore();
+  x.restore();
 }
 function spawnClear(i,c,s,delay,dir){
   c=terrCor(i,c);
   if(s==='bomb') spawnExplosion(i,delay);
   const x=i%N, y=(i/N)|0;
   if(!SET.lite&&effSkin()==='crochet'&&s!=='bomb'){ const vert=dir==='v'; yarnAdd(i,c,s,delay,dir,vert?y>=N-1:x>=N-1); return; }
+  if(!SET.lite&&baseSkin(effSkin())==='bug'&&s!=='bomb'&&/^[0-9wz]$/.test(clrKey(c,s))){ bugAdd(i,c,s,delay,dir); return; }
   const d=document.createElement('div');
   const sk=SET.lite?'classic':effSkin(), vert=dir==='v';
   /* o fio corre para a casa vizinha da mesma linha (ou coluna); na ponta do tabuleiro ele volta para dentro */

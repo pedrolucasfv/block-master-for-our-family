@@ -55,7 +55,7 @@
 .cell.dead .blk{animation:dead .45s ease forwards;animation-delay:calc(var(--y) * 55ms)}
 @keyframes dead{to{filter:grayscale(1) brightness(.55)}}
 #fx{position:absolute;inset:0;pointer-events:none;z-index:3}
-.yarncv{position:absolute;left:0;top:0;pointer-events:none}
+.clrcv{position:absolute;left:0;top:0;pointer-events:none}
 .cell.glow::after,.cell.glow .blk,.cell.fall .blk,.cell.drop .blk,.fxc,.boom,.ring,.ft,.praise .ch,.cd{will-change:transform,opacity}
 #grid{contain:layout}
 .cell{contain:layout style}

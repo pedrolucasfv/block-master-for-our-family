@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.28 · 28/11/2026
+- 🐞 **Joaninhas voando:** com o bloco Joaninha, quando uma linha ou coluna some, cada joaninha abre o casco, bate as asinhas e sai voando em zigue-zague para fora do tabuleiro. É a primeira de uma série: os outros blocos também vão ganhar sua própria animação.
+
 ## 1.27.1 · 28/11/2026
 - 🔧 **Correção:** logo depois da atualização, alguns celulares misturavam partes da versão nova com partes da antiga, e aí não dava para criar sala nem ligar o modo teste. Agora o jogo sempre carrega todas as partes da mesma versão.
 
