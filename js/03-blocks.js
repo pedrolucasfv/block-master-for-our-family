@@ -430,7 +430,7 @@ function buildSprites(){
   const dpr=Math.min(2.5,window.devicePixelRatio||1), w=Math.max(16,Math.round(CS*.94*dpr));
   if(SPR.skin===skin&&SPR.lite===SET.lite&&SPR.px===w) return;
   const job=++SPR.job;
-  const list=[...PALETTE.map((c,i)=>[String(i),c,skin==='fruit'?FRUIT[i]:null]),['s',STONE,null],['g',isGold(skin)?DIAMC:GOLD,null,isGold(skin)?baseSkin(skin):null],['w','#fff',null,'wild'],['u',BEARC,null,'bear'],['m',GUMC,null,'gum'],['f',RIPEC,null,'ripe'],['r',ROTC,null,'rotten'],['k',STALKC,null,'stalk'],['p',PETALC,null,'petal'],['c',COINC,null,'koban'],['n',NUTC,null,'nut']];
+  const list=[...PALETTE.map((c,i)=>[String(i),c,skin==='fruit'?FRUIT[i]:null]),['s',STONE,null],['g',isGold(skin)?DIAMC:GOLD,null,isGold(skin)?baseSkin(skin):null],['w','#fff',null,'wild'],['u',BEARC,null,'bear'],['m',GUMC,null,'gum'],['f',RIPEC,null,'ripe'],['r',ROTC,null,'rotten'],['k',STALKC,null,'stalk'],['p',PETALC,null,'petal'],['c',COINC,null,'koban'],['n',NUTC,null,'nut'],['z',NEUTC,null]];
   const out=[]; let i=0;
   const step=()=>{ if(job!==SPR.job) return;
     const t0=performance.now();

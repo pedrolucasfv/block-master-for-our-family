@@ -140,8 +140,9 @@ function applies(type,k){
   if(k==='pblocks') return type==='live'||type==='tlive'||type==='tsplit'||type==='cabo'||type==='terr'||type==='tterr';
   if(type==='live') return true;
   if(type==='tlive') return k!=='handicap';
-  if(type==='cabo'||type==='terr') return k!=='handicap'&&k!=='goal';
-  if(type==='tterr') return k!=='goal'&&(base.includes(k)||['hold','attacks','series','pblocks'].includes(k));
+  if(type==='cabo') return k!=='handicap'&&k!=='goal';
+  if(type==='terr') return k!=='handicap'&&k!=='goal'&&k!=='color'; /* no Território as peças não têm cor: sem Bônus de cor */
+  if(type==='tterr') return k!=='goal'&&k!=='color'&&(base.includes(k)||['hold','attacks','series','pblocks'].includes(k));
   if(type==='tsplit') return base.includes(k)||['hold','attacks','series','pblocks'].includes(k);
   if(type==='versus') return base.includes(k)||k==='sudden'||k==='series';
   return base.includes(k)||k==='hold';

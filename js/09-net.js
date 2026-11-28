@@ -441,6 +441,7 @@ function hostStart(rematch){
   if(L.type==='camp'){ const w=L.w||1, ph=L.ph||1, def=CWD(w).phases[ph-1], st=campLoad('group'), k=ck(w,ph); st.att[k]=(st.att[k]||0)+1; campSave('group',st);
     cfg.opts=campOpts(def); cfg.size=ids.length>2&&def.setup!=='puzzle'?10:8; cfg.camp={w,ph,helps:campHelps(st),slot:'group',att:st.att[k]}; }
   if(L.type==='cabo'||L.type==='terr'||L.type==='tterr'){ cfg.opts.goal=0; cfg.opts.handicap=false; }
+  if(L.type==='terr'||L.type==='tterr') cfg.opts.color=false;
   if(!rematch) NET.ser={};
   if(L.type==='live'&&L.opts.handicap&&rematch&&NET.lastWinner) cfg.hc=NET.lastWinner;
   NET.cur=cfg; send(cfg); beginOnline(cfg);

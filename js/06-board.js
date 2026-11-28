@@ -108,7 +108,6 @@ function bDraw(t){
   }
   if(BELT) drawBelt(cs);
   if(MK) drawMarks(cs);
-  if(TMAP) drawTerr(cs);
   bDirty=false; if(anim) bReq();
 }
 function drawCell(c,x,y,bs,sc,al,t,i){
@@ -116,7 +115,7 @@ function drawCell(c,x,y,bs,sc,al,t,i){
   const img=(c.mode===3?S.hl:S.cv)[c.key];
   if(sc!==1){ const d=bs*sc; x+=(bs-d)/2; y+=(bs-d)/2; bs=d; }
   bx.globalAlpha=al*(c.mode===2?.35:1);
-  if(img) bx.drawImage(img,x,y,bs,bs); else { bx.fillStyle=c.key==='s'?STONE:c.key==='g'?goldCol():c.key==='w'?WILDC:c.key==='u'?BEARC:c.key==='m'?GUMC:c.key==='f'?RIPEC:c.key==='r'?ROTC:c.key==='k'?STALKC:c.key==='p'?PETALC:c.key==='c'?COINC:c.key==='n'?NUTC:(PALETTE[+c.key]||'#999'); rrect2(x,y,bs,bs*.16); bx.fill(); }
+  if(img) bx.drawImage(img,x,y,bs,bs); else { bx.fillStyle=c.key==='s'?STONE:c.key==='g'?goldCol():c.key==='w'?WILDC:c.key==='u'?BEARC:c.key==='m'?GUMC:c.key==='f'?RIPEC:c.key==='r'?ROTC:c.key==='k'?STALKC:c.key==='p'?PETALC:c.key==='c'?COINC:c.key==='n'?NUTC:c.key==='z'?NEUTC:(PALETTE[+c.key]||'#999'); rrect2(x,y,bs,bs*.16); bx.fill(); }
   if(c.ov&&c.mode===1) for(const o of c.ov){ const im=S.ov&&S.ov[o]; if(im) bx.drawImage(im,x,y,bs,bs); }
   if(c.pw&&c.mode===1){ bx.font=`${Math.round(bs*.56)}px system-ui,sans-serif`; bx.textAlign='center'; bx.textBaseline='middle'; bx.fillText(PWI[c.pw],x+bs/2,y+bs*.54); }
   if(c.tb!=null&&c.mode===1){ bx.font=`${Math.round(bs*.42)}px system-ui,sans-serif`; bx.textAlign='center'; bx.textBaseline='middle'; bx.fillText(c.tp?'🎨':'💣',x+bs*.36,y+bs*.42);
@@ -140,10 +139,11 @@ function drawBelt(cs){
 }
 /* território (js/30-territorio.js): mapa igual em todos os tabuleiros, '' neutra, 'az' ou 'la'; TMAPT = quando a casa mudou (para piscar) */
 let TMAP=null, TMAPT=[];
-/* casa com bloco em cima: uma bolinha da cor do dono no canto, para o mapa continuar à vista */
-function drawTerr(cs){ const r=cs*.11; bx.save(); bx.lineWidth=Math.max(1.5,cs*.035); bx.strokeStyle='rgba(255,255,255,.9)';
-  for(let i=0;i<N*N;i++){ const k=TMAP[i]; if(!k||CELL[i].mode!==1) continue; const x=(i%N)*cs+cs*.2, y=((i/N)|0)*cs+cs*.2; bx.fillStyle=TEAM[k].c; bx.beginPath(); bx.arc(x,y,r,0,7); bx.fill(); bx.stroke(); }
-  bx.restore(); }
+/* no Território os blocos não têm cor própria: ficam da cor do dono da casa (azul, laranja) ou cinza claro se ela for neutra */
+const terrCinza=()=>!!TMAP&&((D&&D.live&&D.o.terr)||(SH&&SH.type==='tsplit'&&SH.o.terr));
+function terrKey(i){ const k=TMAP[i]; return k==='az'?'5':k==='la'?'1':'z'; }
+/* cor do efeito de limpeza (mesma regra, com o mapa já atualizado) */
+function terrCor(i,c){ if(c<0||!terrCinza()) return c; const k=TMAP[i]; return k==='az'?5:k==='la'?1:-13; }
 /* marcações da equipe (co-op): casas para preencher e linhas/colunas para limpar */
 let MK=null;
 function drawMarks(cs){
@@ -194,15 +194,15 @@ function renderBoard(b,o,pv,extra={}){
       for(let x=0;x<N;x++){ let f=true; for(let y=0;y<N;y++) if(!tmp[y][x]){ f=false; break; } if(f) for(let y=0;y<N;y++) hl.add(y*N+x); }
     }
   }
-  const reg=extra.region;
+  const reg=extra.region, tc=terrCinza();
   for(let i=0;i<N*N;i++){
     const y=(i/N)|0, x=i%N, v=b[y][x], c=CELL[i];
     const hidden=blind && v && v.c>=0 && now-v.t>2500 && !(reveal[i]>now);
     const on=!!v && !hidden, gh=ghost.has(i), h=hl.has(i), bad=reveal[i]>now&&!!v, sh=!!reg&&!inReg(reg,y,x);
-    const key=(on?'1':'0')+(gh?'1':'0')+(h?'1':'0')+(sh?'1':'0')+(bad?'1':'0')+'|'+(on?v.c+(v.s||'')+(v.cr?'c':'')+(v.pw||'')+(v.tb!=null?'t'+v.tb:'')+(v.tp?'p'+v.tp:'')+(v.rp!=null?'r'+v.rp:''):'')+'|'+((h||gh)?pv.p.color:'');
+    const key=(on?'1':'0')+(gh?'1':'0')+(h?'1':'0')+(sh?'1':'0')+(bad?'1':'0')+'|'+(on?v.c+(v.s||'')+(v.cr?'c':'')+(v.pw||'')+(v.tb!=null?'t'+v.tb:'')+(v.tp?'p'+v.tp:'')+(v.rp!=null?'r'+v.rp:''):'')+'|'+((h||gh)?pv.p.color:'')+(tc?TMAP[i]:'');
     if(c._k===key) continue; c._k=key; bDirty=true;
     c.mode=h?3:on?1:gh?2:0;
-    c.key=(h||(!on&&gh))?String(pv.p.color):on?(v.c===-4&&v.tp?(v.tp==='az'?'5':'1'):v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.c===-7?'f':v.c===-8?'r':v.c===-9?'k':v.c===-10?'p':v.c===-11?'c':v.c===-12?'n':v.s==='wild'?'w':String(v.c)):'';
+    c.key=tc&&(h||(!on&&gh)||(on&&v.c>=0))?terrKey(i):(h||(!on&&gh))?String(pv.p.color):on?(v.c===-4&&v.tp?(v.tp==='az'?'5':'1'):v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.c===-7?'f':v.c===-8?'r':v.c===-9?'k':v.c===-10?'p':v.c===-11?'c':v.c===-12?'n':v.s==='wild'?'w':String(v.c)):'';
     c.pw=on&&!h?v.pw||'':''; c.tb=on&&v.c===-4?v.tb:null; c.tp=on&&v.c===-4?v.tp||'':''; c.rp=on&&!h&&(v.c===-7||v.c===-10)?v.rp:null;
     c.ov=on&&!h?((v.s==='bomb'?'b':v.s==='ice'?'i':'')+(v.cr?'c':'')+(v.c===-2?'g':'')):'';
     c.slot=bad?2:sh?1:0;
@@ -246,7 +246,7 @@ function clearDirs(cells){ const rows={}, cols={}, out={}; cells.forEach(([i])=>
    Linha limpa: o bloco solta 4 fios na horizontal (as 4 carreiras); coluna: 3 fios em pé (as 3 colunas de pontos).
    Cada fio tem a grossura dos pontos, corre para a casa vizinha da mesma linha/coluna e some. */
 const YARN={cv:null,x:null,list:[],raf:0,dpr:1};
-const KEY_OF={'-1':'s','-4':'s','-2':'g','-5':'u','-6':'m','-7':'f','-8':'r','-9':'k','-10':'p','-11':'c','-12':'n'};
+const KEY_OF={'-13':'z','-1':'s','-4':'s','-2':'g','-5':'u','-6':'m','-7':'f','-8':'r','-9':'k','-10':'p','-11':'c','-12':'n'};
 function yarnAdd(i,c,s,delay,dir,flip){
   const g=$('#fx'), W=Math.round(CS*N), dpr=Math.min(2,window.devicePixelRatio||1);
   if(!YARN.cv){ YARN.cv=document.createElement('canvas'); YARN.cv.className='yarncv'; YARN.x=YARN.cv.getContext('2d'); }
@@ -286,6 +286,7 @@ function yarnStep(t){
   if(YARN.list.length) YARN.raf=requestAnimationFrame(yarnStep); else { YARN.raf=0; x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,YARN.cv.width,YARN.cv.height); }
 }
 function spawnClear(i,c,s,delay,dir){
+  c=terrCor(i,c);
   if(s==='bomb') spawnExplosion(i,delay);
   const x=i%N, y=(i/N)|0;
   if(!SET.lite&&effSkin()==='crochet'&&s!=='bomb'){ const vert=dir==='v'; yarnAdd(i,c,s,delay,dir,vert?y>=N-1:x>=N-1); return; }
@@ -294,7 +295,7 @@ function spawnClear(i,c,s,delay,dir){
   /* o fio corre para a casa vizinha da mesma linha (ou coluna); na ponta do tabuleiro ele volta para dentro */
   const flip=vert?y>=N-1:(dir==='h'?x>=N-1:Math.random()<.5);
   d.className='fxc fx-'+sk+(s==='bomb'?' sp-bomb':'')+(flip?' flip':'')+(vert?' vert':''); d.dataset.col=s==='wild'?'x':c===-1?'s':c===-2?'g':c>=0?c:'x';
-  d.style.setProperty('--x',x); d.style.setProperty('--y',y); const cc=c===-1?STONE:c===-2?goldCol():c===-5?BEARC:c===-6?GUMC:c===-7?RIPEC:c===-8?ROTC:c===-9?STALKC:c===-10?PETALC:c===-11?COINC:c===-12?NUTC:(PALETTE[c]||WILDC); d.style.setProperty('--c',cc);
+  d.style.setProperty('--x',x); d.style.setProperty('--y',y); const cc=c===-1?STONE:c===-2?goldCol():c===-5?BEARC:c===-6?GUMC:c===-7?RIPEC:c===-8?ROTC:c===-9?STALKC:c===-10?PETALC:c===-11?COINC:c===-12?NUTC:c===-13?NEUTC:(PALETTE[c]||WILDC); d.style.setProperty('--c',cc);
   d.style.setProperty('--dl',delay+'ms'); d.style.animationDelay=delay+'ms';
   d.innerHTML=sk==='brick'?'<div class="blk bev q q1"></div><div class="blk bev q q2"></div><div class="blk bev q q3"></div><div class="blk bev q q4"></div>'
     :sk==='crochet'?'<div class="blk bev"></div><svg class="yarn" viewBox="0 0 100 100" aria-hidden="true"><path pathLength="100" d="M50 50 C 64 36, 80 64, 96 50 S 124 38, 136 52 S 160 62, 172 50"/><path class="ply" pathLength="100" d="M50 50 C 64 36, 80 64, 96 50 S 124 38, 136 52 S 160 62, 172 50"/></svg>'
@@ -418,11 +419,11 @@ const holdSlot=$('#holdSlot');
 function pieceEl(p){
   const el=document.createElement('div');
   el.style.width=`calc(var(--cs) * ${p.w})`; el.style.height=`calc(var(--cs) * ${p.h})`;
-  el.style.setProperty('--c',PALETTE[p.color]);
-  el.innerHTML=p.cells.map(([r,c],i)=>{ const sp=p.spec&&p.spec.i===i?' sp-'+p.spec.s:''; const col=sp===' sp-wild'?`;--c:${WILDC}`:''; return `<div class="pc${sp}" data-col="${sp===' sp-wild'?'x':p.color}" style="--x:${c};--y:${r}${col}"><div class="blk bev"></div>${p.pw&&p.pw.i===i?`<span class="pwi">${PWI[p.pw.k]}</span>`:''}</div>`; }).join('');
+  const cinza=terrCinza(); el.style.setProperty('--c',cinza?NEUTC:PALETTE[p.color]); /* Território: a peça é cinza até cair numa casa com dono */
+  el.innerHTML=p.cells.map(([r,c],i)=>{ const sp=p.spec&&p.spec.i===i?' sp-'+p.spec.s:''; const col=sp===' sp-wild'?`;--c:${WILDC}`:''; return `<div class="pc${sp}" data-col="${sp===' sp-wild'?'x':cinza?'z':p.color}" style="--x:${c};--y:${r}${col}"><div class="blk bev"></div>${p.pw&&p.pw.i===i?`<span class="pwi">${PWI[p.pw.k]}</span>`:''}</div>`; }).join('');
   return el;
 }
-const pkey=p=>p?(p._k||(p._k=p.color+'|'+p.cells.join(';')+'|'+(p.spec?p.spec.i+p.spec.s:'')+(p.pw?'|'+p.pw.i+p.pw.k:''))):'';
+const pkey=p=>p?(terrCinza()?'z':'')+(p._k||(p._k=p.color+'|'+p.cells.join(';')+'|'+(p.spec?p.spec.i+p.spec.s:'')+(p.pw?'|'+p.pw.i+p.pw.k:''))):'';
 function trayPiece(host,p,anim,delay){
   const k=pkey(p);
   if(host._k===k&&host._el&&!anim) return host._el;

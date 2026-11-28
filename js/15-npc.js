@@ -16,6 +16,7 @@ function startNpc(o){
   const lv=Math.min(4,Math.max(1,o.npc|0)), opts={...o,npc:lv}, seed='N|'+Date.now()+'|'+Math.random().toString(36).slice(2);
   if(opts.cabo&&opts.terr) opts.terr=false;
   if(opts.cabo||opts.terr){ opts.goal=0; opts.handicap=false; }
+  if(opts.terr) opts.color=false;
   startDuel({type:'live',opts,seed,players:['A','npc'],npc:lv,teams:opts.cabo||opts.terr?{A:'az',npc:'la'}:null,label:(opts.cabo?'🪢 Cabo de guerra · ':opts.terr?'🏰 Território · ':'')+'Contra o '+NPC_N[lv]+' · '+timeName(opts.time)+(opts.play?' · '+PLAYS[opts.play]:'')});
   const eng=new Engine(opts); if(opts.obstacles) eng.addStones(makeRng(seed+'|obs'),6);
   NPC={d:D,lv,cfg:NPC_LV[lv],eng,rng:makeRng(seed),tray:null,score:0,placed:0,t:0,next:0,last:performance.now(),timeline:[[0,0]],over:false,shield:0,frozen:0,slow:0,hurry:false,timer:0,tranco:0};

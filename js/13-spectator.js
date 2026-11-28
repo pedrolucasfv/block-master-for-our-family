@@ -97,8 +97,9 @@ function specDraw(cv,b,n,o={}){
     const px=c*cs, py=r*cs, shade=o.region&&!inReg(o.region,r,c);
     x.fillStyle=slot; x.globalAlpha=shade?.45:1; x.beginPath(); const p=cs*.07, w=cs-2*p, rr=w*.2;
     x.moveTo(px+p+rr,py+p); x.arcTo(px+p+w,py+p,px+p+w,py+p+w,rr); x.arcTo(px+p+w,py+p+w,px+p,py+p+w,rr); x.arcTo(px+p,py+p+w,px+p,py+p,rr); x.arcTo(px+p,py+p,px+p+w,py+p,rr); x.fill(); x.globalAlpha=1;
+    const tk=o.tmap&&o.tmap[r*n+c]; if(tk){ x.globalAlpha=.45; x.fillStyle=TEAM[tk].c; x.fill(); x.globalAlpha=1; } /* território: chão com a cor do dono */
     const v=b[r]&&b[r][c]; if(!v) continue;
-    const key=v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.c===-7?'f':v.c===-8?'r':v.c===-9?'k':v.c===-10?'p':v.c===-11?'c':v.c===-12?'n':v.s==='wild'?'w':String(v.c), img=SPR.cv&&SPR.cv[key];
+    const key=o.tmap&&v.c>=0?(tk==='az'?'5':tk==='la'?'1':'z'):v.c===-1||v.c===-4?'s':v.c===-2?'g':v.c===-5?'u':v.c===-6?'m':v.c===-7?'f':v.c===-8?'r':v.c===-9?'k':v.c===-10?'p':v.c===-11?'c':v.c===-12?'n':v.s==='wild'?'w':String(v.c), img=SPR.cv&&SPR.cv[key];
     if(img) x.drawImage(img,px+cs*.03,py+cs*.03,cs*.94,cs*.94); else { x.fillStyle=v.c===-1?STONE:v.c===-2?goldCol():(PALETTE[v.c]||'#999'); x.fillRect(px+cs*.06,py+cs*.06,cs*.88,cs*.88); }
     const ov=SPR.ov||{}; if(v.s==='ice'&&ov.i) x.drawImage(ov.i,px+cs*.03,py+cs*.03,cs*.94,cs*.94); if(v.s==='bomb'&&ov.b) x.drawImage(ov.b,px+cs*.03,py+cs*.03,cs*.94,cs*.94); if(v.cr&&ov.c) x.drawImage(ov.c,px+cs*.03,py+cs*.03,cs*.94,cs*.94);
   }
@@ -155,7 +156,7 @@ function specPaint(){
   if(SP.mode==='live'){
     const ids=SP.cfg.players.slice();
     ids.forEach(id=>{ const c=document.querySelector(`.spcard[data-id="${id}"]`); if(!c) return; const p=SP.pl[id];
-      specDraw(c.querySelector('canvas'),strBoard(p.b),8); c.querySelector('.spsc').textContent=fmtN(p.score);
+      specDraw(c.querySelector('canvas'),strBoard(p.b),8,{tmap:SP.cfg.opts.terr?SP.tmap:null}); c.querySelector('.spsc').textContent=fmtN(p.score);
       c.querySelector('.spst').textContent=p.info?(p.info.reason==='quit'?'saiu':'terminou'):(id===SP.leader?'👑 na liderança':'jogando'); c.classList.toggle('done',!!p.info); c.classList.toggle('lead',id===SP.leader&&!p.info); });
     if(rank&&SP.cfg.teams){ const T=SP.cfg.teams, sum={az:0,la:0}; ids.forEach(id=>sum[T[id]]+=SP.pl[id].score);
       const cabo=SP.cfg.opts.cabo, f={az:0,la:0}; if(cabo) ids.forEach(id=>{ const p=SP.pl[id], x=p.info||p; f[T[id]]+=(x.score||0)+(x.tranco||0); });
@@ -166,7 +167,7 @@ function specPaint(){
     else if(rank) rank.innerHTML='<h2>Ranking</h2>'+ids.sort((a,b)=>SP.pl[b].score-SP.pl[a].score).map((id,i)=>`<div class="kv big"><span>${i+1}º ${avatarHTML(id,28)}${esc(nm(id))}</span><b>${fmtN(SP.pl[id].score)}</b></div>`).join('');
   } else if(SP.view&&SP.cfg.type==='tsplit'){
     const v=SP.view, T=SP.cfg.teams, ids=SP.cfg.players;
-    ['az','la'].forEach(k=>{ const B=v.bds[k]; if(!B) return; specDraw($('#spB_'+k),B.b,SP.cfg.size||8,{marks:B.marks}); $('#spSc_'+k).textContent=fmtN(B.sc||0); $('#spSt_'+k).textContent=v.out&&v.out[k]?'sem jogadas':(B.combo>=2?'🔥 combo x'+B.combo:''); });
+    ['az','la'].forEach(k=>{ const B=v.bds[k]; if(!B) return; specDraw($('#spB_'+k),B.b,SP.cfg.size||8,{marks:B.marks,tmap:SP.cfg.opts.terr?SP.tmap:null}); $('#spSc_'+k).textContent=fmtN(B.sc||0); $('#spSt_'+k).textContent=v.out&&v.out[k]?'sem jogadas':(B.combo>=2?'🔥 combo x'+B.combo:''); });
     if(rank) rank.innerHTML=(SP.cfg.opts.terr?`<h2>🏰 Território</h2>${terrMapHTML(SP.tmap)}${terrBarHTML('spTerr')}`:'')+'<h2>Jogadores</h2>'+ids.map(id=>`<div class="kv"><span>${TEAM[T[id]].e} ${avatarHTML(id,24)}${esc(nm(id))}</span><b>${v.stuck&&v.stuck[id]?'<small class="muted">sem jogada</small>':''}</b></div>`).join('');
     if(SP.cfg.opts.terr) terrBarSet($('#spTerr'),terrConta(SP.tmap),'az',caboLado('az',T),caboLado('la',T));
   } else if(SP.view){

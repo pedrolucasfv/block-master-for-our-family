@@ -39,6 +39,7 @@ function terrFim(m){
 }
 function terrMudou(mud){
   const t=performance.now(); mud.forEach(i=>{ TMAPT[i]=t; }); bDirty=true; bReq(); terrRender();
+  if(mud.length&&D&&D.live){ if(D.spect) renderSpect(); else if(!D.over) renderDuel(); terrPulo(mud); } /* os blocos em cima trocam de cor */
   terrCheck();
 }
 /* depois de cada mudança: o mapa ficou todo de uma cor ou o outro lado inteiro caiu (travou, o tempo da peça acabou ou saiu) */
@@ -139,9 +140,11 @@ function terrSplitWinner(H){ const n=terrConta(H.tmap); return n.az>n.la?'az':n.
 /* o mapa que chegou (ou o de quem criou): pisca as casas que mudaram */
 function terrSetMap(nv){
   if(!TMAP||TMAP.length!==nv.length){ TMAP=nv; TMAPT=Array(nv.length).fill(0); bDirty=true; bReq(); terrRender(); return; }
-  const t=performance.now(); let mud=false; for(let i=0;i<nv.length;i++) if(TMAP[i]!==nv[i]){ TMAP[i]=nv[i]; TMAPT[i]=t; mud=true; }
-  if(mud){ bDirty=true; bReq(); terrRender(); }
+  const t=performance.now(), mud=[]; for(let i=0;i<nv.length;i++) if(TMAP[i]!==nv[i]){ TMAP[i]=nv[i]; TMAPT[i]=t; mud.push(i); }
+  if(mud.length){ bDirty=true; bReq(); terrRender(); setTimeout(()=>terrPulo(mud),0); }
 }
+/* bloco que trocou de cor dá um pulinho */
+function terrPulo(mud){ const bl=mud.filter(i=>CELL[i]&&CELL[i].mode===1); if(bl.length) BC.glow(bl); }
 /* avisos de tinta na tela de cada um (mk = o tabuleiro do meu time) */
 function terrSplitEv(ev,mk){
   if(ev.tinta){ if(ev.tinta.to===mk){ showAttacker(ev.who,`${nm(ev.who)} jogou um bloco de tinta!`); setTimeout(()=>BC.drop(ev.tinta.cells),0); toast('🎨 Bloco de tinta! Limpe a linha ou coluna dele em 3 jogadas, senão ele pinta o mapa em volta'); }

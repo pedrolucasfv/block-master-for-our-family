@@ -258,6 +258,7 @@ body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="5"]>.bev{background:va
 body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="6"]>.bev{background:var(--spr6) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
 body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="s"]>.bev{background:var(--sprs) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
 body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="g"]>.bev{background:var(--sprg) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
+body.spr :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col="z"]>.bev{background:var(--sprz) center/100% 100% no-repeat!important;background-color:var(--c)!important;background-blend-mode:normal!important;box-shadow:none!important;border:0!important}
 /* pompom tem contorno de pelinhos: sem cor de reserva atrás nem cantos cortados */
 body.spr.skin-velvet :is(#grid,#tray,#holdRow,.drag,.tutb) [data-col]>.bev{background-color:transparent!important;border-radius:0!important}
 /* jogo */

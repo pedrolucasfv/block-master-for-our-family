@@ -358,7 +358,7 @@ function renderShared(anim){
   } else {
     renderTray(v.tr[me]||[null,null,null],v.hold,{anim,holdOn:!!s.o.hold,holdLbl:s.type==='tsplit'?'Guardada (do time)':`Guardada (da ${teamWord()})`,nofit:p=>!VE.anyFit(p,reg),dim:i=>(isTurnType(s.type)&&v.turn!==me&&s.ids.length>1)||!!(s.hook&&s.hook.dimSlot&&s.hook.dimSlot(i)),hideSrc:s.pending});
     if(!anim) showScore(v.sc);
-    if(s.type==='tsplit'){ const ot=otherTeam(bdKey(me)), ob=v.bds[ot], cv=$('#oppBoard'); if(cv&&ob) specDraw(cv,ob.b,N); const e=$('#oppTeamSc'); if(e) e.textContent=fmtN(ob?ob.sc:0); }
+    if(s.type==='tsplit'){ const ot=otherTeam(bdKey(me)), ob=v.bds[ot], cv=$('#oppBoard'); if(cv&&ob) specDraw(cv,ob.b,N,{tmap:s.o.terr?TMAP:null}); const e=$('#oppTeamSc'); if(e) e.textContent=fmtN(ob?ob.sc:0); }
   }
   if(s.hook&&s.hook.render) s.hook.render(v,anim);
   updateCombo(v.combo,v.since);
