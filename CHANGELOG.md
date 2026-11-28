@@ -3,6 +3,11 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.30.1 · 28/11/2026
+- 🧸 **Pelúcia de novo:** agora ela é um dente-de-leão. Passa um sopro, os pelinhos se soltam e saem voando como sementinhas, e o pompom vai diminuindo até sumir.
+- 🍉 **Frutinhas de novo:** um canudinho espeta a fruta e ela é sugada: o suco sobe pelo canudo, a fruta murcha, enruga e perde a cor, sobem bolhinhas e ela some.
+- 🎂 **Bolo com mordidas:** depois de soprar a velinha, o bolo leva três mordidas, uma de cada lado, soltando farelos, e o que sobra some com granulado colorido.
+
 ## 1.30 · 28/11/2026
 - 🐻 **Ursinho novo:** agora ele dá duas mordidas (nhac, nhac!), some numa poeirinha e sai correndo. Na linha ele corre para o lado, visto de perfil; na coluna corre para cima ou para baixo, visto de cima.
 - 🧸 **Pelúcia:** o pompom é apertado, balança e se desmancha em pompons pequenininhos que sobem flutuando.

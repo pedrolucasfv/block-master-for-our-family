@@ -261,7 +261,7 @@ Draft de peças · Cartas de poder · Rei do morro · Troca de tabuleiro · Liga
 ## ✨ Animações dos blocos (ao limpar linha/coluna)
 Cada bloco com uma animação própria, como o crochê desfiando. Tudo desenhado no canvas único por cima do tabuleiro (`CLR`, `clrAdd` no `06-board.js`: cada tema tem um `xxxAdd` + `xxxDraw(x,it,e)`, ligado em `CLR_SKIN`); com "aparelho fraco" fica a animação simples. Os dourados usam a do tema de origem (`baseSkin`).
 
-Já tinham: Crochê (desfia, é a referência de capricho). Refeitas na 1.30 para ficar no nível das novas: Pelúcia (aperta e vira pompons pequenos que sobem, `velvetDraw`), Tijolinhos (racha e os tijolos desabam com poeira, `brickDraw`), Frutinhas (abre em duas metades, suco e mancha, `fruitDraw`), Bolo (velinha acesa, soprada, e o bolo se desfaz com granulado, `candyDraw`). As antigas em CSS ficaram só para pedras e especiais desses temas.
+Já tinham: Crochê (desfia, é a referência de capricho). Refeitas na 1.30 para ficar no nível das novas: Tijolinhos (racha e os tijolos desabam com poeira, `brickDraw`). Na 1.30.1, depois de a família achar estranho: Pelúcia vira dente-de-leão (sopro e sementinhas voando, `velvetDraw`; descartados: pompons pequenos subindo, quicar, abraço), Frutinhas sugada por canudinho (`fruitDraw`; descartados: duas metades com suco, uma animação por fruta, splash), Bolo com velinha e três mordidas (`candyDraw`; pedaços caindo pareciam pedra). As antigas em CSS ficaram só para pedras e especiais desses temas.
 
 | Bloco | Ideia | Situação |
 |---|---|---|

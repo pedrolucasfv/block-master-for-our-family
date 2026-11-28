@@ -506,21 +506,28 @@ function classicDraw(x,it,e){
       x.save(); x.globalAlpha=Math.max(0,1-t*1.5); x.translate(px,py); x.rotate(q.r*t); x.drawImage(img,iw*gx/4,iw*gy/4,iw/4,iw/4,-u/8,-u/8,u/4,u/4); x.restore(); }); }
   x.restore();
 }
-/* pelúcia: o pompom é apertado (balança como gelatina) e se desmancha em pompons pequenininhos que sobem flutuando */
-function velvetAdd(i,c,s,delay,dir){ clrSkin(i,c,s,delay,dir,velvetDraw,1500,{}); const it=CLR.list[CLR.list.length-1]; it.fc=isGold(effSkin())?GOLDSK:it.col;
-  it.puffs=Array.from({length:7},(_,k)=>({a:k/7*Math.PI*2+Math.random()*.5,r:.12+Math.random()*.18,sz:.13+Math.random()*.09,up:.9+Math.random()*.9,ph:Math.random()*6,dl:Math.random()*.12})); }
-function pompom(x,r,col){ const g=x.createRadialGradient(-r*.3,-r*.35,r*.1,0,0,r*1.05); g.addColorStop(0,mix(col,'#ffffff',.55)); g.addColorStop(.55,col); g.addColorStop(1,mix(col,'#000000',.6));
-  x.strokeStyle=col; x.lineWidth=Math.max(1,r*.07); x.lineCap='round'; x.globalAlpha*=.8; x.beginPath();
-  for(let k=0;k<30;k++){ const a=k*.84, l=r*(1.08+(k%3)*.06); x.moveTo(Math.cos(a)*r*.7,Math.sin(a)*r*.7); x.lineTo(Math.cos(a)*l,Math.sin(a)*l); } x.stroke(); x.globalAlpha/=.8;
-  x.fillStyle=g; x.beginPath(); x.arc(0,0,r*.95,0,7); x.fill(); x.fillStyle='rgba(255,255,255,.35)'; x.beginPath(); x.ellipse(-r*.3,-r*.38,r*.3,r*.16,-.5,0,7); x.fill(); }
+/* canvas de rascunho (para recortar mordidas, murchar etc. sem mexer no resto) */
+function clrTmp(sz){ if(!CLR.tc){ CLR.tc=document.createElement('canvas'); CLR.tx=CLR.tc.getContext('2d'); } if(CLR.tc.width<sz) CLR.tc.width=CLR.tc.height=sz; const t=CLR.tx; t.setTransform(1,0,0,1,0,0); t.globalCompositeOperation='source-over'; t.globalAlpha=1; t.clearRect(0,0,sz,sz); return t; }
+/* pelúcia: dente-de-leão. Um sopro passa, os pelinhos se soltam e saem voando como sementinhas, e o pompom vai diminuindo até sumir */
+function velvetAdd(i,c,s,delay,dir){ clrSkin(i,c,s,delay,dir,velvetDraw,1700,{}); const it=CLR.list[CLR.list.length-1]; const fc=isGold(effSkin())?GOLDSK:it.col; it.lt=hmix(fc,'#ffffff',.35); it.dk=hmix(fc,'#000000',.6);
+  it.seeds=Array.from({length:16},(_,k)=>{ const a=k/16*Math.PI*2+Math.random()*.3; return {a,r:.18+Math.random()*.2,dl:.04+Math.random()*.5,vx:it.side*(.7+Math.random()*1.1)+Math.cos(a)*.3,vy:-(.35+Math.random()*.7),ph:Math.random()*6,sz:.85+Math.random()*.4}; }); }
+function velvetSeed(x,u,sz,lt,dk){ /* sementinha: cabinho com um tufo de pelinhos em leque em cima */
+  const L=u*.24*sz; x.strokeStyle=lt; x.lineWidth=Math.max(1,u*.018); x.lineCap='round'; x.beginPath(); x.moveTo(0,0); x.lineTo(0,L); x.stroke();
+  x.lineWidth=Math.max(1,u*.014); x.beginPath(); for(let k=0;k<7;k++){ const a=-Math.PI/2+(k-3)*.42; x.moveTo(0,0); x.lineTo(Math.cos(a)*L*.55,Math.sin(a)*L*.55); } x.stroke();
+  x.fillStyle=dk; x.beginPath(); x.ellipse(0,L,u*.02,u*.035,0,0,7); x.fill(); }
 function velvetDraw(x,it,e){
   const cs=CS, img=SPR.cv&&SPR.cv[it.key], u=cs*.94; if(e<0||!img) return clrStill(x,it);
-  const cx=it.x*cs+cs/2, cy=it.y*cs+cs/2, SQ=380; x.save(); x.translate(cx,cy);
-  if(e<SQ){ const p=e/SQ, w=Math.sin(p*Math.PI*3)*(1-p)*.22; x.scale(1+w+p*.12,1-w+p*.12); clrPart(x,img,u); }
-  else { const t=(e-SQ)/1000;
-    if(t<.12){ const q=t/.12; x.globalAlpha=1-q; x.save(); x.scale(1.12+q*.4,1.12+q*.4); clrPart(x,img,u); x.restore(); x.globalAlpha=1; }
-    it.puffs.forEach(pf=>{ const tt=Math.max(0,t-pf.dl); if(tt<=0) return; const sp=Math.min(1,tt/.18), px=Math.cos(pf.a)*u*pf.r*(1+sp*1.4)+Math.sin(tt*5+pf.ph)*u*.12*tt*2, py=Math.sin(pf.a)*u*pf.r*(1+sp*1.4)-u*pf.up*tt*tt*2.2-u*.3*tt;
-      x.save(); x.globalAlpha=Math.max(0,1-Math.max(0,tt-.7)/.4); x.translate(px,py); x.rotate(tt*pf.ph*.3); pompom(x,u*pf.sz*(sp<1?.6+sp*.4:1),it.fc); x.restore(); }); }
+  const cx=it.x*cs+cs/2, cy=it.y*cs+cs/2, IN_=220; x.save(); x.translate(cx,cy);
+  const t=Math.max(0,(e-IN_)/1000);
+  /* o pompom: respira (incha um pouco) e depois vai encolhendo e clareando */
+  const sc=e<IN_?1+.08*Math.sin(e/IN_*Math.PI):Math.max(0,1-Math.pow(t/.75,1.3)), lean=e<IN_?0:it.side*Math.min(1,t*4)*.12;
+  if(sc>0){ x.save(); x.globalAlpha=Math.min(1,sc*1.6); x.rotate(lean); x.scale(sc,sc); clrPart(x,img,u); x.restore(); x.globalAlpha=1; }
+  /* o sopro: linhas de vento passando */
+  if(e>IN_*.4&&t<.45){ const q=Math.min(1,(e-IN_*.4)/500); x.strokeStyle='rgba(255,255,255,.7)'; x.lineCap='round'; x.lineWidth=Math.max(1,u*.03);
+    for(let k=0;k<3;k++){ const yy=u*(-.25+k*.25), x0=-it.side*u*(.9-q*1.8), len=u*.5; x.globalAlpha=.7*Math.sin(q*Math.PI); x.beginPath(); x.moveTo(x0,yy); x.quadraticCurveTo(x0+it.side*len*.5,yy-u*.08,x0+it.side*len,yy); x.stroke(); } x.globalAlpha=1; }
+  /* sementinhas voando */
+  it.seeds.forEach(sd=>{ const tt=t-sd.dl; if(tt<=0) return; const px=Math.cos(sd.a)*u*sd.r+u*sd.vx*tt+Math.sin(tt*5+sd.ph)*u*.1, py=Math.sin(sd.a)*u*sd.r+u*sd.vy*tt-u*.25*tt*tt;
+    x.save(); x.globalAlpha=Math.max(0,Math.min(1,tt*6))*Math.max(0,1-Math.max(0,tt-.55)/.4); x.translate(px,py); x.rotate(Math.sin(tt*4+sd.ph)*.5+it.side*.3); velvetSeed(x,u,sd.sz,it.lt,it.dk); x.restore(); });
   x.restore();
 }
 /* tijolinhos: o muro treme, racha e os tijolos caem um a um (de cima para baixo), levantando poeira */
@@ -540,28 +547,39 @@ function brickDraw(x,it,e){
   if(t<.8){ x.fillStyle='#d8cdb8'; for(let k=0;k<6;k++){ const q=Math.max(0,t-.08-k*.03); if(q<=0) continue; x.globalAlpha=.5*Math.max(0,1-q/.6); x.beginPath(); x.arc(u*(-.45+k*.18)+u*(k%2?.1:-.1)*q,u*(.42-q*.3),u*(.1+q*.35),0,7); x.fill(); } }
   x.restore();
 }
-/* frutinhas: a fruta é apertada, abre em duas metades que caem para os lados e espirra suco, deixando uma mancha que some */
-function fruitAdd(i,c,s,delay,dir){ clrSkin(i,c,s,delay,dir,fruitDraw,1250,{}); const it=CLR.list[CLR.list.length-1]; const fr=c>=0&&FRUIT[c]?FRUIT[c]:[it.col,it.col,'#fff',it.col];
-  it.juice=fr[0]; it.flesh=fr[2]; it.drops=Array.from({length:10},()=>({a:-Math.PI/2+(Math.random()-.5)*2.8,v:1.4+Math.random()*1.8,sz:.04+Math.random()*.05})); }
+/* frutinhas: um canudinho espeta a fruta e ela é sugada: murcha, enruga, perde a cor e sobem bolhinhas até sumir */
+function fruitAdd(i,c,s,delay,dir){ clrSkin(i,c,s,delay,dir,fruitDraw,1450,{}); const it=CLR.list[CLR.list.length-1]; const fr=c>=0&&FRUIT[c]?FRUIT[c]:[it.col,it.col,'#fff',it.col];
+  it.juice=fr[0]; it.tilt=it.side*(.3+Math.random()*.15); it.bub=Array.from({length:7},()=>({t:.05+Math.random()*.6,x:(Math.random()-.5)*.5,sz:.03+Math.random()*.04})); }
+function fruitStraw(x,u,fill,e){ /* canudinho dobrado, ponta em (0,0), sobe para y negativo */
+  const w=u*.1, L1=u*.75, L2=u*.32;
+  x.fillStyle='rgba(255,255,255,.92)'; x.fillRect(-w/2,-L1,w,L1);
+  if(fill){ x.fillStyle=fill.col; x.fillRect(-w*.28,-L1*fill.v,w*.56,L1*fill.v); }
+  x.save(); x.beginPath(); x.rect(-w/2,-L1,w,L1); x.clip(); x.fillStyle='rgba(255,95,122,.75)'; for(let k=0;k<8;k++){ const yy=-k*u*.11; x.beginPath(); x.moveTo(-w/2,yy); x.lineTo(w/2,yy-u*.05); x.lineTo(w/2,yy-u*.09); x.lineTo(-w/2,yy-u*.04); x.fill(); } x.restore();
+  x.strokeStyle='rgba(0,0,0,.25)'; x.lineWidth=Math.max(1,u*.012); for(let k=0;k<3;k++){ x.beginPath(); x.moveTo(-w/2,-L1+k*u*.03); x.lineTo(w/2,-L1+k*u*.03); x.stroke(); }
+  x.save(); x.translate(0,-L1); x.rotate(.7); x.fillStyle='rgba(255,255,255,.92)'; x.fillRect(-w/2,-L2,w,L2); x.fillStyle='rgba(255,95,122,.75)'; x.fillRect(-w/2,-L2*.55,w,u*.05); x.fillRect(-w/2,-L2*.95,w,u*.05); x.restore();
+}
 function fruitDraw(x,it,e){
   const cs=CS, img=SPR.cv&&SPR.cv[it.key], u=cs*.94; if(e<0||!img) return clrStill(x,it);
-  const cx=it.x*cs+cs/2, cy=it.y*cs+cs/2, SQ=230; x.save(); x.translate(cx,cy);
-  const t=(e-SQ)/1000;
-  /* mancha de suco no chão */
-  if(t>0){ x.globalAlpha=.4*Math.max(0,1-Math.max(0,t-.35)/.5); x.fillStyle=it.juice; const gr=Math.min(1,t/.08); x.beginPath(); x.ellipse(0,u*.12,u*.34*gr,u*.22*gr,0,0,7); x.fill(); [[.3,-.05,.08],[-.32,.02,.07],[.18,.3,.06],[-.2,.32,.05],[.42,.2,.045]].forEach(([a,b2,r])=>{ x.beginPath(); x.arc(u*a*gr*1.1,u*(b2+.1)*gr,u*r*gr,0,7); x.fill(); }); x.globalAlpha=1; }
-  if(e<SQ){ const p=e/SQ, sq=Math.sin(p*Math.PI/2); x.translate(0,u*.5); x.scale(1+.22*sq,1-.25*sq); x.translate(0,-u*.5); clrPart(x,img,u); x.restore(); return; }
-  /* metades */
-  for(const sd of [-1,1]){ x.save(); x.translate(sd*u*(.05+.9*t),u*(-.6*t+5*t*t)); x.rotate(sd*t*3.2); x.globalAlpha=Math.max(0,1-Math.max(0,t-.5)/.3);
-    sd<0?clrPart(x,img,u,0,0,.5,1):clrPart(x,img,u,.5,0,.5,1);
-    x.fillStyle=it.flesh; x.globalAlpha*=.9; x.fillRect(sd<0?-u*.04:0,-u*.42,u*.04,u*.84); x.restore(); }
-  /* gotas de suco */
-  it.drops.forEach(dp=>{ const px=Math.cos(dp.a)*u*dp.v*t, py=Math.sin(dp.a)*u*dp.v*t+u*6*t*t; x.globalAlpha=Math.max(0,1-t*1.6); x.fillStyle=it.juice; x.beginPath(); x.ellipse(px,py,u*dp.sz,u*dp.sz*1.3,Math.atan2(py,px),0,7); x.fill(); });
+  const cx=it.x*cs+cs/2, cy=it.y*cs+cs/2, IN_=260, SUCK=850, END=IN_+SUCK; x.save(); x.translate(cx,cy);
+  const sp=e<IN_?0:Math.min(1,(e-IN_)/SUCK), gl=Math.sin(e*.04);
+  /* a fruta murchando: encolhe para baixo, enruga (faixas tortas) e fica sem cor */
+  if(e<END+120){ const sc=e<END?1-.82*Math.pow(sp,1.4):Math.max(0,.18*(1-(e-END)/120)), d=CLR.dpr, S=Math.ceil(u*d)+2, tx=clrTmp(S);
+    tx.drawImage(img,0,0,u*d,u*d); if(sp>0){ tx.globalCompositeOperation='source-atop'; tx.fillStyle='rgba(150,120,90,'+(sp*.55)+')'; tx.fillRect(0,0,S,S); }
+    const bands=6, pulse=sp>0&&sp<1?.04*gl:0;
+    x.save(); x.translate(0,u*.48); x.scale(sc*(1+pulse),sc*(1-pulse)); x.translate(0,-u*.48);
+    for(let k=0;k<bands;k++){ const wob=sp*Math.sin(k*2.1+e*.012)*.08, sx=1-sp*.18+wob; x.drawImage(CLR.tc,0,S*k/bands,S,S/bands,-u/2*sx,-u/2+u*k/bands,u*sx,u/bands+.5); }
+    x.restore(); }
+  /* bolhinhas */
+  if(sp>0) it.bub.forEach(b=>{ const tt=sp-b.t; if(tt<0||tt>.4) return; const q=tt/.4; x.globalAlpha=1-q; x.strokeStyle='rgba(255,255,255,.9)'; x.lineWidth=Math.max(1,u*.015); x.beginPath(); x.arc(u*b.x+Math.sin(q*9)*u*.04,u*(.1-q*.7),u*b.sz,0,7); x.stroke(); }); x.globalAlpha=1;
+  /* o canudinho: desce e espeta, o suco sobe por ele, depois ele sai */
+  const din=e<IN_?1-ease2(e/IN_):0, out=e>END?Math.min(1,(e-END)/300):0, top=u*(.48-.82*Math.pow(sp,1.4)*.96)-u*.06;
+  if(out<1){ x.save(); x.globalAlpha=1-out; x.translate(Math.sin(it.tilt)*u*1.2*(din+out),Math.min(top,u*.05)-u*1.2*(din+out)); x.rotate(it.tilt); fruitStraw(x,u,sp>0?{col:it.juice,v:Math.min(1,sp*3)*(.85+.15*gl)}:0,e); x.restore(); }
   x.restore();
 }
-/* bolo: aparece uma velinha acesa, ela é soprada (fumacinha) e o bolo se desfaz em pedaços com granulado colorido */
+/* bolo: aparece uma velinha acesa, ela é soprada (fumacinha) e o bolo leva três mordidas; o resto some com granulado colorido */
 function candyAdd(i,c,s,delay,dir){ clrSkin(i,c,s,delay,dir,candyDraw,1500,{}); const it=CLR.list[CLR.list.length-1];
-  it.pcs=Array.from({length:9},(_,k)=>({k,vx:((k%3)-1)*.8+(Math.random()-.5)*.6,vy:-(.6+Math.random()*1.2),r:(Math.random()-.5)*9}));
-  setTimeout(()=>{ const g=GR(), px=g.left+(it.x+.5)*CS, py=g.top+(it.y+.5)*CS; for(let k=0;k<7;k++) burst(px,py,PALETTE[(k*3+(c>=0?c:0)+7)%7]||it.col,1,1.6,{size:CS*.14,g:.14,spin:true,w:.3}); },delay+720); }
+  const cc=c>=0?PALETTE[c]:it.col; it.bites=[[.62,-.05,.3],[-.58,-.4,.32],[.05,.66,.34]].map(([bx,by,r])=>({x:bx,y:by,r,a:Math.atan2(-by,-bx),cr:Array.from({length:6},(_,j)=>({vx:bx*(.8+Math.random())+(Math.random()-.5)*.8,vy:-(.3+Math.random()*.8),s:.04+Math.random()*.04,c:j%3?'#5a3418':cc}))}));
+  setTimeout(()=>{ const g=GR(), px=g.left+(it.x+.5)*CS, py=g.top+(it.y+.5)*CS; for(let k=0;k<7;k++) burst(px,py,PALETTE[(k*3+(c>=0?c:0)+7)%7]||it.col,1,1.6,{size:CS*.14,g:.14,spin:true,w:.3}); },delay+1260); }
 function candyDraw(x,it,e){
   const cs=CS, img=SPR.cv&&SPR.cv[it.key], u=cs*.94; if(e<0||!img) return clrStill(x,it);
   const cx=it.x*cs+cs/2, cy=it.y*cs+cs/2, IN_=160, LIT=520, BLOW=700; x.save(); x.translate(cx,cy);
@@ -574,10 +592,16 @@ function candyDraw(x,it,e){
       x.shadowBlur=0; x.fillStyle='#fff6c8'; x.beginPath(); x.ellipse(0,-u*.04,u*.025,u*.045,0,0,7); x.fill(); x.restore(); }
     if(e>=LIT){ const q=(e-LIT)/(BLOW-LIT+500); x.strokeStyle='rgba(200,200,210,'+(.8*(1-q))+')'; x.lineWidth=Math.max(1,u*.03); x.beginPath(); for(let k=0;k<=8;k++){ const yy=-u*.36-k*u*.06*(.4+q*1.6); x.lineTo(Math.sin(k*.9+e*.01)*u*.05*(k/8+.2),yy); } x.stroke(); }
     x.restore(); x.restore(); return; }
-  const t=(e-BLOW)/1000, iw=img.width;
-  if(t<.06){ x.scale(1+t*3,1-t*2); }
-  it.pcs.forEach(q=>{ const gx=q.k%3, gy=(q.k/3)|0; x.save(); x.globalAlpha=Math.max(0,1-Math.max(0,t-.4)/.35); x.translate(u*((gx+.5)/3-.5+q.vx*t),u*((gy+.5)/3-.5+q.vy*t+5*t*t)); x.rotate(q.r*t);
-    x.drawImage(img,iw*gx/3,iw*gy/3,iw/3,iw/3,-u/6,-u/6,u/3,u/3); x.restore(); });
+  /* três mordidas, cada uma de um lado, com farelos; depois o resto some com granulado */
+  const d=CLR.dpr, S=Math.ceil(u*d)+2, tx=clrTmp(S), BT=[0,180,360], gone=e-BLOW-560;
+  tx.drawImage(img,0,0,u*d,u*d); tx.globalCompositeOperation='destination-out'; tx.fillStyle='#000';
+  let sq=0; it.bites.forEach((bt,k)=>{ const be=e-BLOW-BT[k]; if(be<0) return; if(be<90) sq=Math.max(sq,Math.sin(be/90*Math.PI));
+    const bx=(bt.x+.5)*u*d, by=(bt.y+.5)*u*d, R=bt.r*u*d; tx.beginPath(); tx.arc(bx,by,R,0,7); tx.fill();
+    for(let j=0;j<9;j++){ const a=bt.a+(j-4)*.32; tx.beginPath(); tx.arc(bx+Math.cos(a)*R,by+Math.sin(a)*R,R*.2,0,7); tx.fill(); } });
+  x.save(); if(gone>0){ const q=Math.min(1,gone/160); x.globalAlpha=1-q; x.scale(1-q*.6,1-q*.6); }
+  x.scale(1+sq*.06,1-sq*.06); x.drawImage(CLR.tc,0,0,u*d,u*d,-u/2,-u/2,u,u); x.restore();
+  /* farelos */
+  it.bites.forEach((bt,k)=>{ const be=(e-BLOW-BT[k])/1000; if(be<0||be>.5) return; bt.cr.forEach(cr=>{ const px=u*(bt.x*.7+cr.vx*be), py=u*(bt.y*.7+cr.vy*be+5*be*be); x.globalAlpha=Math.max(0,1-be*2.2); x.fillStyle=cr.c; x.fillRect(px-u*cr.s/2,py-u*cr.s/2,u*cr.s,u*cr.s); }); });
   x.restore();
 }
 const CLR_SKIN={velvet:velvetAdd,brick:brickAdd,fruit:fruitAdd,candy:candyAdd,bug:bugAdd,robot:robotAdd,bamboo:bambooAdd,sushi:sushiAdd,lantern:lanternAdd,bear:bearAdd,jelly:jellyAdd,classic:classicAdd};
