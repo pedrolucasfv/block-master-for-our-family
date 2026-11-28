@@ -2,7 +2,7 @@
 /* CONEXÃO WebRTC, QR, sala com vários jogadores, mensagens, resultados, abas da sala */
 /* ===================== CONEXÃO (WebRTC) ===================== */
 const IDS='ABCDEF', MAXP=6;
-const LIMITS={live:[2,6],coop:[2,4],halves:[2,4],versus:[2,4],tlive:[2,6],tsplit:[2,6],camp:[1,4]};
+const LIMITS={live:[2,6],coop:[2,4],halves:[2,4],versus:[2,4],tlive:[2,6],tsplit:[2,6],cabo:[2,6],camp:[1,4]};
 const NET={prof:{},role:null,open:false,session:'',round:0,peers:{},pend:null,link:null,players:[],names:{},daily:{},
   rematch:{me:false},rematchReq:new Set(),ser:{},lastWinner:null,lobby:{type:'live',opts:defOpts()},cur:null,match:null,room:{matches:[]}};
 function rawSend(dc,txt){ if(dc&&dc.readyState==='open'){ try{ dc.send(txt); }catch(e){} } }
@@ -281,9 +281,10 @@ function common(m){
 }
 function onSt(m){
   const f=m.from; if(!D||!D.live||!D.opps[f]||(m.seed&&m.seed!==D.cfg.seed)) return;
-  const o=D.opps[f]; o.score=m.s; o.mini=m.m; if(m.b) o.b=m.b; o.c=m.c|0; o.k=m.k|0;
+  const o=D.opps[f]; o.score=m.s; o.mini=m.m; if(m.b) o.b=m.b; o.c=m.c|0; o.k=m.k|0; o.tranco=m.tc|0;
   oppSet(f,m.s,m.m); updTeamLine(); if(D.spect&&D.watch===f) renderSpect();
-  if(D.teams&&!D.over){ const g=GOALS[D.o.goal]; if(g&&teamSum(D.myTeam)>=g) duelEnd('goal'); }
+  if(D.o.cabo) caboCheck();
+  else if(D.teams&&!D.over){ const g=GOALS[D.o.goal]; if(g&&teamSum(D.myTeam)>=g) duelEnd('goal'); }
   const w=$('#waitList'); if(w) w.innerHTML=waitListHTML();
 }
 function onEnd(m){
@@ -291,7 +292,8 @@ function onEnd(m){
   if(!D||!D.live||!D.opps[f]||(m.seed&&m.seed!==D.cfg.seed)) return;
   D.opps[f].info=m.info; oppSet(f,m.info.score,null,{done:true});
   const w=$('#waitList'); if(w) w.innerHTML=waitListHTML();
-  if(!D.over){
+  if(!D.over&&D.o.cabo){ updTeamLine(); if(!caboCheck()&&m.info.reason!=='time') toast(m.info.reason==='quit'?`${nm(f)} saiu da partida`:`${nm(f)} ficou sem jogada`); }
+  else if(!D.over){
     if(m.info.reason==='goal'){ D.goalBy=f; duelEnd('oppGoal'); }
     else if(passedOpp()) duelEnd('passed');
     else if(m.info.reason==='quit') toast(`${nm(f)} saiu da partida`);
@@ -315,6 +317,7 @@ function noteEnd(id,info,seed){
   const M=NET.match; if(NET.role!=='A'||!M||M.type!=='live'||M.done||!M.ids.includes(id)||(seed&&seed!==M.seed)) return;
   M.infos[id]=info;
   if(M.ids.every(x=>M.infos[x])){ M.done=true; const rank=liveRank(M.infos);
+    if(M.cabo){ const cr=caboResult(M.infos,M.teams), per={}; M.ids.forEach(id=>per[id]=M.infos[id].score||0); const rec=teamRec('cabo',M.label,M.teams,cr.sum,cr.winner,per,null); rec.rows.forEach((r,i)=>{ const id=Object.keys(M.teams)[i]; r.c=M.infos[id].combo||0; r.q=M.infos[id].reason==='quit'?1:0; }); recordMatch(rec); return; }
     if(M.teams){ const tr=teamResult(M.infos,M.teams), per={}; M.ids.forEach(id=>per[id]=M.infos[id].score||0); const rec=teamRec('tlive',M.label,M.teams,tr.sum,tr.winner,per,null); rec.rows.forEach((r,i)=>{ const id=Object.keys(M.teams)[i]; r.c=M.infos[id].combo||0; r.q=M.infos[id].reason==='quit'?1:0; }); recordMatch(rec); return; }
     recordMatch({type:'live',label:M.label,date:Date.now(),rows:rank.map(r=>({n:nm(r.id,false),s:r.info.score||0,p:r.place,c:r.info.combo||0,q:r.info.reason==='quit'?1:0}))}); }
 }
@@ -402,7 +405,7 @@ function renderLobby(){
   if(ms.length){ const {list}=roomStats(); $('#roomList').innerHTML=`<p class="muted">${ms.length} partida${ms.length>1?'s':''} nesta sala</p>`+list.slice(0,6).map((p,i)=>`<div class="kv"><span>${i+1}º ${esc(p.n)}</span><b>${p.w} V · ${fmtN(p.pts)}</b></div>`).join(''); }
 }
 /* abas da sala (Sala, Partida, Placar) e sub-abas da partida (Estilo, Regras/Fase, Modificadores — as opções "Conectados" ficam dentro de Modificadores) */
-const TYPE_GROUPS=[['Individual',['live','versus']],['Em times',['tlive','tsplit']],['Cooperação',['coop','halves','camp']]];
+const TYPE_GROUPS=[['Individual',['live','versus']],['Em times',['tlive','tsplit','cabo']],['Cooperação',['coop','halves','camp']]];
 /* Regras e Modificadores ficam juntos numa aba só (os modificadores em grupos que abrem e fecham) */
 const OPT_TABS=[['estilo','Estilo de jogo'],['fase','Fase'],['regras','Regras e modificadores']];
 let LTAB='partida', OTAB='estilo';
@@ -429,17 +432,18 @@ function hostStart(rematch){
   let teams=null;
   if(isTeamType(L.type)){ teams=teamsFinal(); const c={az:0,la:0}; Object.values(teams).forEach(k=>c[k]++); if(!c.az||!c.la){ toast('Cada time precisa de pelo menos 1 jogador'); NET.round--; return; } if(L.type==='tsplit'&&(c.az>3||c.la>3)){ toast('No tabuleiro dividido, até 3 por time'); NET.round--; return; } NET.teams=teams; sendRoster(); }
   const size=L.type==='halves'&&ids.length>2?10:L.type==='tsplit'&&teams&&Math.max(...['az','la'].map(k=>Object.values(teams).filter(x=>x===k).length))===3?9:8;
-  const cfg={t:'cfg',type:L.type,opts:{...L.opts},seed:'N|'+NET.session+'|'+NET.round,round:NET.round,newSeries:!rematch,hc:null,players:ids,size,teams};
+  const cfg={t:'cfg',type:L.type,opts:{...L.opts,cabo:L.type==='cabo'},seed:'N|'+NET.session+'|'+NET.round,round:NET.round,newSeries:!rematch,hc:null,players:ids,size,teams};
   if(L.type==='camp'){ const w=L.w||1, ph=L.ph||1, def=CWD(w).phases[ph-1], st=campLoad('group'), k=ck(w,ph); st.att[k]=(st.att[k]||0)+1; campSave('group',st);
     cfg.opts=campOpts(def); cfg.size=ids.length>2&&def.setup!=='puzzle'?10:8; cfg.camp={w,ph,helps:campHelps(st),slot:'group',att:st.att[k]}; }
+  if(L.type==='cabo'){ cfg.opts.goal=0; cfg.opts.handicap=false; }
   if(!rematch) NET.ser={};
   if(L.type==='live'&&L.opts.handicap&&rematch&&NET.lastWinner) cfg.hc=NET.lastWinner;
   NET.cur=cfg; send(cfg); beginOnline(cfg);
 }
 function beginOnline(cfg){
   NET.rematch={me:false}; NET.rematchReq=new Set(); closeEnd(); $('#pauseOv').classList.remove('show');
-  NET.match={type:cfg.type==='tlive'?'live':cfg.type,seed:cfg.seed,ids:cfg.players.slice(),infos:{},label:TYPES[cfg.type]+' · R'+cfg.round,done:false,teams:cfg.teams||null};
-  if(cfg.type==='live'||cfg.type==='tlive') startDuel({type:'live',opts:cfg.opts,seed:cfg.seed,label:TYPES[cfg.type]+' · R'+cfg.round,handicapMe:cfg.type==='live'&&cfg.hc===NET.role,players:cfg.players,teams:cfg.teams||null});
+  NET.match={type:cfg.type==='tlive'||cfg.type==='cabo'?'live':cfg.type,cabo:cfg.type==='cabo',seed:cfg.seed,ids:cfg.players.slice(),infos:{},label:TYPES[cfg.type]+' · R'+cfg.round,done:false,teams:cfg.teams||null};
+  if(cfg.type==='live'||cfg.type==='tlive'||cfg.type==='cabo') startDuel({type:'live',opts:cfg.opts,seed:cfg.seed,label:TYPES[cfg.type]+' · R'+cfg.round,handicapMe:cfg.type==='live'&&cfg.hc===NET.role,players:cfg.players,teams:cfg.teams||null});
   else startShared(cfg);
 }
 function requestRematch(){

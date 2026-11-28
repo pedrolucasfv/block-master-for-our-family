@@ -1,6 +1,6 @@
 # Ideias para o Duelo de Blocos (brainstorm)
 
-Plano vivo do brainstorm. **Nada aqui está implementado.** Quando o brainstorm terminar, juntamos tudo num plano de execução (ordem, tamanho, dependências).
+Plano vivo do brainstorm. Só o que está marcado como ✅ feito foi implementado. Quando o brainstorm terminar, juntamos tudo num plano de execução (ordem, tamanho, dependências).
 
 ## ✅ Plano consolidado (brainstorm encerrado em 23/11/2026)
 Ordem sugerida, pensando no que já existe no código e no que depende do quê. Tamanho: P (pequeno), M (médio), G (grande).
@@ -11,7 +11,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 1 | 🎉 Datas especiais no Desafio do dia (Natal primeiro) | M | Natal está perto; usa o Desafio do dia e os avisos que já existem. Recompensa: **troféu no perfil**, então só depois do perfil (o Natal de 2026 pode ficar sem troféu) | Onde cadastrar aniversários |
 | 2 | 🤖 Supere o robô | P | Reaproveita o robô do duelo; é a base do robô treinador | Nível do robô; robô joga no aparelho ou no banco |
 | 3 | 🎓 Robô treinador | G | Melhorar o cérebro do robô (3 peças em todas as ordens), depois: aviso na hora → revisão no fim → erros mais comuns | Quando falar; quantas dicas 💡 |
-| 4 | 🪢 Cabo de guerra | P/M | Só uma regra nova em cima do duelo ao vivo; aquece para o Território | Quanto puxa cada linha; times |
+| 4 | 🪢 Cabo de guerra | ✅ feito (1.26) | Só uma regra nova em cima do duelo ao vivo; aquece para o Território | Ver se a ponta de 1.000 pontos está boa jogando de verdade |
 | 5 | 🏰 Território | G | Duelo/tela dividida + mapa igual para todos + bloco de tinta | Detalhes do bloco de tinta |
 | 6 | 🥔 Batata quente na sala | M | Em cima do co-op em turnos do tabuleiro único | 1 ou 3 peças por vez; vidas |
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
@@ -177,9 +177,17 @@ Base no código: duelo ao vivo (cada um no seu tabuleiro), tela dividida e times
 
 ---
 
-## 7b. 🪢 Cabo de guerra ⭐🧪
-Duelo com uma corda no meio da tela. Cada linha limpa puxa a corda para o seu lado (combo puxa mais); ganha quem puxar até o fim, ou quem estiver mais perto quando o tempo acabar. Travou, perdeu (igual ao Território).
-**Em aberto:** quanto cada linha puxa; funciona em times (soma do time)?; com Ataques ligado, um ataque dá um "tranco" na corda?
+## 7b. 🪢 Cabo de guerra ✅ feito na 1.26
+Duelo com uma corda no meio da tela; ganha quem puxar até o fim, ou quem estiver com a corda do seu lado quando o tempo acabar. Travou, perdeu (igual ao Território).
+
+**Decidido e feito** (código em `js/29-cabo.js`):
+- **A corda segue a diferença de pontos** (escolhido no lugar de "cada linha puxa X"). Ponta = **1.000 pontos de vantagem** (`CABO_PTS`). Começamos com 1.500, mas em partidas de robô contra robô do mesmo nível a corda quase não chegava na ponta em 3 minutos; com 1.000 ela anda mais.
+- **Tranco:** com Ataques ligado, limpar 3+ linhas de uma vez manda os blindados como sempre e ainda soma 150 pontos de corda (15% do caminho, `CABO_TRANCO`). Os trancos não entram nos pontos da pessoa, só na corda.
+- **Times:** com 2 pessoas é 1×1; com 3 a 6, Time Azul × Time Laranja (a mesma escolha de time dos Times ao vivo), somando pontos e trancos do time. O time só perde por travar quando todos travarem; quem trava fica assistindo.
+- Meta de pontos e Handicap não valem no Cabo de guerra.
+- Também dá para jogar contra o robô no Sozinho (opção 🪢 Cabo de guerra na caixa do robô), e a TV mostra a corda.
+
+**Para pensar depois:** a ponta poderia crescer com o tempo de partida (os pontos sobem mais rápido no fim por causa dos combos).
 
 ---
 

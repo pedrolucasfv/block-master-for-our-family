@@ -539,3 +539,16 @@ textarea.sgta{font:inherit;font-size:15px;line-height:1.4;word-break:normal;min-
 #tutRivB.pisca{animation:tutPulsa .5s ease-in-out 2}
 .tutdois{flex-direction:row;flex-wrap:wrap;justify-content:center}.tutdois .mpic{width:45%!important}.tutdois>div{flex-basis:100%}
 @keyframes tutNovo{0%{transform:scale(.6);filter:brightness(1.8)}60%{transform:scale(1.08)}100%{transform:none}}
+/* cabo de guerra: a corda entre o placar e o tabuleiro (o seu lado à esquerda) */
+.cabo{width:100%;max-width:520px;margin:4px auto 0;--ce:#3e6fe0;--cd:#f08c25}
+.cabolbl{display:flex;align-items:baseline;justify-content:space-between;gap:6px;font-size:12px;font-weight:700;padding:0 4px}
+.cabolbl .cl{color:var(--ce)}.cabolbl .cr{color:var(--cd);text-align:right}.cabolbl .cl,.cabolbl .cr{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34%}
+.cabolbl .ct{color:var(--muted);font-weight:600;font-size:11px;text-align:center;flex:1}
+.cabotrk{position:relative;height:22px;border-radius:11px;background:linear-gradient(90deg,color-mix(in srgb,var(--ce) 22%,transparent),transparent 45%,transparent 55%,color-mix(in srgb,var(--cd) 22%,transparent))}
+.cabofim{position:absolute;top:0;bottom:0;width:4%;border-radius:11px}.cabofim.l{left:0;background:var(--ce)}.cabofim.r{right:0;background:var(--cd)}
+.cabomeio{position:absolute;left:50%;top:2px;bottom:2px;width:2px;margin-left:-1px;background:var(--muted);opacity:.5}
+.cabocorda{position:absolute;left:4%;right:4%;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:repeating-linear-gradient(115deg,#b98a4e 0 5px,#8d6232 5px 8px)}
+.cabono{position:absolute;top:50%;left:50%;font-size:18px;line-height:1;transform:translate(-50%,-50%);transition:left .45s cubic-bezier(.3,1.4,.5,1);filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+.cabono.puxao{animation:caboPux .45s}
+@keyframes caboPux{40%{transform:translate(-50%,-50%) scale(1.45)}}
+.cabo.fim{margin:10px auto}

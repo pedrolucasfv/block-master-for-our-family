@@ -15,7 +15,7 @@ function specMsg(m){
     case 'cfg': specBegin(m); break;
     case 'lobby': SP.mode='lobby'; SP.cfg=null; specAnn(null); specRender(); break;
     case 'st': { const p=SP.pl[f]; if(!p||(m.seed&&SP.cfg&&m.seed!==SP.cfg.seed)) break;
-      const had=hasBlocks(p.b), jump=m.s-p.score; p.score=m.s; if(m.b) p.b=m.b;
+      const had=hasBlocks(p.b), jump=m.s-p.score; p.score=m.s; if(m.b) p.b=m.b; p.tranco=m.tc|0;
       if(had&&m.b&&!hasBlocks(m.b)&&jump>=300) specAnn(`✨ PERFECT de ${nm(f)}!`,f);
       specLeader(); SP.dirty=true; break; }
     case 'end': { const p=SP.pl[f]; if(!p||(m.seed&&SP.cfg&&m.seed!==SP.cfg.seed)) break; p.info=m.info; p.score=m.info.score;
@@ -41,7 +41,7 @@ function specAnn(txt,id){
   SP.annT=setTimeout(()=>{ el.className=''; },2600);
 }
 function specBegin(cfg){
-  SP.cfg=cfg; setForceSkin(cfg.type==='camp'?campSkin(cfg):null); setWorldLook(cfg.type==='camp'?(cfg.camp.w||1):null); SP.over=null; SP.view=null; SP.leader=null; SP.paused=false; SP.mode=(cfg.type==='live'||cfg.type==='tlive')?'live':'shared';
+  SP.cfg=cfg; setForceSkin(cfg.type==='camp'?campSkin(cfg):null); setWorldLook(cfg.type==='camp'?(cfg.camp.w||1):null); SP.over=null; SP.view=null; SP.leader=null; SP.paused=false; SP.mode=(cfg.type==='live'||cfg.type==='tlive'||cfg.type==='cabo')?'live':'shared';
   SP.pl={}; cfg.players.forEach(id=>SP.pl[id]={score:0,b:'',info:null});
   SP.start=performance.now()+(cfg.late?0:3200);
   specAnn(null); specRender(); specAnn(`${TYPES[cfg.type]} · Rodada ${cfg.round}`);
@@ -55,6 +55,7 @@ function specLeader(){
 function specCheckLiveEnd(){
   const ids=Object.keys(SP.pl); if(!ids.length||ids.some(id=>!SP.pl[id].info)) return;
   const infos={}; ids.forEach(id=>infos[id]=SP.pl[id].info);
+  if(SP.cfg&&SP.cfg.teams&&SP.cfg.opts.cabo){ const cr=caboResult(infos,SP.cfg.teams); SP.over={cr}; specPodium(null,cr.winner?`🪢 ${caboLado(cr.winner,SP.cfg.teams)} venceu!`:'Empate!',caboPorque(cr,SP.cfg.teams)); return; }
   if(SP.cfg&&SP.cfg.teams){ const tr=teamResult(infos,SP.cfg.teams); SP.over={tr}; specPodium(null,tr.winner?`${TEAM[tr.winner].e} ${TEAM[tr.winner].n} venceu!`:'Empate!',`${TEAM.az.n} ${fmtN(tr.sum.az)} × ${fmtN(tr.sum.la)} ${TEAM.la.n}`); return; }
   SP.over={rows:liveRank(infos).map(r=>({id:r.id,score:r.info.score,place:r.place,sub:r.info.reason==='quit'?'saiu':''}))};
   specPodium(SP.over.rows);
@@ -153,7 +154,9 @@ function specPaint(){
       specDraw(c.querySelector('canvas'),strBoard(p.b),8); c.querySelector('.spsc').textContent=fmtN(p.score);
       c.querySelector('.spst').textContent=p.info?(p.info.reason==='quit'?'saiu':'terminou'):(id===SP.leader?'👑 na liderança':'jogando'); c.classList.toggle('done',!!p.info); c.classList.toggle('lead',id===SP.leader&&!p.info); });
     if(rank&&SP.cfg.teams){ const T=SP.cfg.teams, sum={az:0,la:0}; ids.forEach(id=>sum[T[id]]+=SP.pl[id].score);
-      rank.innerHTML=`<h2>Times</h2>${['az','la'].map(k=>`<div class="kv big"><span style="color:${TEAM[k].c};font-weight:700">${TEAM[k].e} ${TEAM[k].n}</span><b>${fmtN(sum[k])}</b></div>`).join('')}<h2 style="margin-top:16px">Jogadores</h2>`+ids.slice().sort((a,b)=>SP.pl[b].score-SP.pl[a].score).map(id=>`<div class="kv"><span>${TEAM[T[id]].e} ${avatarHTML(id,24)}${esc(nm(id))}</span><b>${fmtN(SP.pl[id].score)}</b></div>`).join(''); }
+      const cabo=SP.cfg.opts.cabo, f={az:0,la:0}; if(cabo) ids.forEach(id=>{ const p=SP.pl[id], x=p.info||p; f[T[id]]+=(x.score||0)+(x.tranco||0); });
+      rank.innerHTML=(cabo?`<h2>🪢 Corda</h2>${caboBarHTML('spCabo')}`:'')+`<h2>Times</h2>${['az','la'].map(k=>`<div class="kv big"><span style="color:${TEAM[k].c};font-weight:700">${TEAM[k].e} ${TEAM[k].n}</span><b>${fmtN(sum[k])}</b></div>`).join('')}<h2 style="margin-top:16px">Jogadores</h2>`+ids.slice().sort((a,b)=>SP.pl[b].score-SP.pl[a].score).map(id=>`<div class="kv"><span>${TEAM[T[id]].e} ${avatarHTML(id,24)}${esc(nm(id))}</span><b>${fmtN(SP.pl[id].score)}</b></div>`).join('');
+      if(cabo) caboBarSet($('#spCabo'),f.az-f.la,'az',caboLado('az',T),caboLado('la',T)); }
     else if(rank) rank.innerHTML='<h2>Ranking</h2>'+ids.sort((a,b)=>SP.pl[b].score-SP.pl[a].score).map((id,i)=>`<div class="kv big"><span>${i+1}º ${avatarHTML(id,28)}${esc(nm(id))}</span><b>${fmtN(SP.pl[id].score)}</b></div>`).join('');
   } else if(SP.view&&SP.cfg.type==='tsplit'){
     const v=SP.view, T=SP.cfg.teams, ids=SP.cfg.players;

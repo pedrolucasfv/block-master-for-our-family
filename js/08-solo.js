@@ -47,7 +47,7 @@ function renderSolo(){
 }
 function openSolo(){ renderSolo(); show('solo'); }
 function startSolo(o){
-  ac(); const opts={...o,npc:0,attacks:false,pblocks:false,powers:false};
+  ac(); const opts={...o,npc:0,attacks:false,pblocks:false,powers:false,cabo:false};
   startDuel({type:'solo',opts,seed:'S|'+Date.now()+'|'+Math.random().toString(36).slice(2),label:'Sozinho · '+timeName(opts.time)+(opts.play?' · '+PLAYS[opts.play]:'')});
 }
 /* teste das vozes (Configurações): a linha de baixo fica sempre com um buraco e a bandeja só com pecinhas de 1 casa; cada pecinha no buraco é +1 no combo */

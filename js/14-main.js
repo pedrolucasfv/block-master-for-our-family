@@ -68,7 +68,7 @@ function simBoot(){
 function simBot(){
   if(SIMCTL||!NET.open) return; const t=performance.now(); if(t<simNext) return;
   if($('#lobby').classList.contains('active')){ /* times: entra no time com menos gente */
-    const ty=NET.lobby&&NET.lobby.type; if((ty==='tlive'||ty==='tsplit')&&!(NET.teams&&NET.teams[NET.role])){
+    const ty=NET.lobby&&NET.lobby.type; if(isTeamType(ty)&&!(NET.teams&&NET.teams[NET.role])){
       const cnt=k=>Object.values(NET.teams||{}).filter(x=>x===k).length; send({t:'team',v:cnt('la')<cnt('az')?'la':'az'}); simNext=t+1500; } return; }
   if(!IN||drag) return;
   if(IN.tap){ for(const s of [0,1,2]) if(IN.tap(s)){ simNext=t+900+Math.random()*700; return; } }

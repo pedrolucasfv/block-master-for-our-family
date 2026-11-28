@@ -3,6 +3,10 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.26 · 28/11/2026
+- 🪢 **Cabo de guerra:** estilo novo na sala (em "Em times"). Cada um joga no seu tabuleiro e uma corda no meio segue a diferença de pontos. Quem abrir 1.000 pontos de vantagem puxa a corda até o fim e ganha na hora; se o tempo acabar, ganha quem estiver com a corda do seu lado. Travou, perdeu: no time, só quando todos travarem. Com Ataques ligado, limpar 3 linhas ou mais de uma vez também dá um tranco na corda. Com 2 pessoas é um contra um; com mais, Time Azul × Time Laranja. A TV mostra a corda.
+- 🤖 **Cabo de guerra contra o robô:** no Sozinho, escolha um robô e ligue 🪢 Cabo de guerra para treinar.
+
 ## 1.25 · 26/11/2026
 - 👹 **Testar os chefões:** no Teste das vozes (Configurações), o novo botão 👹 Chefões deixa escolher um chefão e ver a chegada, o ataque, a raiva e a derrota dele, com som, animação e fala.
 
