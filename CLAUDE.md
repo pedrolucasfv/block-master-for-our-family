@@ -56,7 +56,7 @@ Os `js/NN-*.js` são scripts clássicos (não módulos), carregados **nesta orde
 `IDEIAS.md` (raiz) guarda o brainstorm de novidades: o plano consolidado no topo (ordem, tamanho, o que falta decidir) e o detalhe de cada ideia, inclusive as regras já combinadas e as ideias descartadas (para não sugerir de novo). Antes de começar uma novidade do plano, leia a seção dela; ao implementar ou decidir algo, atualize o arquivo. Ele não é carregado pelo jogo e mudar só ele não sobe a versão.
 
 ## Versões
-- `VERSAO` e `VERSAO_DATA` ficam no topo de `js/02-core.js` e aparecem no rodapé do menu. Toda mudança que vai para a `main` sobe a versão (1.x para novidade, 1.x.y para correção) e ganha uma linha em `CHANGELOG.md` — que o jogo mostra na tela "✨ Novidades": mantenha o formato (`## 1.x · data` e itens `- emoji **Título:** texto`, escritos para o jogador).
+- `VERSAO` e `VERSAO_DATA` ficam no topo de `js/02-core.js` e aparecem no rodapé do menu. Para subir, rode `python3 ferramentas/subir-versao.py 1.x [data]`: ele muda essas duas e o `?v=` de todos os `css/`/`js/` do `index.html` (sem o `?v=` novo, o celular pode juntar arquivos novos com velhos guardados e o jogo trava ao abrir; arquivo novo no `index.html` também leva o `?v=`). Toda mudança que vai para a `main` sobe a versão (1.x para novidade, 1.x.y para correção) e ganha uma linha em `CHANGELOG.md` — que o jogo mostra na tela "✨ Novidades": mantenha o formato (`## 1.x · data` e itens `- emoji **Título:** texto`, escritos para o jogador).
 
 ## Convenções
 - Código denso, de propósito: funções curtas numa linha só quando cabem. Não minifique nem encurte nomes; não reformate trechos que não está mudando.

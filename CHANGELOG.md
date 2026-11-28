@@ -3,6 +3,9 @@
 A versão atual aparece no rodapé do menu principal. Cada vez que algo novo vai para o site, o número sobe aqui e em `VERSAO` (`js/02-core.js`).
 Número grande (1.x) = novidade; número depois do segundo ponto (1.4.1) = correção pequena.
 
+## 1.27.1 · 28/11/2026
+- 🔧 **Correção:** logo depois da atualização, alguns celulares misturavam partes da versão nova com partes da antiga, e aí não dava para criar sala nem ligar o modo teste. Agora o jogo sempre carrega todas as partes da mesma versão.
+
 ## 1.27 · 28/11/2026
 - 🏰 **Território:** estilo novo na sala (em "Em times"). Cada um joga no seu tabuleiro, mas o chão é um mapa igual para todos. Limpou uma linha ou coluna: as casas neutras dela ficam da sua cor e as do outro lado voltam a ser neutras (para tomar uma casa do outro, limpe duas vezes). Ganha quem tiver mais casas quando o tempo acabar, ou na hora quem pintar o mapa inteiro. Travou, perdeu: no time, só quando todos travarem. As peças ficam claras, sem cor: depois de colocadas, cada bloco fica azul ou laranja se a casa embaixo tiver dono, e claro se for neutra, então o tabuleiro mostra o mapa (e os blocos trocam de cor quando a casa muda de dono). Uma barra mostra as casas de cada lado, e a TV mostra o mapa. O Bônus de cor não vale no Território.
 - 🏰 **Território no tabuleiro dividido:** dupla contra dupla (até 3 por time), com um tabuleiro por time dividido em faixas e o mesmo mapa nos dois. Quem travar espera o parceiro, que continua sozinho; o time que ficar sem jogadas perde. Com Ataques, 3 linhas ou mais de uma vez mandam os blindados e também um bloco de tinta para o outro time.

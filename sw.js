@@ -13,6 +13,8 @@ async function guardarTudo(){
   await Promise.all([...lista].map(u=>{ const url=new URL(u,base); if(url.origin!==location.origin&&(!DE_FORA.test(url.href)||url.pathname==='/')) return;
     return fetch(url,{cache:'no-store',mode:url.origin===location.origin?'same-origin':'cors'}).then(x=>{ if(x.ok) return c.put(url,x); }).catch(()=>{}); }));
 }
+/* cada arquivo do jogo vem com ?v=versão: guardou a versão nova, apaga as cópias das outras versões do mesmo arquivo */
+function limparVersoes(c,url){ c.keys().then(ks=>ks.forEach(k=>{ const u=new URL(k.url); if(u.origin===url.origin&&u.pathname===url.pathname&&u.search!==url.search) c.delete(k); })).catch(()=>{}); }
 self.addEventListener('install',e=>{ self.skipWaiting(); e.waitUntil(guardarTudo().catch(()=>{})); });
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(l=>Promise.all(l.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 /* pede à internet; se demorar demais ou não tiver, usa a cópia guardada. O que chega da internet atualiza a cópia. */
@@ -22,7 +24,7 @@ self.addEventListener('fetch',e=>{
   const pagina=req.mode==='navigate', chave=pagina?self.registration.scope:req; /* ?d=…, ?s=…: a página é a mesma */
   e.respondWith((async()=>{
     const c=await caches.open(CACHE);
-    const rede=fetch(req).then(r=>{ if(r.ok||r.type==='opaque') c.put(chave,r.clone()).catch(()=>{}); return r; });
+    const rede=fetch(req).then(r=>{ if(r.ok||r.type==='opaque'){ c.put(chave,r.clone()).catch(()=>{}); if(meu&&url.searchParams.has('v')) limparVersoes(c,url); } return r; });
     /* sem resposta em 4 s (internet muito fraca): mostra o guardado, se tiver, e a cópia se atualiza quando a resposta chegar */
     const guardado=await c.match(chave,{ignoreSearch:pagina});
     if(!guardado) return rede;
