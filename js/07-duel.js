@@ -89,6 +89,7 @@ function startDuel(cfg){
      playing:false,over:false,paused:false,elapsed:0,lastTick:0,suddenAt:Infinity,pv:null,finalShown:false,lastBlind:0,
      live:cfg.type==='live',wait:cfg.type!=='live'&&(TIMES[o.time]>0||!!o.sudden||rampOn(o)),powers:0,powerLines:0,frozenUntil:0,fog:null,nextGold:30000,others:[],opps:{}};
   if(D.live){ D.others=(cfg.players||[]).filter(id=>id!==NET.role); D.others.forEach(id=>D.opps[id]={score:0,mini:'',b:'',info:null}); D.teams=cfg.teams||null; D.myTeam=D.teams?D.teams[NET.role]:null; }
+  if(D.live&&o.terr&&D.teams) terrInicio(cfg.seed); else TMAP=null;
   resetScore(); animTimers.forEach(clearTimeout); $('#fx').innerHTML=''; BC.reset();
   $('#gLabel').textContent=cfg.label; $('#gMute').textContent=muted?'🔇':'🔊';
   if(D.live){ oppsSetup(D.others,true,id=>{ if(D&&D.spect) pickWatch(id); },D.teams); } else $('#opps').hidden=true;
@@ -97,8 +98,8 @@ function startDuel(cfg){
   $('#timer').textContent=tot?fmtT(tot):(GOALS[o.goal]?'Meta '+GOAL_L[o.goal]:'Sem limite'); $('#timer').className='timer';
   $('#timebar').style.visibility=(tot||GOALS[o.goal])?'visible':'hidden'; $('#timebarFill').style.transform=tot?'scaleX(1)':'scaleX(0)';
   $('#mission').hidden=true; $('#subTxt')._h=''; myEndOff(); D.oldBest=getBest(cfg.type,o); $('#subTxt').textContent=D.oldBest?'Recorde '+fmtN(D.oldBest):(cfg.type==='solo'?'Primeira partida neste modo':'Recorde 0'); updateCombo(0,0); updTeamLine();
-  if(D.teams) $('#scoreLbl').textContent=D.o.cabo&&Object.values(D.teams).filter(k=>k===D.myTeam).length<2?'Você':`Você · ${TEAM[D.myTeam].e} ${TEAM[D.myTeam].n}`;
-  caboRender();
+  if(D.teams) $('#scoreLbl').textContent=(D.o.cabo||D.o.terr)&&Object.values(D.teams).filter(k=>k===D.myTeam).length<2?'Você':`Você · ${TEAM[D.myTeam].e} ${TEAM[D.myTeam].n}`;
+  caboRender(); terrRender();
   setStatus(D.live?'':(PLAYS[o.play]!=='Clássico'?'Modo '+PLAYS[o.play]:''));
   $('#fog').classList.remove('show');
   IN=duelIN;
@@ -127,7 +128,8 @@ function renderDuel(anim){
   updPowChips();
   if(D.holdHint) setStatus('Guarde a peça!',true);
   else if(D.hammerHint&&D.hammer>0) setStatus('Nenhuma peça cabe: use o martelo 🔨',true);
-  else if(D.live&&!D.o.sudden&&!D.spect){ const bl=bombLeft(D.eng.b); setStatus(bl!=null?`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`:'',bl!=null&&bl<=1); }
+  else if(D.live&&!D.o.sudden&&!D.spect){ const bl=bombLeft(D.eng.b), tl=D.o.terr?terrTintaLeft(D.eng.b):null;
+    setStatus(bl!=null?`💣 Limpe a bomba em ${bl} jogada${bl>1?'s':''}!`:tl!=null?`🎨 Limpe a tinta em ${tl} jogada${tl>1?'s':''}!`:'',(bl!=null&&bl<=1)||(bl==null&&tl!=null&&tl<=1)); }
 }
 const duelIN={
   piece:src=>src==='h'?D.hold:D.tray[src],
@@ -162,6 +164,7 @@ function duelDrop(src,r,c){
   const res=D.eng.place(p,r,c,performance.now());
   D.placed++; if(D.wait){ D.wait=false; setStatus(''); }
   const tb=tickBombs(D.eng); if(tb.boom){ setTimeout(()=>BC.drop(tb.added),0); toast('💣 A bomba explodiu! Blocos cinza no seu tabuleiro'); SFX.boom(); shake(); }
+  terrDepoisJogada();
   duelApply(res,r+p.h/2,c+p.w/2,goldTxt('Bloco dourado é seu! +150'));
   const refilled=D.tray.every(x=>!x);
   if(D.cfg.vtest) vtPrep(); else if(refilled) D.tray=gen3(D.rng,D.o);
@@ -179,7 +182,7 @@ function duelApply(res,cr,cc,goldMsg){
   D.timeline.push([Math.round(D.elapsed/1000),D.score]);
   if(D.live&&res.powers&&res.powers.length) firePowers(res.powers);
   if(D.live&&D.o.attacks&&res.n>=3){ const k=res.n-1, to=leaderId(); if(to){ send({t:'atk',n:k,to}); toast(`Ataque! ${k} blocos blindados para ${nm(to)} (líder)`); } }
-  caboTranco(res);
+  caboTranco(res); terrLimpei(res); terrTinta(res);
   feedback(res,pts,cr,cc);
   showScore(D.score);
   if(res.steps.length>1||(res.steps[0]&&res.steps[0].falls)){
@@ -192,7 +195,7 @@ function duelAfter(newMove){
   sendState(); if(newMove) armSudden();
   const g=GOALS[D.o.goal];
   if(g&&(D.teams?teamSum(D.myTeam):D.score)>=g){ duelEnd('goal'); return; }
-  if(D.o.cabo){ if(caboCheck()) return; } else if(passedOpp()){ duelEnd('passed'); return; }
+  if(D.o.cabo){ if(caboCheck()) return; } else if(D.o.terr){ if(terrCheck()) return; } else if(passedOpp()){ duelEnd('passed'); return; }
   duelCheckStuck();
 }
 /* com o espaço de guardar vazio e só uma peça na bandeja, guardar traz 3 peças novas: ainda há jogada */
@@ -315,7 +318,7 @@ function updTeamLine(){ if(!D||!D.teams) return;
   ['az','la'].forEach(k=>{ const e=$(`#opps [data-tsum="${k}"]`), t=fmtN(teamSum(k)); if(e&&e.textContent!==t) e.textContent=t; });
   const m=$('#opps [data-mysc]'); if(m) m.textContent=fmtN(D.spect&&D.info?D.info.score:D.score);
   if(!D.spect) $('#subTxt').textContent=''; /* o total de cada time fica em cima da coluna dele */
-  caboRender(); }
+  caboRender(); terrRender(); }
 function leaderId(){ let pl=stillPlaying(); if(D&&D.teams) pl=pl.filter(id=>D.teams[id]!==D.myTeam); if(!pl.length) return null; return pl.sort((a,b)=>D.opps[b].score-D.opps[a].score)[0]; }
 /* blocos de poder no duelo: ataques vão para o líder (do outro time, nos times); escudo e martelo são seus */
 function firePowers(list){
@@ -335,9 +338,10 @@ function shieldBlock(from){ if(!D||!(D.shield>0)) return false; D.shield--; updP
 function receivePower(k,side,from){
   if(!D||D.over) return;
   if(shieldBlock(from)) return;
-  showAttacker(from,k==='freeze'?`${nm(from)} congelou você!`:k==='fog'?`${nm(from)} jogou névoa!`:`${nm(from)} jogou uma bomba-relógio!`);
+  showAttacker(from,k==='freeze'?`${nm(from)} congelou você!`:k==='fog'?`${nm(from)} jogou névoa!`:k==='tinta'?`${nm(from)} jogou um bloco de tinta!`:`${nm(from)} jogou uma bomba-relógio!`);
   if(k==='freeze'){ D.frozenUntil=D.elapsed+4000; cancelDrag(); toast(`${nm(from)} congelou suas peças por 4 s`); }
   else if(k==='fog'){ D.fog={until:D.elapsed+5000}; fogShow(side,0); toast(`${nm(from)} jogou névoa no seu tabuleiro`); }
+  else if(k==='tinta'){ const i=terrPoeTinta(D.eng,(D.teams&&D.teams[from])||otherTeam(D.myTeam)); if(i>=0) setTimeout(()=>BC.drop([i]),0); toast('🎨 Bloco de tinta! Limpe a linha ou coluna dele em 3 jogadas, senão ele pinta o mapa em volta'); sendState(); }
   else if(k==='tbomb'){ const i=placeTimeBomb(D.eng); if(i>=0) setTimeout(()=>BC.drop([i]),0); toast('💣 Bomba-relógio! Limpe a linha ou coluna dela em 3 jogadas'); sendState(); }
   SFX.alert(); renderDuel();
 }
@@ -360,7 +364,7 @@ function passedOpp(){
   const real=inf.filter(x=>x.reason!=='quit'); if(!real.length||real.some(x=>x.reason==='goal')) return false;
   return D.score>Math.max(...real.map(x=>x.score));
 }
-const REASON={time:'Tempo esgotado',stuck:'Sem espaço',sudden:'O tempo da peça acabou',goal:'Meta atingida',quit:'Você saiu',caboWin:'Corda puxada até o fim!',caboLose:'O outro lado puxou a corda até o fim',caboTravou:'O outro lado ficou sem jogada',caboSaiu:'O outro lado saiu da partida'};
+const REASON={time:'Tempo esgotado',stuck:'Sem espaço',sudden:'O tempo da peça acabou',goal:'Meta atingida',quit:'Você saiu',caboWin:'Corda puxada até o fim!',caboLose:'O outro lado puxou a corda até o fim',caboTravou:'O outro lado ficou sem jogada',caboSaiu:'O outro lado saiu da partida',terrWin:'O mapa ficou todo da sua cor!',terrLose:'O mapa ficou todo da cor do outro lado',terrTravou:'O outro lado ficou sem jogada',terrSaiu:'O outro lado saiu da partida'};
 function reasonTxt(r){ if(r==='oppGoal'&&D&&D.teams&&D.goalBy) return `${TEAM[D.teams[D.goalBy]].n} atingiu a meta`; if(r==='goal'&&D&&D.teams) return 'Seu time atingiu a meta'; if(r==='passed') return D&&D.teams?'O outro time terminou e o seu já tem mais pontos':D&&D.others&&D.others.length>1?'Você passou a pontuação de todos':'Você passou a pontuação do outro'; if(r==='oppGoal') return `${nm(D&&D.goalBy)} atingiu a meta`; return REASON[r]||''; }
 function duelEnd(reason){
   if(!D||D.over) return;
@@ -408,7 +412,8 @@ function showDuelEnd(){
   if(i.goalTime!=null) stats[2]=[fmtT(i.goalTime),'até a meta'];
   const btns=[];
   if(live){
-    if(!stillPlaying().length&&d.o.cabo&&d.teams){
+    if(!stillPlaying().length&&d.o.terr&&d.teams){ body=terrEndBody(d,i,stats,btns); }
+    else if(!stillPlaying().length&&d.o.cabo&&d.teams){
       const infos={[NET.role]:i}; d.others.forEach(id=>infos[id]=d.opps[id].info);
       const cr=d.cr||(d.cr=caboResult(infos,d.teams)), res=d.res||(d.res=cr.winner===d.myTeam?'win':cr.winner?'lose':'tie'), per={}; for(const id in infos) per[id]=infos[id].score;
       d.tr={sum:cr.sum,winner:cr.winner}; body=''; /* o motivo vem com nome logo abaixo do vencedor */
@@ -464,6 +469,7 @@ function showDuelEnd(){
   }
   if(!d.live&&d.cfg.type==='daily') body+='<div id="rkDaily"></div>';
   openEnd(body,btns);
+  terrEndBar(d);
   if(d.cr){ const f=$('#caboFim'); if(f){ f.classList.add('fim'); caboBarSet(f,d.cr.val,'az',caboLado('az',d.teams,NET.role),caboLado('la',d.teams,NET.role)); } } /* Azul à esquerda, como o placar logo abaixo */
   if(!d.live&&d.cfg.type==='daily') rkDailyBox('#rkDaily',d.cfg.key);
   $$('#whoBox .btn').forEach(b=>b.addEventListener('click',()=>{

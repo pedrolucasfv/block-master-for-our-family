@@ -14,8 +14,9 @@ function startNpc(o){
   if(NET.open){ toast('Saia da sala de jogo conectado para jogar contra o robô'); return; }
   ac(); npcStop(); NET.role='A';
   const lv=Math.min(4,Math.max(1,o.npc|0)), opts={...o,npc:lv}, seed='N|'+Date.now()+'|'+Math.random().toString(36).slice(2);
-  if(opts.cabo){ opts.goal=0; opts.handicap=false; }
-  startDuel({type:'live',opts,seed,players:['A','npc'],npc:lv,teams:opts.cabo?{A:'az',npc:'la'}:null,label:(opts.cabo?'🪢 Cabo de guerra · ':'')+'Contra o '+NPC_N[lv]+' · '+timeName(opts.time)+(opts.play?' · '+PLAYS[opts.play]:'')});
+  if(opts.cabo&&opts.terr) opts.terr=false;
+  if(opts.cabo||opts.terr){ opts.goal=0; opts.handicap=false; }
+  startDuel({type:'live',opts,seed,players:['A','npc'],npc:lv,teams:opts.cabo||opts.terr?{A:'az',npc:'la'}:null,label:(opts.cabo?'🪢 Cabo de guerra · ':opts.terr?'🏰 Território · ':'')+'Contra o '+NPC_N[lv]+' · '+timeName(opts.time)+(opts.play?' · '+PLAYS[opts.play]:'')});
   const eng=new Engine(opts); if(opts.obstacles) eng.addStones(makeRng(seed+'|obs'),6);
   NPC={d:D,lv,cfg:NPC_LV[lv],eng,rng:makeRng(seed),tray:null,score:0,placed:0,t:0,next:0,last:performance.now(),timeline:[[0,0]],over:false,shield:0,frozen:0,slow:0,hurry:false,timer:0,tranco:0};
   NPC.tray=gen3(NPC.rng,opts); NPC.next=npcDelay(); npcState(); npcLoop();
@@ -95,6 +96,7 @@ function npcScore(res,goldMsg){
   if(res.powers&&res.powers.length) npcPowers(res.powers);
   if(d.o.attacks&&res.n>=3&&!d.over) receiveAttack(res.n-1,'npc');
   if(d.o.cabo&&d.o.attacks&&res.n>=3) n.tranco+=CABO_TRANCO;
+  if(d.o.terr&&res.n){ terrHost({t:'tr',seed:d.cfg.seed,k:'la',r:[...new Set(res.rowsC)],c:[...new Set(res.colsC)]}); if(d.o.attacks&&res.n>=3&&!d.over) receivePower('tinta',null,'npc'); }
   if(res.n>=3&&!d.over&&Math.random()<.4) setTimeout(()=>{ if(D===d&&!d.over) bigEmoji(['😎','🤖','😈'][Math.floor(Math.random()*3)]); },500);
 }
 function npcMove(){
@@ -103,6 +105,7 @@ function npcMove(){
   const p=n.tray[m.i]; n.tray[m.i]=null;
   const res=e.place(p,m.r,m.c,0); n.placed++;
   tickBombs(e);
+  if(d.o.terr) terrTickTinta(e).forEach(t=>terrHost({t:'tr',seed:d.cfg.seed,k:t.k,p:t.p}));
   npcScore(res,`${npcName()} pegou o bloco dourado`);
   if(n.tray.every(x=>!x)) n.tray=gen3(n.rng,d.o);
   npcState(); npcCheck();
@@ -111,7 +114,7 @@ function npcMove(){
 function npcCheck(){
   const n=NPC; if(!n||n.over) return; const d=n.d, g=GOALS[d.o.goal];
   if(g&&n.score>=g){ npcEnd('goal'); return; }
-  if(!d.o.cabo&&d.info&&d.info.reason!=='quit'&&n.score>d.info.score){ npcEnd('passed'); return; }
+  if(!d.o.cabo&&!d.o.terr&&d.info&&d.info.reason!=='quit'&&n.score>d.info.score){ npcEnd('passed'); return; }
   if(!n.tray.some(p=>p&&n.eng.anyFit(p))) npcEnd('stuck');
 }
 function npcPowers(list){
@@ -133,7 +136,7 @@ function npcHear(m){
   switch(m.t){
     case 'atk': if(m.to!=='npc'||npcBlocked()) return; e.addStones(Math.random,m.n,-1,'ice'); npcState(); break;
     case 'pw': if(m.to!=='npc'||npcBlocked()) return;
-      if(m.k==='freeze') n.frozen=n.t+4000; else if(m.k==='fog') n.slow=n.t+5000; else placeTimeBomb(e);
+      if(m.k==='freeze') n.frozen=n.t+4000; else if(m.k==='fog') n.slow=n.t+5000; else if(m.k==='tinta') terrPoeTinta(e,'az'); else placeTimeBomb(e);
       npcState(); break;
     case 'gold': { const free=[]; for(let y=0;y<N;y++) for(let x=0;x<N;x++) if(!e.b[y][x]) free.push([y,x]); if(!free.length) return;
       const safe=free.filter(([y,x])=>!e.wouldFill(y,x)), pool=safe.length?safe:free, [y,x]=pool[Math.floor(Math.random()*pool.length)];
@@ -142,6 +145,7 @@ function npcHear(m){
     case 'end': { const i=m.info||{};
       if(i.reason==='quit'){ npcStop(); return; }
       /* cabo de guerra: a partida acaba para os dois (a corda chegou na ponta, o tempo acabou ou você travou) */
+      if(d.o.terr){ npcEnd(i.reason==='terrWin'?'terrLose':i.reason==='terrLose'?'terrWin':i.reason==='time'?'time':'terrTravou'); return; }
       if(d.o.cabo){ npcEnd(i.reason==='caboWin'?'caboLose':i.reason==='caboLose'?'caboWin':i.reason==='time'?'time':'caboTravou'); return; }
       if(i.reason==='time'){ npcEnd('time'); return; }
       if(i.reason==='goal'){ npcEnd('oppGoal'); return; }
@@ -161,6 +165,8 @@ function renderNpcBox(){
   const s=npcStats()[lv]||{w:0,l:0,t:0};
   box.innerHTML=`<p class="muted">${['','Joga devagar e às vezes erra. Bom para aprender.','Joga direitinho, num ritmo tranquilo.','Pensa na próxima peça, mas ainda erra de vez em quando.','Rápido, pensa na próxima peça e quase não erra. Boa sorte!'][lv]}</p>
     <p class="muted">Contra o ${NPC_N[lv]}: ${s.w} vitória${s.w===1?'':'s'} · ${s.l} derrota${s.l===1?'':'s'}${s.t?` · ${s.t} empate${s.t>1?'s':''}`:''}</p>
-    <div class="toggles">${['cabo','attacks','pblocks','powers'].map(k=>`<button type="button" class="tog ${soloOpts[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div>`;
-  box.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.t; soloOpts[k]=!soloOpts[k]; b.classList.toggle('on',soloOpts[k]); store.set('ddb_soloOpts',soloOpts); }));
+    <div class="toggles">${['cabo','terr','attacks','pblocks','powers'].map(k=>`<button type="button" class="tog ${soloOpts[k]?'on':''}" data-t="${k}"><span>${LABEL[k]}</span><small>${HINT[k]}</small></button>`).join('')}</div>`;
+  box.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.t; soloOpts[k]=!soloOpts[k]; b.classList.toggle('on',soloOpts[k]);
+    if(soloOpts[k]&&(k==='cabo'||k==='terr')){ const o=k==='cabo'?'terr':'cabo'; soloOpts[o]=false; const ob=box.querySelector(`.tog[data-t="${o}"]`); if(ob) ob.classList.remove('on'); } /* um ou outro */
+    store.set('ddb_soloOpts',soloOpts); }));
 }

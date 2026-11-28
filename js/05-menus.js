@@ -30,7 +30,7 @@ const TIMES=[120,180,300,0,600,900,0], TIME_L=['2 min','3 min','5 min','Sem limi
 const TIME_ORDER_NET=[0,1,2,4,5,3,6], TIME_ORDER_LOCAL=[0,1,2,3,6];
 /* "Sem limite com progressão" (tempo 6): sem relógio geral, mas o tempo para pôr cada peça vai apertando (RAMP, no 07-duel).
    Só nos modos em que cada um joga no seu tabuleiro (o relógio dos modos de tabuleiro único é outro). */
-const RAMP_TYPES=['solo','duel','live','tlive','cabo'];
+const RAMP_TYPES=['solo','duel','live','tlive','cabo','terr'];
 const rampOn=o=>!!o.ramp||o.time===6;
 const timeName=t=>TIMES[t]?TIME_L[t]:t===6?TIME_L[6]:'Sem limite';
 /* etapas da progressão escolhidas pelo jogador (o.rp = [[a partir de (s), segundos por peça], …]); sem escolha = RAMP (o mesmo do Desafio do dia) */
@@ -57,11 +57,11 @@ const GOALS=[0,500,1000,2000], GOAL_L=['Sem meta','500','1.000','2.000'];
 const SERIES_L=['Avulsa','Melhor de 3','Melhor de 5'], SERIES_N=[1,3,5];
 const FLAGS=['sudden','obstacles','heavy','color','undo','hold','bomb','ice','wild','final'];
 const NETF=['attacks','pblocks','powers','handicap'];
-const LABEL={sudden:'Morte súbita',obstacles:'Obstáculos',heavy:'Peças pesadas',color:'Bônus de cor',undo:'Desfazer',hold:'Guardar peça',bomb:'Bomba',ice:'Gelo',wild:'Coringa',final:'Reta final',attacks:'Ataques',pblocks:'Blocos de poder',powers:'Bloco dourado',handicap:'Handicap',cabo:'🪢 Cabo de guerra'};
-const HINT={sudden:'5 s para colocar cada peça',obstacles:'blocos cinzas no início',heavy:'só peças grandes',color:'+100 por linha de uma cor só',undo:'desfaz 1 jogada por partida',hold:'guarda 1 peça para depois',bomb:'explode 3x3 ao sumir',ice:'precisa sumir duas vezes',wild:'vale qualquer cor',final:'pontos em dobro nos últimos 30 s',attacks:'3+ linhas mandam blocos blindados (4 linhas = 3 blocos…)',pblocks:'peças com ícone: limpe a linha do ícone para ativar o poder',powers:'aparece um bloco dourado; quem limpar primeiro leva +150',handicap:'quem venceu começa com obstáculos',cabo:'corda no meio: 1.000 pontos de vantagem ganham; quem travar perde'};
-const TYPES={camp:'Campanha',live:'Duelo ao vivo',coop:'Co-op',halves:'Co-op dividido',versus:'Versus em turnos',tlive:'Times ao vivo',tsplit:'Times no tabuleiro dividido',cabo:'Cabo de guerra'};
+const LABEL={sudden:'Morte súbita',obstacles:'Obstáculos',heavy:'Peças pesadas',color:'Bônus de cor',undo:'Desfazer',hold:'Guardar peça',bomb:'Bomba',ice:'Gelo',wild:'Coringa',final:'Reta final',attacks:'Ataques',pblocks:'Blocos de poder',powers:'Bloco dourado',handicap:'Handicap',cabo:'🪢 Cabo de guerra',terr:'🏰 Território'};
+const HINT={sudden:'5 s para colocar cada peça',obstacles:'blocos cinzas no início',heavy:'só peças grandes',color:'+100 por linha de uma cor só',undo:'desfaz 1 jogada por partida',hold:'guarda 1 peça para depois',bomb:'explode 3x3 ao sumir',ice:'precisa sumir duas vezes',wild:'vale qualquer cor',final:'pontos em dobro nos últimos 30 s',attacks:'3+ linhas mandam blocos blindados (4 linhas = 3 blocos…)',pblocks:'peças com ícone: limpe a linha do ícone para ativar o poder',powers:'aparece um bloco dourado; quem limpar primeiro leva +150',handicap:'quem venceu começa com obstáculos',cabo:'corda no meio: 1.000 pontos de vantagem ganham; quem travar perde',terr:'linha limpa pinta o mapa; ganha quem tiver mais casas; quem travar perde'};
+const TYPES={camp:'Campanha',live:'Duelo ao vivo',coop:'Co-op',halves:'Co-op dividido',versus:'Versus em turnos',tlive:'Times ao vivo',tsplit:'Times no tabuleiro dividido',cabo:'Cabo de guerra',terr:'Território'};
 const TEAM={az:{n:'Time Azul',c:'#3e6fe0',e:'🔵'},la:{n:'Time Laranja',c:'#f08c25',e:'🟠'}};
-const isTeamType=t=>t==='tlive'||t==='tsplit'||t==='cabo';
+const isTeamType=t=>t==='tlive'||t==='tsplit'||t==='cabo'||t==='terr';
 function otherTeam(k){ return k==='az'?'la':'az'; }
 /* resultado de times: soma dos pontos; quem bateu a meta primeiro leva */
 function teamResult(infos,teams){ const sum={az:0,la:0}; let gk=null, gt=Infinity;
@@ -77,7 +77,7 @@ function teamRec(type,label,teams,sc,winner,per,quitter){
   const ids=Object.keys(teams);
   return {type,label,date:Date.now(),tw:1,rows:ids.map(id=>({n:nm(id,false),s:per&&per[id]!=null?per[id]:0,p:winner?(teams[id]===winner?1:2):1,c:0,q:id===quitter?1:0})),
     tm:{az:ids.filter(id=>teams[id]==='az').map(id=>nm(id,false)),la:ids.filter(id=>teams[id]==='la').map(id=>nm(id,false)),sAz:sc.az||0,sLa:sc.la||0}}; }
-const TYPE_HINT={camp:'Campanha em grupo (até 4), num tabuleiro só dividido: cada um com a sua parte (metade, ou quadrante com 3 ou 4 jogadores), todos jogando ao mesmo tempo. No quebra-cabeça o tabuleiro é livre para todos. Com mais gente, as metas ficam maiores. O progresso do grupo fica no celular de quem criou a sala.',tlive:'Dois times, cada jogador no seu tabuleiro, com as mesmas peças. Os pontos do time são somados e os ataques vão para o líder do outro time.',tsplit:'Um tabuleiro por time, dividido em faixas (uma para cada jogador, até 3 por time). Os dois tabuleiros correm lado a lado e linhas limpas atacam o outro time.',live:'Cada um no seu tabuleiro (2 a 6 jogadores), com as mesmas peças, placar ao vivo e miniatura dos outros. Ataques vão para o líder.',coop:'Um tabuleiro só (2 a 4 jogadores), um de cada vez, somando pontos.',halves:'Um tabuleiro só e cada um com a sua parte: com 2, metades; com 3 ou 4, um quadrante para cada num tabuleiro 10×10 (com 3, o quarto é livre). Toda peça precisa tocar a sua parte.',versus:'Um tabuleiro só, em turnos (2 a 4 jogadores): cada um escolhe a peça de quem joga depois dele.',cabo:'Cada um no seu tabuleiro, com uma corda no meio que segue a diferença de pontos. Com 2 é um contra um; com mais, dois times. Ganha quem puxar a corda até a ponta (1.000 pontos de vantagem) ou estiver com ela do seu lado quando o tempo acabar. Quem travar perde (no time, só quando todos travarem). Com Ataques, 3 linhas ou mais de uma vez dão um tranco na corda.'};
+const TYPE_HINT={camp:'Campanha em grupo (até 4), num tabuleiro só dividido: cada um com a sua parte (metade, ou quadrante com 3 ou 4 jogadores), todos jogando ao mesmo tempo. No quebra-cabeça o tabuleiro é livre para todos. Com mais gente, as metas ficam maiores. O progresso do grupo fica no celular de quem criou a sala.',tlive:'Dois times, cada jogador no seu tabuleiro, com as mesmas peças. Os pontos do time são somados e os ataques vão para o líder do outro time.',tsplit:'Um tabuleiro por time, dividido em faixas (uma para cada jogador, até 3 por time). Os dois tabuleiros correm lado a lado e linhas limpas atacam o outro time.',live:'Cada um no seu tabuleiro (2 a 6 jogadores), com as mesmas peças, placar ao vivo e miniatura dos outros. Ataques vão para o líder.',coop:'Um tabuleiro só (2 a 4 jogadores), um de cada vez, somando pontos.',halves:'Um tabuleiro só e cada um com a sua parte: com 2, metades; com 3 ou 4, um quadrante para cada num tabuleiro 10×10 (com 3, o quarto é livre). Toda peça precisa tocar a sua parte.',versus:'Um tabuleiro só, em turnos (2 a 4 jogadores): cada um escolhe a peça de quem joga depois dele.',cabo:'Cada um no seu tabuleiro, com uma corda no meio que segue a diferença de pontos. Com 2 é um contra um; com mais, dois times. Ganha quem puxar a corda até a ponta (1.000 pontos de vantagem) ou estiver com ela do seu lado quando o tempo acabar. Quem travar perde (no time, só quando todos travarem). Com Ataques, 3 linhas ou mais de uma vez dão um tranco na corda.',terr:'Cada um no seu tabuleiro, com um mapa igual em todos. Limpou uma linha ou coluna: as casas neutras dela ficam da sua cor e as do outro lado voltam a ser neutras (para tomar uma casa, limpe duas vezes). Vale para o mapa de todo mundo. Com 2 é um contra um; com mais, dois times. Ganha quem tiver mais casas quando o tempo acabar ou pintar o mapa inteiro. Quem travar perde (no time, só quando todos travarem). Com Ataques, 3 linhas ou mais de uma vez mandam um bloco de tinta: se não for limpo em 3 jogadas, pinta o mapa em volta com a sua cor.'};
 /* desenho de cada estilo de jogo (na escolha da sala): quantos tabuleiros, de quem é cada parte. n = jogadores na sala, tc = {az,la} gente em cada time */
 const MP_C=['#e5483f','#3e6fe0','#4cbb47','#f0a325','#a35bd6','#1fb5a8'], MP_FILL=[[0,3],[1,3],[3,3],[0,2],[1,2],[3,2],[2,1],[2,3]];
 /* tabuleiro 4×4 em miniatura; cor(cx,cy) diz de quem é cada casa (pinta as casas cheias e o fundo da parte de cada um) */
@@ -99,6 +99,10 @@ function modePic(type,n,tc){
     return svg(mpBoard(4,y,w,()=>TEAM.az.c,0,TEAM.az.c)+mpBoard(W-4-w,y,w,()=>TEAM.la.c,2,TEAM.la.c)
       +`<path d="M${4+w+2} ${H/2-4} q12 5 ${W-2*w-12} 0" fill="none" stroke="#a8763c" stroke-width="2.4" stroke-dasharray="4 1.5"/><circle cx="${W/2-7}" cy="${H/2-1.5}" r="4" fill="#e5483f"/>`
       +`<line x1="${W/2}" y1="${H/2-14}" x2="${W/2}" y2="${H/2+10}" stroke="currentColor" stroke-opacity=".4" stroke-dasharray="2 2"/>`+mpDot(4+w/2,y+w+8,TEAM.az.c)+mpDot(W-4-w/2,y+w+8,TEAM.la.c)); }
+  if(type==='terr'){ /* dois tabuleiros com o mesmo mapa pintado embaixo */
+    const w=34, y=(H-w)/2-4, pat=(a,b)=>a+b<3?TEAM.az.c:a+b>4?TEAM.la.c:null;
+    return svg(mpBoard(4,y,w,pat,0,TEAM.az.c)+mpBoard(W-4-w,y,w,pat,2,TEAM.la.c)+`<text x="${W/2}" y="${H/2+1}" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" fill-opacity=".6">=</text><text x="${W/2}" y="${H/2-12}" font-size="11" text-anchor="middle">🏰</text>`
+      +mpDot(4+w/2,y+w+8,TEAM.az.c)+mpDot(W-4-w/2,y+w+8,TEAM.la.c)); }
   if(type==='tlive'||type==='tsplit'){ const t={az:Math.max(1,tc&&tc.az||1),la:Math.max(1,tc&&tc.la||1)};
     const side=(k,x0)=>{ const m=Math.min(type==='tsplit'?3:3,t[k]), col=TEAM[k].c;
       if(type==='tsplit'){ const w=40, cs=['','',''].map((_,i)=>MP_C[(k==='az'?0:3)+i]);
@@ -127,10 +131,10 @@ function applies(type,k){
   const base=['time','play','goal','obstacles','heavy','color','final','bomb','ice','wild'];
   if(type==='solo') return ['obstacles','heavy','sudden','color','final','undo','hold','bomb','ice','wild'].includes(k);
   if(type==='duel') return base.includes(k)||['series','sudden','undo','hold'].includes(k);
-  if(k==='pblocks') return type==='live'||type==='tlive'||type==='tsplit'||type==='cabo';
+  if(k==='pblocks') return type==='live'||type==='tlive'||type==='tsplit'||type==='cabo'||type==='terr';
   if(type==='live') return true;
   if(type==='tlive') return k!=='handicap';
-  if(type==='cabo') return k!=='handicap'&&k!=='goal';
+  if(type==='cabo'||type==='terr') return k!=='handicap'&&k!=='goal';
   if(type==='tsplit') return base.includes(k)||['hold','attacks','series','pblocks'].includes(k);
   if(type==='versus') return base.includes(k)||k==='sudden'||k==='series';
   return base.includes(k)||k==='hold';

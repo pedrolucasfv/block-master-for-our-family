@@ -552,3 +552,14 @@ textarea.sgta{font:inherit;font-size:15px;line-height:1.4;word-break:normal;min-
 .cabono.puxao{animation:caboPux .45s}
 @keyframes caboPux{40%{transform:translate(-50%,-50%) scale(1.45)}}
 .cabo.fim{margin:10px auto}
+/* território: barra com as casas de cada lado (o seu à esquerda) e o mapa em miniatura (placar final e TV) */
+.terr{width:100%;max-width:520px;margin:4px auto 0;--ce:#3e6fe0;--cd:#f08c25}
+.terrlbl{display:flex;align-items:baseline;justify-content:space-between;gap:6px;font-size:12px;font-weight:700;padding:0 4px}
+.terrlbl .tl{color:var(--ce)}.terrlbl .tr{color:var(--cd);text-align:right}.terrlbl .tl,.terrlbl .tr{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38%}
+.terrlbl .tt{color:var(--muted);font-weight:600;font-size:11px;text-align:center;flex:1}
+.terrtrk{position:relative;height:14px;border-radius:7px;overflow:hidden;background:color-mix(in srgb,var(--muted) 22%,transparent)}
+.terre,.terrd{position:absolute;top:0;bottom:0;width:0;transition:width .45s cubic-bezier(.3,1.3,.5,1)}.terre{left:0;background:var(--ce)}.terrd{right:0;background:var(--cd)}
+.terr.fim{margin:6px auto 10px}
+.tmapa{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:min(180px,60%);margin:10px auto 4px;padding:4px;border-radius:10px;background:color-mix(in srgb,var(--muted) 18%,transparent)}
+.tmapa i{aspect-ratio:1;border-radius:3px;background:color-mix(in srgb,var(--muted) 30%,transparent)}
+#spRank .tmapa{width:min(260px,90%)}

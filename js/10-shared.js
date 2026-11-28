@@ -24,7 +24,7 @@ function nextOf(id){ const L=SH.ids; return L[(L.indexOf(id)+1)%L.length]; }
 function prevOf(id){ const L=SH.ids; return L[(L.indexOf(id)-1+L.length)%L.length]; }
 function teamWord(){ return SH&&SH.ids.length>2?'equipe':'dupla'; }
 function startShared(cfg){
-  closeEnd(); D=null; IN=null; caboRender(); setN(cfg.size||8); setForceSkin(cfg.type==='camp'?campSkin(cfg):null); setWorldLook(cfg.type==='camp'?(cfg.camp.w||1):null); bossHide();
+  closeEnd(); D=null; IN=null; TMAP=null; caboRender(); terrRender(); setN(cfg.size||8); setForceSkin(cfg.type==='camp'?campSkin(cfg):null); setWorldLook(cfg.type==='camp'?(cfg.camp.w||1):null); bossHide();
   const o=cfg.opts, me=cfg.me||NET.role, host=!!cfg.solo||me==='A', ids=cfg.players, ts=cfg.type==='tsplit';
   SH={cfg,o,type:cfg.type,me,host,ids,view:null,pv:null,playing:false,over:false,paused:false,elapsed:0,lastTick:0,lastEv:0,lastBlind:0,pending:null,lastSync:0,remAt:null,markMode:false,mkKey:'',tapMode:null,frozenUntil:0,hook:cfg.type==='camp'?campHook(cfg):null};
   if(host){

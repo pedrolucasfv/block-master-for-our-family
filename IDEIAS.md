@@ -12,7 +12,7 @@ Ordem sugerida, pensando no que já existe no código e no que depende do quê. 
 | 2 | 🤖 Supere o robô | P | Reaproveita o robô do duelo; é a base do robô treinador | Nível do robô; robô joga no aparelho ou no banco |
 | 3 | 🎓 Robô treinador | G | Melhorar o cérebro do robô (3 peças em todas as ordens), depois: aviso na hora → revisão no fim → erros mais comuns | Quando falar; quantas dicas 💡 |
 | 4 | 🪢 Cabo de guerra | ✅ feito (1.26) | Só uma regra nova em cima do duelo ao vivo; aquece para o Território | Ver se a ponta de 1.000 pontos está boa jogando de verdade |
-| 5 | 🏰 Território | G | Duelo/tela dividida + mapa igual para todos + bloco de tinta | Detalhes do bloco de tinta |
+| 5 | 🏰 Território | ✅ feito (1.27), menos a dupla com tela dividida | Duelo ao vivo + mapa igual para todos + bloco de tinta | Formato dupla × dupla com tela dividida; combo/tabuleiro limpo pintarem algo a mais |
 | 6 | 🥔 Batata quente na sala | M | Em cima do co-op em turnos do tabuleiro único | 1 ou 3 peças por vez; vidas |
 | 7 | 👀 Assistir quem está jogando | M/G | Precisa de tabela nova no banco (presença + retrato da partida) | Detalhes da permissão |
 | 8 | 🧢 Times com técnico | G | O mais complexo; **refinar antes** de começar | Estoque/fichas; bandeja ou peça a peça; time com 1 pessoa |
@@ -145,7 +145,7 @@ Ver ao vivo a partida de alguém da família, **só se a pessoa deixar**.
 
 ---
 
-## 7. 🏰 Território ⭐🧪
+## 7. 🏰 Território ✅ feito na 1.27 (1×1 e times; falta a dupla com tela dividida)
 Cada um joga no **seu tabuleiro**, mas existe um **mapa de território igual em todos os tabuleiros** (o chão por baixo das peças, com as mesmas marcações em todos).
 
 **Formatos:**
@@ -169,11 +169,17 @@ Cada um joga no **seu tabuleiro**, mas existe um **mapa de território igual em 
 - **Barra ao vivo** com as cores de cada lado mostrando quem tem mais casas.
 - **Bloco de tinta 🎨** (só com a opção Ataques ligada): limpar 3+ linhas de uma vez manda um bloco de tinta para o tabuleiro do adversário. Se ele não limpar a linha/coluna do bloco a tempo, o bloco **explode e pinta as casas em volta no mapa** com a cor de quem mandou.
 
-**Ainda em aberto:**
-- Bloco de tinta: quanto tempo (ou quantas jogadas) até explodir? Pinta 3×3 em volta? Vira casa da sua cor mesmo se era do rival, ou segue a regra rival → neutra?
-- Combo ou tabuleiro limpo pintam algo a mais?
+**Decidido e feito na 1.27** (código em `js/30-territorio.js`, mapa `TMAP` desenhado no `bDraw` do `06-board.js`):
+- 1×1 e times (cada um no seu tabuleiro): estilo `terr` da sala (vira `startDuel` tipo `live` com `opts.terr`) e contra o robô no Sozinho (`soloOpts.terr`, um ou outro com o Cabo de guerra). A TV mostra o mapa e a barra.
+- **Quem criou a sala é o dono do mapa:** cada celular manda as linhas/colunas que limpou (`{t:'tr'}`), quem criou aplica na ordem que chegam e manda o mapa para todos (`{t:'tm'}`); no fim manda o mapa final (`{t:'tfim'}`) e todos contam as casas com ele (quem não recebe em 3 s conta com o seu).
+- **Bloco de tinta:** explode depois de **3 jogadas** sem ser limpo (como a bomba-relógio, `c:-4` com `tp` = time de quem mandou), pinta **3×3 em volta** e vira casa de quem mandou **mesmo se era do rival** (é a recompensa por limpar 3+ linhas). Vai para o líder do outro lado, e o escudo bloqueia.
+- Casa com bloco em cima mostra uma bolinha da cor do dono no canto; casa vazia fica com o chão colorido.
+- Meta de pontos e Handicap não valem no Território. Os pontos continuam contando (gráfico, placar), mas quem ganha é o mapa.
 
-Base no código: duelo ao vivo (cada um no seu tabuleiro), tela dividida e times (`tlive`/`tsplit`), desenho do chão no `renderBoard`, quem criou a sala é o dono da verdade (`relay`).
+**Ainda em aberto:**
+- Dupla com tela dividida contra dupla com tela dividida (um tabuleiro por dupla, em cima do `tsplit`).
+- Combo ou tabuleiro limpo pintam algo a mais?
+- O robô ainda não pensa no mapa (só joga bem); dava para ele preferir linhas que tomam casas.
 
 ---
 

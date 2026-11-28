@@ -1,7 +1,7 @@
 'use strict';
 /* utilidades, store (localStorage/SIM), SET (configurações salvas), temas ganhos e dourados */
 /* versão do jogo: aparece no rodapé do menu. A cada mudança publicada, suba o número e anote em CHANGELOG.md */
-const VERSAO='1.26', VERSAO_DATA='28/11/2026';
+const VERSAO='1.27', VERSAO_DATA='28/11/2026';
 /* ===================== utilidades ===================== */
 const PALETTE=['#e5483f','#f08c25','#f3c22f','#4cbb47','#2cb4d6','#3e6fe0','#8a52d8'];
 const STONE='#7d859c', GOLD='#e8b923', WILDC='#b9bfd6', BEARC='#a8703e', GUMC='#ff6fae', GOLDSK='#eab526', RIPEC='#ff4b3e', ROTC='#8d5a2b', STALKC='#8fcf5a', PETALC='#ffb3cc', COINC='#e0a83a', NUTC='#9aa6b8';
@@ -15,11 +15,11 @@ const PWN={pedra:'Pedra',gelo:'Gelo',nevoa:'Névoa',bomba:'Bomba-relógio',escud
 function placeTimeBomb(eng){ const e=[]; for(let y=0;y<N;y++) for(let x=0;x<N;x++) if(!eng.b[y][x]&&!eng.wouldFill(y,x)) e.push([y,x]); if(!e.length) return -1;
   const [y,x]=e[Math.floor(Math.random()*e.length)]; eng.b[y][x]={c:-4,s:null,t:performance.now(),tb:3}; return y*N+x; }
 function tickBombs(eng){ const boom=[], added=[];
-  for(let y=0;y<N;y++) for(let x=0;x<N;x++){ const v=eng.b[y][x]; if(v&&v.c===-4){ v.tb--; if(v.tb<=0) boom.push([y,x]); } }
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){ const v=eng.b[y][x]; if(v&&v.c===-4&&!v.tp){ v.tb--; if(v.tb<=0) boom.push([y,x]); } }
   boom.forEach(([y,x])=>{ eng.b[y][x]={c:-1,s:null,t:0}; added.push(y*N+x);
     for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const ny=y+dy, nx=x+dx; if(ny<0||nx<0||ny>=N||nx>=N||eng.b[ny][nx]) continue; eng.b[ny][nx]={c:-1,s:null,t:0}; added.push(ny*N+nx); } });
   return {boom:boom.length,added}; }
-function bombLeft(b){ let m=null; for(const row of b) for(const v of row) if(v&&v.c===-4) m=m==null?v.tb:Math.min(m,v.tb); return m; }
+function bombLeft(b){ let m=null; for(const row of b) for(const v of row) if(v&&v.c===-4&&!v.tp) m=m==null?v.tb:Math.min(m,v.tb); return m; }
 const FOG_SIDES=['top','bottom','left','right'];
 function fogShow(side,ms){ const f=$('#fog'), h=side==='top'||side==='bottom', st=f.style;
   st.left=side==='right'?'50%':'0'; st.top=side==='bottom'?'50%':'0'; st.width=h?'100%':'50%'; st.height=h?'50%':'100%'; f.classList.add('show');
